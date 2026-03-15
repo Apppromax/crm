@@ -31,15 +31,15 @@ CRM Pro V2 là ứng dụng **web mobile-first (PWA)** quản lý pipeline bán 
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | **Next.js 14+** (App Router) + **React 18+** |
-| Styling | **Tailwind CSS v4** |
+| Frontend | **Next.js 16.1** (App Router) + **React 19** |
+| Styling | **Tailwind CSS v4** + Custom CSS |
 | Language | **TypeScript 5+** |
-| ORM | **Prisma 5+** |
+| ORM | **Prisma 7.5** + `@prisma/adapter-pg` |
 | Database | **PostgreSQL** (Supabase) |
-| Auth | **Supabase Auth** (JWT) |
-| Real-time | **Supabase Realtime** (WebSocket) |
-| AI | **Google Gemini API** |
-| Hosting | **Vercel** (Edge Runtime) |
+| Auth | **Supabase Auth** (JWT) — planned |
+| AI | **Google Gemini API** — planned |
+| Hosting | **Vercel** |
+| State | **Zustand** (persisted) |
 
 ---
 
@@ -47,33 +47,40 @@ CRM Pro V2 là ứng dụng **web mobile-first (PWA)** quản lý pipeline bán 
 
 ```
 CRMPROV2/
-├── docs/                    ← 📋 TÀI LIỆU DỰ ÁN (BẮT BUỘC ĐỌC)
-│   ├── PRD.md              ← Yêu cầu sản phẩm
-│   ├── SRS.md              ← Yêu cầu kỹ thuật (35+ FR)
+├── docs/                    ← 📋 TÀI LIỆU DỰ ÁN
+│   ├── PRD.md / SRS.md     ← Yêu cầu sản phẩm + kỹ thuật
 │   ├── ARCHITECTURE.md     ← Kiến trúc hệ thống
 │   ├── DATABASE.md         ← Schema Prisma (14 tables)
-│   ├── API.md              ← API Specification (25+ endpoints)
-│   ├── UI-UX.md            ← Design System + Wireframes
-│   ├── ROADMAP.md          ← Lộ trình 4 phases, 7 sprints
 │   ├── CHANGELOG.md        ← Nhật ký thay đổi
-│   └── AI-GUIDE.md         ← Hướng dẫn AI cập nhật docs
-├── src/                     ← 💻 SOURCE CODE
-│   ├── app/                ← Next.js App Router
-│   │   ├── (auth)/         ← Login, Register
-│   │   ├── (sale)/         ← Sale screens
-│   │   ├── (manager)/      ← Manager screens
-│   │   ├── (ceo)/          ← CEO Dashboard
-│   │   └── api/            ← API Route Handlers
-│   ├── components/         ← React Components
-│   ├── services/           ← Business logic layer
-│   ├── lib/                ← Utility, clients
-│   ├── hooks/              ← Custom React hooks
-│   └── types/              ← TypeScript types
+│   └── ROADMAP.md          ← Lộ trình phát triển
 ├── prisma/
-│   ├── schema.prisma       ← Database schema
-│   └── migrations/
-└── README.md               ← 📖 FILE NÀY
+│   ├── schema.prisma       ← Database schema (14 tables, 11 enums)
+│   └── seed.ts             ← Seed data (5 users, 6 leads)
+├── src/
+│   ├── app/
+│   │   ├── (auth)/         ← Login
+│   │   ├── (sale)/         ← Sale: Home, Leads, Detail, Schedule, Stats, Achievements
+│   │   ├── (manager)/      ← Manager: Dashboard, SOS, Team, Shadow, Pool, Reports
+│   │   ├── (ceo)/          ← CEO: Dashboard, Analytics, Team, Settings
+│   │   └── actions/        ← Server Actions (leads, interactions, users, dashboard)
+│   ├── components/
+│   │   ├── sale/           ← SmartCard, BigButton, VoiceRecorder, Popups
+│   │   ├── manager/        ← SendAdviceModal
+│   │   ├── shared/         ← NotificationPanel, Gamification, PWA
+│   │   └── dev/            ← RoleSwitcher (dev-only)
+│   └── lib/                ← prisma.ts, engine.ts, utils.ts, stores.ts, mock-data.ts
+├── prisma.config.ts        ← Prisma v7 config (datasource URL, seed command)
+└── package.json
 ```
+
+### 📊 Trạng Thái Hiện Tại
+
+| Module | Pages | DB Connected | Status |
+|--------|-------|-------------|--------|
+| **Sale** | 7 pages | ✅ SSR | 🟢 Live |
+| **Manager** | 7 pages | ❌ Mock | 🟡 UI Done |
+| **CEO** | 4 pages | ❌ Mock | 🟡 UI Done |
+| **Auth** | 1 page | ❌ Bypass | 🔴 Pending |
 
 ---
 
@@ -122,29 +129,33 @@ Fix bug         → CHANGELOG
 # Install dependencies
 npm install
 
-# Setup database
+# Setup database (first time)
 npm run db:generate
 npm run db:push
+npm run db:seed          # Seed demo data
 
 # Run development server
-npm run dev
+npm run dev              # → http://localhost:3000
 
-# Open Prisma Studio
-npm run db:studio
+# Prisma tools
+npm run db:studio        # Visual DB editor
 ```
+
+### 🌐 Deploy
+
+- **GitHub**: [Apppromax/crm](https://github.com/Apppromax/crm)
+- **Vercel**: Import from GitHub → Add env vars → Deploy
+- **Build**: `prisma generate && next build` (auto in `npm run build`)
 
 ---
 
 ## 🔑 Environment Variables
 
 ```env
-DATABASE_URL="postgresql://..."
-DIRECT_URL="postgresql://..."
+DATABASE_URL="postgresql://...@supabase.com:5432/postgres"
 NEXT_PUBLIC_SUPABASE_URL="https://xxx.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
 SUPABASE_SERVICE_ROLE_KEY="eyJ..."
-GEMINI_API_KEY="AIza..."
-ENCRYPTION_KEY="random-32-char-key"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 

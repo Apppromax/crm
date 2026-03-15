@@ -173,6 +173,78 @@
 - App store (snooze timers per-lead, notification count, persisted)
 - Files: `src/lib/stores.ts`
 
+### 🚀 Added (2026-03-15 — Session 4: Supabase Integration + Deploy)
+
+#### Supabase Database Connection ✅
+- Prisma v7 connected to Supabase PostgreSQL (session pooler port 5432)
+- `@prisma/adapter-pg` driver adapter for Prisma v7 client engine
+- `prisma db push --force-reset` — dropped all existing tables, created 14 fresh tables
+- `prisma generate` — Prisma Client generated
+- `prisma.config.ts` — datasource URL + seed command configured
+- Files: `prisma.config.ts`, `src/lib/prisma.ts`, `.env`
+
+#### Seed Data ✅
+- 1 Organization (CRM Pro Demo Corp)
+- 5 Lead Sources (Facebook Ads, Google Ads, Website, Referral, Cold Call)
+- 1 Team (Alpha)
+- 5 Users: 1 CEO, 1 Manager, 3 Sales
+- 6 Leads with realistic BANT, milestones 1-4, BĐS deal values (1.8 tỷ → 8.2 tỷ)
+- 5 Interactions (Call, Zalo Chat, Note) with AI labels
+- 2 Milestone promotions, 3 Schedules, 2 SOS Alerts, 1 Manager Advice, 1 Daily Metrics
+- Files: `prisma/seed.ts`
+
+#### Server Actions (API Layer) ✅
+- `leads.ts` — getTopPriorityLeads, getLeadsByUser, getLeadDetail, getLeadPool, createLead, updateMilestone, assignLead, snoozeLead
+- `interactions.ts` — createInteraction (auto 72h golden detect), getInteractionsByLead
+- `users.ts` — getUserByRole, getUserStats, getTeamMembers, getTeamPerformance
+- `dashboard.ts` — getSOSAlerts, resolveSOSAlert, sendAdvice, getSchedulesByUser, getDashboardMetrics
+- Files: `src/app/actions/*`
+
+#### Frontend → Real Database ✅
+- Sale Home page — SSR, reads top-priority leads + stats from Supabase
+- Sale Home client component split (server/client pattern)
+- Leads List — SSR, reads leads by assigned user
+- Lead Detail — SSR, reads full lead with interactions, milestone history, schedules, advice
+- Files: `src/app/(sale)/sale/page.tsx`, `home-client.tsx`, `leads/page.tsx`, `leads-list-client.tsx`, `leads/[id]/page.tsx`
+
+#### Gamification Components ✅
+- StreakCelebration modal with animated flames + milestone messages
+- AchievementBadges grid (earned vs locked)
+- Sale Achievements page — streak card, stats, badges, personal records
+- Files: `src/components/shared/gamification.tsx`, `src/app/(sale)/sale/achievements/page.tsx`
+
+#### CEO Dashboard Enhancements ✅
+- Analytics sub-page — pipeline funnel, conversion rates, monthly revenue, lead source ROI
+- Team Performance sub-page — individual rankings, revenue progress, compliance
+- Settings page — profile, report preferences, notifications, security
+- Bottom navigation (Dashboard / Analytics / Team / Settings)
+- Files: `src/app/(ceo)/ceo/analytics/page.tsx`, `team/page.tsx`, `settings/page.tsx`, `layout.tsx`
+
+#### Sale Enhancements ✅
+- Schedule page — weekly calendar + daily agenda
+- Lead Detail — VoiceRecorder, Snooze, Anti-Hoarding integration
+- Golden 72h timer + Snooze button in note input
+- Notification Bell → opens NotificationPanel
+- Settings → links to Achievements + Stats pages
+- Files: `src/app/(sale)/sale/schedule/page.tsx`, `src/components/sale/lead-detail-client.tsx`
+
+#### Manager Enhancements ✅
+- Shadow Mode — real-time monitoring of sales reps
+- Lead Pool — unassigned leads with assignment interface
+- Send Advice modal — quick commands + custom messages
+- Files: `src/app/(manager)/manager/shadow/[id]/page.tsx`, `pool/page.tsx`, `src/components/manager/send-advice-modal.tsx`
+
+#### Dev Tools ✅
+- Role Switcher — floating button to switch Sale/Manager/CEO
+- PWA Install Prompt — banner with dismiss persistence
+- Files: `src/components/dev/role-switcher.tsx`, `src/components/shared/pwa-install-prompt.tsx`
+
+#### Deployment ✅
+- GitHub repo: `Apppromax/crm`
+- Build script: `prisma generate && next build`
+- tsconfig excludes `prisma/seed.ts`, `prisma.config.ts`
+- Vercel deployment configured
+
 ---
 
 ## Convention
