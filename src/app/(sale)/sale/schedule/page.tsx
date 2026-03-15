@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { getUserByRole } from '@/app/actions/users'
 import { getSchedulesByUser } from '@/app/actions/dashboard'
 import { ScheduleClient } from './schedule-client'
-import Loading from '../../loading'
+import Loading from '@/app/(sale)/loading'
 
 export default function SchedulePage() {
     return (

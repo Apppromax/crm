@@ -3,7 +3,7 @@ import { getTopPriorityLeads } from '@/app/actions/leads'
 import { getUserByRole, getUserStats } from '@/app/actions/users'
 import { SaleHomeClient } from './home-client'
 import { RealtimeListener } from '@/components/realtime-listener'
-import Loading from '../loading'
+import Loading from '@/app/(sale)/loading'
 
 function determinePriorityReason(lead: any): 'golden_72h' | 'schedule_due' | 'retry' | 'hot_lead' | 'manager_advice' {
     if (lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()) return 'golden_72h'

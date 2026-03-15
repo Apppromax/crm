@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { getLeadsByUser } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
 import { LeadsListClient } from './leads-list-client'
-import Loading from '../../loading'
+import Loading from '@/app/(sale)/loading'
 
 export default function MyLeadsPage() {
     return (
