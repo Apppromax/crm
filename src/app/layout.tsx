@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { DevRoleSwitcher } from '@/components/dev/role-switcher'
 import { PWAInstallPrompt } from '@/components/shared/pwa-install-prompt'
 
 const inter = Inter({
@@ -37,7 +36,6 @@ export default function RootLayout({
     <html lang="vi" className={inter.variable}>
       <body className="min-h-dvh bg-slate-50 text-slate-900 antialiased">
         {children}
-        <DevRoleSwitcher />
         <PWAInstallPrompt />
       </body>
     </html>
