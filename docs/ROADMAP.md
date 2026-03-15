@@ -151,11 +151,11 @@ Phase 4: Polish & Launch           ░░░░░░░░░░░░░░█
 | 7.3 | Weekly Snapshot via Zalo/Telegram (FR-081) | P2 | 2d | - |
 | 7.4 | In-app notification system (FR-080) | P0 | 1.5d | - |
 | 7.5 | PWA offline cache refinement | P1 | 1d | - |
-| 7.6 | Performance optimization (Core Web Vitals) | P1 | 1d | - |
+| 7.6 | Performance optimization (Core Web Vitals) | P1 | 1d | Done |
 | 7.7 | Security audit (encryption, RLS test) | P0 | 1d | - |
-| 7.8 | E2E testing (critical flows) | P0 | 2d | - |
-| 7.9 | Staging deployment + UAT | P0 | 1d | - |
-| 7.10 | Production deployment | P0 | 0.5d | 7.9 |
+| 7.8 | E2E testing (critical flows) | P0 | 2d | Done |
+| 7.9 | Staging deployment + UAT | P0 | 1d | Done |
+| 7.10 | Production deployment | P0 | 0.5d | Done |
 | 7.11 | Monitoring setup (error tracking, uptime) | P1 | 0.5d | 7.10 |
 | 7.12 | User onboarding guide | P1 | 0.5d | - |
 

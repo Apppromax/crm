@@ -245,6 +245,26 @@
 - tsconfig excludes `prisma/seed.ts`, `prisma.config.ts`
 - Vercel deployment configured
 
+### 🚀 Added & Fixed (2026-03-15 — Session 5: Vercel Deployment & E2E Testing)
+
+#### Vercel Deployment & Prisma Connection Fix ✅
+- Resolved `Module not found: Can't resolve '../../loading'` error on Vercel by converting relative imports to absolute alias paths (`@/app/(sale)/loading`) in `leads`, `schedule`, and `sale` pages.
+- Fixed Supabase Prisma `MaxClientsInSessionMode` crash by adjusting `.env` connection strings (`connection_limit`) and confirming serverless pooling topology.
+- Successfully built and deployed to production Vercel.
+
+#### End-to-End (E2E) UI Testing with Playwright ✅
+- Established comprehensive testing pipeline (`TEST_PLAN.md`).
+- Auth & RBAC E2E Test (`e2e/auth.spec.ts`): Verified strict redirection. A Manager attempting to access `/ceo` is accurately redirected to `/manager`.
+- User Workflow E2E Test (`e2e/workflow.spec.ts`): Automated login as Sale, creating a target lead ("Shark Hưng"), and verifying DOM propagation in the Leads list.
+- Manager Workflow E2E Test (`e2e/manager.spec.ts`): Automated checking Heatmap, Shadowing Sale, and reviewing SOS Alerts.
+- CEO Workflow E2E Test (`e2e/ceo.spec.ts`): Automated verification of Strategic Analytics and Team Performance leaderboards.
+- Updated `playwright.config.ts` to output list format instead of HTML to prevent blocking terminals in headless modes.
+
+#### Performance & UX Improvements ✅
+- Converted Sale `leads`, `schedule`, and `home` pages to utilize React Server Components `<Suspense>` streaming, unblocking router queue for instant navigation transition feedback.
+- Integrated `NextTopLoader` in root `layout.tsx` for visual progress feedback during Next.js router transitions.
+- Enforced strict boundary redirect mappings dynamically in `users.ts` (`getUserByRole` action) to immediately deflect unauthorized roles (e.g., stopping a Sale from lingering on blank unassigned CEO views).
+
 ---
 
 ## Convention
