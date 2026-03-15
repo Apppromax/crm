@@ -1,10 +1,11 @@
 'use server'
 
+import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
 
-// Get the currently authenticated user from DB
-export async function getCurrentUser() {
+// Được cache lại để tránh gọi DB/Supabase nhiều lần trong 1 request (tăng tốc độ tải)
+export const getCurrentUser = cache(async () => {
     const supabase = await createClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
 
@@ -18,24 +19,18 @@ export async function getCurrentUser() {
             managedTeams: { select: { id: true, name: true } },
         },
     })
-}
+})
 
-// Fallback: Get user by role (for dev/testing when auth is bypassed)
 export async function getUserByRole(role: 'SALE' | 'MANAGER' | 'CEO') {
-    // First try to get the authenticated user
     const currentUser = await getCurrentUser()
-    if (currentUser) return currentUser
+    if (!currentUser) return null
 
-    // Fallback to findFirst by role (dev mode)
-    const prismaRole = role === 'CEO' ? 'CEO' : role === 'MANAGER' ? 'MANAGER' : 'SALE'
-    return prisma.user.findFirst({
-        where: { role: prismaRole },
-        include: {
-            team: { select: { id: true, name: true } },
-            org: { select: { id: true, name: true } },
-            managedTeams: { select: { id: true, name: true } },
-        },
-    })
+    // Ensure the user actually has the requested role
+    if (currentUser.role !== role) {
+        return null
+    }
+
+    return currentUser
 }
 
 export async function getUserStats(userId: string) {
