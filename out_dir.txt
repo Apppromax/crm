@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ???  1 [chromium] ??? e2e\auth.spec.ts:36:9 ??? Phase 1: Authentication & Role Access Control ??? Director Account: Should access /ceo (7.4s)
+
+  1 passed (9.2s)

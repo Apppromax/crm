@@ -1,0 +1,60 @@
+
+Running 3 tests using 1 worker
+
+  ???  1 [chromium] ??? e2e\auth.spec.ts:5:9 ??? Phase 1: Authentication & Role Access Control ??? Sale Account: Should login to /sale and be blocked from /ceo (9.0s)
+  ???  2 [chromium] ??? e2e\auth.spec.ts:21:9 ??? Phase 1: Authentication & Role Access Control ??? Manager Account: Should login to /manager and be blocked from /ceo (10.8s)
+  ???  3 [chromium] ??? e2e\auth.spec.ts:36:9 ??? Phase 1: Authentication & Role Access Control ??? Director Account: Should access /ceo (7.3s)
+
+
+  1) [chromium] ??? e2e\auth.spec.ts:5:9 ??? Phase 1: Authentication & Role Access Control ??? Sale Account: Should login to /sale and be blocked from /ceo 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/.*\/sale/[39m
+    Received string:  [31m"http://localhost:3000/ceo"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 ?? unexpected value "http://localhost:3000/ceo"[22m
+
+
+      16 |
+      17 |         // Should be blocked and redirected to /sale
+    > 18 |         await expect(page).toHaveURL(/.*\/sale/);
+         |                            ^
+      19 |     });
+      20 |
+      21 |     test('Manager Account: Should login to /manager and be blocked from /ceo', async ({ page }) => {
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\auth.spec.ts:18:28
+
+    Error Context: test-results\auth-Phase-1-Authenticatio-e4664-ale-and-be-blocked-from-ceo-chromium\error-context.md
+
+  2) [chromium] ??? e2e\auth.spec.ts:21:9 ??? Phase 1: Authentication & Role Access Control ??? Manager Account: Should login to /manager and be blocked from /ceo 
+
+    Error: [2mexpect([22m[31mpage[39m[2m).[22mtoHaveURL[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Expected pattern: [32m/.*\/manager/[39m
+    Received string:  [31m"http://localhost:3000/ceo"[39m
+    Timeout: 5000ms
+
+    Call log:
+    [2m  - Expect "toHaveURL" with timeout 5000ms[22m
+    [2m    9 ?? unexpected value "http://localhost:3000/ceo"[22m
+
+
+      31 |
+      32 |         // Should be blocked
+    > 33 |         await expect(page).toHaveURL(/.*\/manager/);
+         |                            ^
+      34 |     });
+      35 |
+      36 |     test('Director Account: Should access /ceo', async ({ page }) => {
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\auth.spec.ts:33:28
+
+    Error Context: test-results\auth-Phase-1-Authenticatio-6a1fb-ger-and-be-blocked-from-ceo-chromium\error-context.md
+
+  2 failed
+    [chromium] ??? e2e\auth.spec.ts:5:9 ??? Phase 1: Authentication & Role Access Control ??? Sale Account: Should login to /sale and be blocked from /ceo 
+    [chromium] ??? e2e\auth.spec.ts:21:9 ??? Phase 1: Authentication & Role Access Control ??? Manager Account: Should login to /manager and be blocked from /ceo 
+  1 passed (31.8s)
