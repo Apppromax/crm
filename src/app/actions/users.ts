@@ -39,7 +39,7 @@ export async function getUserByRole(role: 'SALE' | 'MANAGER' | 'CEO') {
 }
 
 export async function getUserStats(userId: string) {
-    const [totalLeads, activeLeads, milestone45, pipelineAgg] = await Promise.all([
+    const [totalLeads, activeLeads, milestone45, pipelineAgg, user] = await Promise.all([
         prisma.lead.count({ where: { assignedTo: userId } }),
         prisma.lead.count({ where: { assignedTo: userId, status: 'ACTIVE' } }),
         prisma.lead.count({
@@ -49,12 +49,11 @@ export async function getUserStats(userId: string) {
             where: { assignedTo: userId, status: 'ACTIVE' },
             _sum: { dealValue: true },
         }),
+        prisma.user.findUnique({
+            where: { id: userId },
+            select: { streakCount: true },
+        })
     ])
-
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { streakCount: true },
-    })
 
     return {
         totalLeads,

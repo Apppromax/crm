@@ -114,7 +114,7 @@ export async function completeSchedule(scheduleId: string) {
 }
 
 export async function getDashboardMetrics(orgId: string) {
-    const [totalLeads, activeLeads, wonDeals, pipeline, sosCount] = await Promise.all([
+    const [totalLeads, activeLeads, wonDeals, pipeline, sosCount, milestoneDistribution] = await Promise.all([
         prisma.lead.count({ where: { orgId } }),
         prisma.lead.count({ where: { orgId, status: 'ACTIVE' } }),
         prisma.lead.count({ where: { orgId, status: 'WON' } }),
@@ -123,14 +123,13 @@ export async function getDashboardMetrics(orgId: string) {
             _sum: { dealValue: true },
         }),
         prisma.sOSAlert.count({ where: { status: 'ACTIVE', lead: { orgId } } }),
+        prisma.lead.groupBy({
+            by: ['currentMilestone'],
+            where: { orgId, status: 'ACTIVE' },
+            _count: true,
+            _sum: { dealValue: true },
+        })
     ])
-
-    const milestoneDistribution = await prisma.lead.groupBy({
-        by: ['currentMilestone'],
-        where: { orgId, status: 'ACTIVE' },
-        _count: true,
-        _sum: { dealValue: true },
-    })
 
     return {
         totalLeads,

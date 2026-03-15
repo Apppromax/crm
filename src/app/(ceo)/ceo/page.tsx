@@ -10,17 +10,17 @@ export default async function CEODashboard() {
     if (!user) return <div className="p-8 text-center text-slate-400">No CEO user found</div>
 
     const orgId = user.org.id
-    const metrics = await getDashboardMetrics(orgId)
 
-    // Calculate revenue from won deals
-    const wonRevenue = await getWonRevenue(orgId)
+    const [metrics, wonRevenue, allTeamPerf] = await Promise.all([
+        getDashboardMetrics(orgId),
+        getWonRevenue(orgId),
+        getAllTeamPerformance(orgId)
+    ])
+
     const pipelineValue = metrics.pipelineValue
     const target = 20_000_000_000
     const achievementRate = Math.round((wonRevenue / target) * 100)
     const confidence = metrics.activeLeads > 0 ? Math.min(95, Math.round(achievementRate + (pipelineValue / target) * 30)) : 0
-
-    // Get team performance for warriors
-    const allTeamPerf = await getAllTeamPerformance(orgId)
 
     const now = new Date()
     const monthName = now.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
