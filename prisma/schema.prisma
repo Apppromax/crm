@@ -1,0 +1,455 @@
+// ============================================
+// CRM Pro V2 — Prisma Schema
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  SALE
+  LEADER
+  MANAGER
+  ADMIN
+  CEO
+}
+
+enum LeadStatus {
+  ACTIVE
+  POOL
+  ARCHIVED
+  WON
+  LOST
+}
+
+enum SnoozeReason {
+  UNREACHABLE_1
+  UNREACHABLE_2
+  UNREACHABLE_3
+  UNREACHABLE_4
+  UPDATED
+  AI_WARMUP
+}
+
+enum InteractionType {
+  CALL
+  ZALO_CHAT
+  MEETING
+  NOTE
+  VOICE_NOTE
+  SYSTEM
+}
+
+enum MilestoneChangeReason {
+  PROMOTION
+  DEMOTION
+  AUTO_RECLAIM
+  REASSIGN
+}
+
+enum SOSType {
+  HOT_NOT_CLOSED
+  STUCK_MILESTONE
+  DEMOTED
+  BURNOUT_RISK
+}
+
+enum SOSSeverity {
+  WARNING
+  CRITICAL
+}
+
+enum SOSStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum BANTLevel {
+  UNKNOWN
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum ScheduleType {
+  FOLLOW_UP
+  MEETING
+  GOLDEN_72H
+  AI_WARMUP
+}
+
+enum ScheduleStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+// ============================================
+// CORE MODELS
+// ============================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  teams Team[]
+  users User[]
+  leads Lead[]
+  aiInsights AIInsight[]
+  dailyMetrics DailyMetrics[]
+
+  @@map("organizations")
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  name      String
+  managerId String?  @map("manager_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  org     Organization @relation(fields: [orgId], references: [id])
+  manager User?        @relation("TeamManager", fields: [managerId], references: [id])
+  members User[]       @relation("TeamMembers")
+  leads   Lead[]
+  dailyMetrics DailyMetrics[]
+
+  @@map("teams")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  supabaseId    String    @unique @map("supabase_id")
+  orgId         String    @map("org_id")
+  teamId        String?   @map("team_id")
+  email         String    @unique
+  phone         String?
+  name          String
+  avatar        String?
+  role          UserRole  @default(SALE)
+  isActive      Boolean   @default(true) @map("is_active")
+  streakCount   Int       @default(0) @map("streak_count")
+  streakLastDay DateTime? @map("streak_last_day")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  org              Organization       @relation(fields: [orgId], references: [id])
+  team             Team?              @relation("TeamMembers", fields: [teamId], references: [id])
+  managedTeams     Team[]             @relation("TeamManager")
+  assignedLeads    Lead[]             @relation("AssignedTo")
+  interactions     Interaction[]
+  schedules        Schedule[]
+  milestoneChanges MilestoneHistory[] @relation("ChangedBy")
+  sentAdvices      ManagerAdvice[]    @relation("AdviceFrom")
+  receivedAdvices  ManagerAdvice[]    @relation("AdviceTo")
+  resolvedSOS      SOSAlert[]         @relation("ResolvedBy")
+  auditLogs        AuditLog[]
+  dailyMetrics     DailyMetrics[]
+
+  @@index([orgId])
+  @@index([teamId])
+  @@index([role])
+  @@map("users")
+}
+
+// ============================================
+// LEAD & PIPELINE
+// ============================================
+
+model Lead {
+  id                   String      @id @default(cuid())
+  orgId                String      @map("org_id")
+  assignedTo           String?     @map("assigned_to")
+  teamId               String?     @map("team_id")
+  sourceId             String?     @map("source_id")
+
+  // Customer info
+  name                 String
+  phoneEncrypted       String      @map("phone_encrypted")
+  phoneHash            String      @map("phone_hash")
+  email                String?
+  zaloConnected        Boolean     @default(false) @map("zalo_connected")
+
+  // Pipeline
+  currentMilestone     Int         @default(1) @map("current_milestone")
+  status               LeadStatus  @default(ACTIVE)
+  dealValue            Float?      @map("deal_value")
+  priorityScore        Int         @default(0) @map("priority_score")
+  heatScore            Int         @default(0) @map("heat_score")
+
+  // BANT
+  bantBudget           BANTLevel   @default(UNKNOWN) @map("bant_budget")
+  bantAuthority        BANTLevel   @default(UNKNOWN) @map("bant_authority")
+  bantNeed             String?     @map("bant_need")
+  bantTimeline         BANTLevel   @default(UNKNOWN) @map("bant_timeline")
+
+  // Snooze & 72h
+  golden72hExpiresAt   DateTime?   @map("golden_72h_expires_at")
+  snoozeUntil          DateTime?   @map("snooze_until")
+  snoozeReason         SnoozeReason? @map("snooze_reason")
+  consecutiveMissCount Int         @default(0) @map("consecutive_miss_count")
+
+  // AI
+  aiSummary            String?     @map("ai_summary")
+  aiLastAnalyzed       DateTime?   @map("ai_last_analyzed")
+
+  // Timestamps
+  lastInteractionAt    DateTime?   @map("last_interaction_at")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  org              Organization       @relation(fields: [orgId], references: [id])
+  assignee         User?              @relation("AssignedTo", fields: [assignedTo], references: [id])
+  team             Team?              @relation(fields: [teamId], references: [id])
+  source           LeadSource?        @relation(fields: [sourceId], references: [id])
+  interactions     Interaction[]
+  milestoneHistory MilestoneHistory[]
+  schedules        Schedule[]
+  sosAlerts        SOSAlert[]
+  advices          ManagerAdvice[]
+
+  @@index([orgId, status])
+  @@index([assignedTo, status])
+  @@index([teamId, status])
+  @@index([currentMilestone])
+  @@index([priorityScore(sort: Desc)])
+  @@index([golden72hExpiresAt])
+  @@index([snoozeUntil])
+  @@index([lastInteractionAt])
+  @@index([phoneHash])
+  @@map("leads")
+}
+
+model LeadSource {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  leads Lead[]
+
+  @@map("lead_sources")
+}
+
+// ============================================
+// INTERACTIONS & TIMELINE
+// ============================================
+
+model Interaction {
+  id           String          @id @default(cuid())
+  leadId       String          @map("lead_id")
+  userId       String          @map("user_id")
+  type         InteractionType
+  content      String
+  rawVoiceText String?         @map("raw_voice_text")
+  voiceUrl     String?         @map("voice_url")
+  aiLabels     String[]        @map("ai_labels")
+  isGolden72h  Boolean         @default(false) @map("is_golden_72h")
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([leadId, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([isGolden72h])
+  @@map("interactions")
+}
+
+// ============================================
+// MILESTONE TRACKING
+// ============================================
+
+model MilestoneHistory {
+  id            String                @id @default(cuid())
+  leadId        String                @map("lead_id")
+  fromMilestone Int                   @map("from_milestone")
+  toMilestone   Int                   @map("to_milestone")
+  reason        MilestoneChangeReason
+  note          String?
+  changedBy     String                @map("changed_by")
+  changedAt     DateTime              @default(now()) @map("changed_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User  @relation("ChangedBy", fields: [changedBy], references: [id])
+
+  @@index([leadId, changedAt(sort: Desc)])
+  @@index([changedAt])
+  @@index([fromMilestone, toMilestone])
+  @@map("milestone_history")
+}
+
+// ============================================
+// SCHEDULING
+// ============================================
+
+model Schedule {
+  id          String         @id @default(cuid())
+  leadId      String         @map("lead_id")
+  userId      String         @map("user_id")
+  type        ScheduleType
+  scheduledAt DateTime       @map("scheduled_at")
+  status      ScheduleStatus @default(PENDING)
+  note        String?
+  completedAt DateTime?      @map("completed_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, scheduledAt])
+  @@index([status, scheduledAt])
+  @@map("schedules")
+}
+
+// ============================================
+// MANAGER TOOLS
+// ============================================
+
+model SOSAlert {
+  id         String      @id @default(cuid())
+  leadId     String      @map("lead_id")
+  type       SOSType
+  severity   SOSSeverity
+  status     SOSStatus   @default(ACTIVE)
+  message    String
+  resolvedBy String?     @map("resolved_by")
+  resolvedAt DateTime?   @map("resolved_at")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  lead     Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  resolver User? @relation("ResolvedBy", fields: [resolvedBy], references: [id])
+
+  @@index([status, severity])
+  @@index([createdAt(sort: Desc)])
+  @@map("sos_alerts")
+}
+
+model ManagerAdvice {
+  id         String   @id @default(cuid())
+  leadId     String   @map("lead_id")
+  fromUserId String   @map("from_user_id")
+  toUserId   String   @map("to_user_id")
+  content    String
+  voiceUrl   String?  @map("voice_url")
+  isRead     Boolean  @default(false) @map("is_read")
+  isApplied  Boolean  @default(false) @map("is_applied")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  lead     Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  fromUser User @relation("AdviceFrom", fields: [fromUserId], references: [id])
+  toUser   User @relation("AdviceTo", fields: [toUserId], references: [id])
+
+  @@index([toUserId, isRead])
+  @@index([leadId])
+  @@map("manager_advices")
+}
+
+// ============================================
+// AI INSIGHTS
+// ============================================
+
+model AIInsight {
+  id        String   @id @default(cuid())
+  orgId     String   @map("org_id")
+  type      String
+  data      Json
+  period    String?
+  validFrom DateTime @map("valid_from")
+  validTo   DateTime @map("valid_to")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  org Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId, type, validFrom])
+  @@map("ai_insights")
+}
+
+// ============================================
+// ANALYTICS
+// ============================================
+
+model DailyMetrics {
+  id                   String   @id @default(cuid())
+  orgId                String   @map("org_id")
+  teamId               String?  @map("team_id")
+  userId               String?  @map("user_id")
+  date                 DateTime @db.Date
+
+  newLeads             Int      @default(0) @map("new_leads")
+  processedLeads       Int      @default(0) @map("processed_leads")
+  golden72hCompliance  Float    @default(0) @map("golden_72h_compliance")
+
+  promotions           Int      @default(0)
+  demotions            Int      @default(0)
+  closedWon            Int      @default(0) @map("closed_won")
+  closedLost           Int      @default(0) @map("closed_lost")
+
+  revenueActual        Float    @default(0) @map("revenue_actual")
+  pipelineValue        Float    @default(0) @map("pipeline_value")
+
+  totalInteractions    Int      @default(0) @map("total_interactions")
+  streakCompleted      Boolean  @default(false) @map("streak_completed")
+  antiHoardingTriggers Int      @default(0) @map("anti_hoarding_triggers")
+
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  org  Organization @relation(fields: [orgId], references: [id])
+  team Team?        @relation(fields: [teamId], references: [id])
+  user User?        @relation(fields: [userId], references: [id])
+
+  @@unique([orgId, teamId, userId, date])
+  @@index([date])
+  @@index([orgId, date])
+  @@map("daily_metrics")
+}
+
+// ============================================
+// SYSTEM
+// ============================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  oldData   Json?    @map("old_data")
+  newData   Json?    @map("new_data")
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+  note  String?
+
+  @@map("system_configs")
+}

@@ -1,0 +1,190 @@
+import { Eye, TrendingUp, AlertTriangle, Users, Flame, ChevronRight, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { MOCK_LEADS } from '@/lib/mock-data'
+
+// Mock Team Heatmap Data
+const teamData = [
+    {
+        id: 'user-001', name: 'Nguyễn Văn A', activeLeads: 5, overdueLeads: 0,
+        compliance: 92, streak: 5, closedThisMonth: 1, status: 'GREEN' as const,
+    },
+    {
+        id: 'user-002', name: 'Trần Minh B', activeLeads: 4, overdueLeads: 2,
+        compliance: 65, streak: 2, closedThisMonth: 0, status: 'YELLOW' as const,
+    },
+    {
+        id: 'user-003', name: 'Lê Thị C', activeLeads: 6, overdueLeads: 4,
+        compliance: 38, streak: 0, closedThisMonth: 0, status: 'RED' as const,
+    },
+]
+
+const statusColors = {
+    GREEN: { bg: 'bg-emerald-500', ring: 'ring-emerald-200', text: 'text-emerald-700', label: 'On Track' },
+    YELLOW: { bg: 'bg-amber-500', ring: 'ring-amber-200', text: 'text-amber-700', label: 'Chậm trễ' },
+    RED: { bg: 'bg-red-500', ring: 'ring-red-200', text: 'text-red-700', label: 'Nguy hiểm' },
+}
+
+export default function ManagerDashboard() {
+    const totalLeads = MOCK_LEADS.filter(l => l.status === 'ACTIVE').length
+    const overallCompliance = Math.round(teamData.reduce((sum, t) => sum + t.compliance, 0) / teamData.length)
+    const sosCount = 2
+
+    return (
+        <div className="mx-auto max-w-2xl">
+            {/* Header */}
+            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-xl bg-indigo-500 flex items-center justify-center shadow-md shadow-indigo-500/20">
+                            <Eye className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-base font-semibold text-slate-900">Mắt Thần</h1>
+                            <p className="text-xs text-slate-400">Team Alpha • {teamData.length} sales</p>
+                        </div>
+                    </div>
+                    {sosCount > 0 && (
+                        <Link href="/manager/sos" className="flex items-center gap-1.5 rounded-full bg-red-50 border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 animate-pulse-golden">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            {sosCount} SOS
+                        </Link>
+                    )}
+                </div>
+            </header>
+
+            {/* Overview Cards */}
+            <div className="grid grid-cols-3 gap-3 px-4 pt-4">
+                <OverviewCard
+                    label="Compliance"
+                    value={`${overallCompliance}%`}
+                    trend={overallCompliance >= 70 ? 'up' : 'down'}
+                    color={overallCompliance >= 80 ? 'emerald' : overallCompliance >= 50 ? 'amber' : 'red'}
+                />
+                <OverviewCard label="Active Leads" value={`${totalLeads}`} trend="up" color="primary" />
+                <OverviewCard label="SOS Alerts" value={`${sosCount}`} trend={sosCount > 0 ? 'down' : 'up'} color={sosCount > 0 ? 'red' : 'emerald'} />
+            </div>
+
+            {/* Team Heatmap */}
+            <div className="mx-4 mt-5">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-orange-500" />
+                        Nhiệt độ Team
+                    </h2>
+                    <div className="flex gap-2">
+                        {(['GREEN', 'YELLOW', 'RED'] as const).map(s => (
+                            <span key={s} className="flex items-center gap-1 text-[10px] text-slate-400">
+                                <span className={cn('h-2 w-2 rounded-full', statusColors[s].bg)} />
+                                {statusColors[s].label}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    {teamData.map(member => {
+                        const sc = statusColors[member.status]
+                        return (
+                            <div key={member.id} className={cn(
+                                'rounded-2xl bg-white border p-4 transition-all hover:shadow-md',
+                                member.status === 'RED' ? 'border-red-200 shadow-red-50' :
+                                    member.status === 'YELLOW' ? 'border-amber-200 shadow-amber-50' :
+                                        'border-slate-100'
+                            )}>
+                                <div className="flex items-center gap-3">
+                                    {/* Status Ring */}
+                                    <div className={cn('relative h-12 w-12 rounded-full ring-3 flex items-center justify-center', sc.ring)}>
+                                        <div className={cn('h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm', sc.bg)}>
+                                            {member.compliance}%
+                                        </div>
+                                    </div>
+
+                                    {/* Info */}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-sm font-semibold text-slate-800">{member.name}</h3>
+                                            {member.streak > 0 && (
+                                                <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-semibold">
+                                                    🔥 {member.streak}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                                            <span>{member.activeLeads} leads</span>
+                                            {member.overdueLeads > 0 && (
+                                                <span className="text-red-500 font-medium">{member.overdueLeads} quá hạn</span>
+                                            )}
+                                            {member.closedThisMonth > 0 && (
+                                                <span className="text-emerald-600 font-medium">✓ {member.closedThisMonth} chốt</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Action */}
+                                    <Link href={`/manager/team/${member.id}`}>
+                                        <ChevronRight className="h-5 w-5 text-slate-300" />
+                                    </Link>
+                                </div>
+
+                                {/* Compliance Bar */}
+                                <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                    <div
+                                        className={cn('h-full rounded-full transition-all duration-700', sc.bg)}
+                                        style={{ width: `${member.compliance}%` }}
+                                    />
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+
+            {/* Activity Streak Board */}
+            <div className="mx-4 mt-5 mb-6 rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-50">
+                    <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary-500" />
+                        Bảng xếp hạng Streak
+                    </h3>
+                </div>
+                <div className="divide-y divide-slate-50">
+                    {teamData
+                        .sort((a, b) => b.streak - a.streak)
+                        .map((member, idx) => (
+                            <div key={member.id} className="flex items-center gap-3 px-4 py-3">
+                                <span className={cn(
+                                    'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold',
+                                    idx === 0 ? 'bg-amber-100 text-amber-700' :
+                                        idx === 1 ? 'bg-slate-100 text-slate-600' :
+                                            'bg-slate-50 text-slate-400'
+                                )}>
+                                    {idx + 1}
+                                </span>
+                                <span className="flex-1 text-sm font-medium text-slate-700">{member.name}</span>
+                                <span className="text-sm font-bold text-orange-500">🔥 {member.streak}</span>
+                            </div>
+                        ))}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function OverviewCard({ label, value, trend, color }: {
+    label: string; value: string; trend: 'up' | 'down'; color: string
+}) {
+    return (
+        <div className="rounded-xl bg-white border border-slate-100 shadow-sm p-3 text-center">
+            <p className="text-[10px] text-slate-400 mb-1">{label}</p>
+            <div className="flex items-center justify-center gap-1">
+                <p className="text-xl font-bold text-slate-800">{value}</p>
+                {trend === 'up' ? (
+                    <ArrowUpRight className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                    <ArrowDownRight className="h-3.5 w-3.5 text-red-500" />
+                )}
+            </div>
+        </div>
+    )
+}
