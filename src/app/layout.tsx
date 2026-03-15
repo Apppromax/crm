@@ -27,6 +27,8 @@ export const viewport: Viewport = {
   themeColor: '#0ea5e9',
 }
 
+import NextTopLoader from 'nextjs-toploader'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,6 +37,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={inter.variable}>
       <body className="min-h-dvh bg-slate-50 text-slate-900 antialiased">
+        <NextTopLoader color="#0ea5e9" showSpinner={false} speed={300} />
         {children}
         <PWAInstallPrompt />
       </body>
