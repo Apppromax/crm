@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 
 export async function getSOSAlerts(orgId?: string) {
@@ -27,7 +28,7 @@ export async function getSOSAlerts(orgId?: string) {
 }
 
 export async function resolveSOSAlert(alertId: string, userId: string) {
-    return prisma.sOSAlert.update({
+    const result = await prisma.sOSAlert.update({
         where: { id: alertId },
         data: {
             status: 'RESOLVED',
@@ -35,6 +36,8 @@ export async function resolveSOSAlert(alertId: string, userId: string) {
             resolvedAt: new Date(),
         },
     })
+    revalidatePath('/manager')
+    return result
 }
 
 export async function sendAdvice(data: {
@@ -43,7 +46,7 @@ export async function sendAdvice(data: {
     toUserId: string
     content: string
 }) {
-    return prisma.managerAdvice.create({
+    const result = await prisma.managerAdvice.create({
         data: {
             leadId: data.leadId,
             fromUserId: data.fromUserId,
@@ -51,19 +54,63 @@ export async function sendAdvice(data: {
             content: data.content,
         },
     })
+    revalidatePath('/sale')
+    revalidatePath('/manager')
+    return result
 }
 
-export async function getSchedulesByUser(userId: string) {
+export async function getSchedulesByUser(userId: string, includeCompleted = false) {
     return prisma.schedule.findMany({
         where: {
             userId,
-            status: { in: ['PENDING', 'OVERDUE'] },
+            ...(includeCompleted ? {} : { status: { in: ['PENDING', 'OVERDUE'] } }),
         },
         include: {
-            lead: { select: { id: true, name: true, currentMilestone: true } },
+            lead: {
+                select: {
+                    id: true,
+                    name: true,
+                    currentMilestone: true,
+                    dealValue: true,
+                },
+            },
         },
         orderBy: { scheduledAt: 'asc' },
     })
+}
+
+export async function createSchedule(data: {
+    leadId: string
+    userId: string
+    type: 'FOLLOW_UP' | 'MEETING' | 'GOLDEN_72H' | 'AI_WARMUP'
+    scheduledAt: string
+    note?: string
+}) {
+    const result = await prisma.schedule.create({
+        data: {
+            leadId: data.leadId,
+            userId: data.userId,
+            type: data.type,
+            scheduledAt: new Date(data.scheduledAt),
+            note: data.note || null,
+        },
+    })
+    revalidatePath('/sale/schedule')
+    revalidatePath('/sale')
+    return result
+}
+
+export async function completeSchedule(scheduleId: string) {
+    const result = await prisma.schedule.update({
+        where: { id: scheduleId },
+        data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+        },
+    })
+    revalidatePath('/sale/schedule')
+    revalidatePath('/sale')
+    return result
 }
 
 export async function getDashboardMetrics(orgId: string) {

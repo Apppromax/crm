@@ -1,8 +1,11 @@
-'use client'
+import { User, Bell, Shield, Users, Eye, ChevronRight, Clock, Target } from 'lucide-react'
+import { getUserByRole } from '@/app/actions/users'
+import { LogoutButton } from '@/components/logout-button'
 
-import { User, Bell, Shield, Users, Eye, LogOut, ChevronRight, Clock, Target } from 'lucide-react'
+export default async function ManagerSettingsPage() {
+    const user = await getUserByRole('MANAGER')
+    if (!user) return <div className="p-8 text-center text-slate-400">Không tìm thấy thông tin profile</div>
 
-export default function ManagerSettingsPage() {
     return (
         <div className="mx-auto max-w-2xl">
             <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
@@ -14,13 +17,13 @@ export default function ManagerSettingsPage() {
                 <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-lg font-bold">
-                            M
+                            {user.name.split(' ').pop()?.[0]}
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-base font-semibold text-slate-800">Trần Quốc Manager</h3>
-                            <p className="text-sm text-slate-400">manager@crmpro.vn</p>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-semibold text-slate-800 truncate">{user.name}</h3>
+                            <p className="text-sm text-slate-400 truncate">{user.email}</p>
                             <span className="inline-flex items-center mt-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
-                                MANAGER
+                                {user.role} {user.managedTeams?.[0] ? `• Quản lý ${user.managedTeams[0].name}` : ''}
                             </span>
                         </div>
                     </div>
@@ -42,10 +45,11 @@ export default function ManagerSettingsPage() {
                     <SettingItem icon={<Shield className="h-5 w-5" />} label="Bảo mật" subtitle="Đổi mật khẩu" />
                 </SettingsGroup>
 
-                <button className="flex w-full items-center justify-center gap-2 rounded-2xl border border-danger/20 bg-danger/5 py-3 text-sm font-medium text-danger hover:bg-danger/10 transition-colors">
-                    <LogOut className="h-4 w-4" />
-                    Đăng xuất
-                </button>
+                <LogoutButton />
+
+                <p className="text-center text-[10px] text-slate-300 pb-4 mt-8">
+                    CRM Pro V2 — Version 0.1.0
+                </p>
             </div>
         </div>
     )

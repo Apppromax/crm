@@ -1,4 +1,5 @@
 import { getLeadDetail } from '@/app/actions/leads'
+import { getUserByRole } from '@/app/actions/users'
 import { MOCK_AI_COACH } from '@/lib/mock-data'
 import { notFound } from 'next/navigation'
 import { LeadDetailClient } from '@/components/sale/lead-detail-client'
@@ -10,10 +11,14 @@ interface Props {
 export default async function LeadDetailPage({ params }: Props) {
     const { id } = await params
 
-    const dbLead = await getLeadDetail(id)
-    if (!dbLead) notFound()
+    const [dbLead, user] = await Promise.all([
+        getLeadDetail(id),
+        getUserByRole('SALE'),
+    ])
 
-    // Transform DB lead to the shape LeadDetailClient expects (MockLead)
+    if (!dbLead) notFound()
+    if (!user) return <div className="p-8 text-center text-slate-400">No user found</div>
+
     const lead = {
         id: dbLead.id,
         name: dbLead.name,
@@ -34,6 +39,7 @@ export default async function LeadDetailPage({ params }: Props) {
         consecutiveMissCount: dbLead.consecutiveMissCount,
         createdAt: dbLead.createdAt,
         managerAdvice: dbLead.advices[0]?.content || null,
+        assigneeId: dbLead.assignee?.id,
         interactions: dbLead.interactions.map(i => ({
             id: i.id,
             type: i.type,
@@ -53,5 +59,5 @@ export default async function LeadDetailPage({ params }: Props) {
 
     const aiCoach = MOCK_AI_COACH[lead.currentMilestone] || MOCK_AI_COACH[1]
 
-    return <LeadDetailClient lead={lead as any} aiCoach={aiCoach} />
+    return <LeadDetailClient lead={lead as any} aiCoach={aiCoach} userId={user.id} />
 }

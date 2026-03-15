@@ -1,31 +1,34 @@
 import { formatCurrencyShort } from '@/lib/utils'
 import { Crown, TrendingUp, Target, Zap, Users, ArrowUpRight, ArrowDownRight, Sparkles, BarChart3, Activity, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { getUserByRole, getTeamPerformance } from '@/app/actions/users'
+import { getDashboardMetrics } from '@/app/actions/dashboard'
+import { RealtimeListener } from '@/components/realtime-listener'
 
-// CEO Mock Data
-const revenueData = {
-    actual: 6_800_000_000,
-    pipeline: 15_500_000_000,
-    target: 20_000_000_000,
-    confidence: 75,
-    achievementRate: 34,
-}
+export default async function CEODashboard() {
+    const user = await getUserByRole('CEO')
+    if (!user) return <div className="p-8 text-center text-slate-400">No CEO user found</div>
 
-const aiSummary = {
-    line1: '📊 Doanh thu thực tế đạt 34% KPI tháng. Tốc độ chốt deal đang tăng 15% so với tuần trước.',
-    line2: '⚠️ Bottleneck: 3 deal Mốc 4 bị delay quá 5 ngày. Cần Manager A can thiệp deal Phạm Minh Tuấn.',
-    line3: '🌟 Cơ hội: 2 leads mới từ Facebook Ads có BANT score rất cao. Recommend: phân bổ cho sale có conversion rate tốt nhất.',
-}
+    const orgId = user.org.id
+    const metrics = await getDashboardMetrics(orgId)
 
-const topWarriors = [
-    { name: 'Nguyễn Văn A', closed: 1, pipeline: 3, avatar: 'A', score: 92 },
-    { name: 'Trần Minh B', closed: 0, pipeline: 2, avatar: 'B', score: 65 },
-    { name: 'Lê Thị C', closed: 0, pipeline: 1, avatar: 'C', score: 38 },
-]
+    // Calculate revenue from won deals
+    const wonRevenue = await getWonRevenue(orgId)
+    const pipelineValue = metrics.pipelineValue
+    const target = 20_000_000_000
+    const achievementRate = Math.round((wonRevenue / target) * 100)
+    const confidence = metrics.activeLeads > 0 ? Math.min(95, Math.round(achievementRate + (pipelineValue / target) * 30)) : 0
 
-export default function CEODashboard() {
+    // Get team performance for warriors
+    const allTeamPerf = await getAllTeamPerformance(orgId)
+
+    const now = new Date()
+    const monthName = now.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
+
     return (
         <div className="mx-auto max-w-2xl px-4 py-6">
+            <RealtimeListener table="leads" orgId={orgId} />
+
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -34,12 +37,12 @@ export default function CEODashboard() {
                     </div>
                     <div>
                         <h1 className="text-lg font-bold text-white">Chỉ Huy Tối Cao</h1>
-                        <p className="text-xs text-slate-500">CEO Dashboard • Tháng 3/2026</p>
+                        <p className="text-xs text-slate-500">CEO Dashboard • {monthName}</p>
                     </div>
                 </div>
                 <div className="text-right">
                     <p className="text-[10px] text-slate-500">Cập nhật</p>
-                    <p className="text-xs text-slate-400">5 phút trước</p>
+                    <p className="text-xs text-slate-400">vừa xong</p>
                 </div>
             </div>
 
@@ -54,7 +57,7 @@ export default function CEODashboard() {
                     {/* Actual Revenue */}
                     <div className="text-center">
                         <p className="text-3xl font-black neon-green text-glow-green">
-                            {(revenueData.actual / 1_000_000_000).toFixed(1)}
+                            {(wonRevenue / 1_000_000_000).toFixed(1)}
                         </p>
                         <p className="text-[10px] text-slate-500 mt-1">tỷ • Thực tế</p>
                     </div>
@@ -62,7 +65,7 @@ export default function CEODashboard() {
                     {/* Pipeline */}
                     <div className="text-center">
                         <p className="text-3xl font-black neon-cyan text-glow-cyan">
-                            {(revenueData.pipeline / 1_000_000_000).toFixed(1)}
+                            {(pipelineValue / 1_000_000_000).toFixed(1)}
                         </p>
                         <p className="text-[10px] text-slate-500 mt-1">tỷ • Pipeline</p>
                     </div>
@@ -70,7 +73,7 @@ export default function CEODashboard() {
                     {/* Confidence */}
                     <div className="text-center">
                         <p className="text-3xl font-black neon-gold text-glow-gold">
-                            {revenueData.confidence}%
+                            {confidence}%
                         </p>
                         <p className="text-[10px] text-slate-500 mt-1">Tự tin đạt KPI</p>
                     </div>
@@ -79,13 +82,13 @@ export default function CEODashboard() {
                 {/* Target Progress */}
                 <div>
                     <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs text-slate-400">KPI: {formatCurrencyShort(revenueData.target)}</span>
-                        <span className="text-xs font-semibold neon-cyan">{revenueData.achievementRate}%</span>
+                        <span className="text-xs text-slate-400">KPI: {formatCurrencyShort(target)}</span>
+                        <span className="text-xs font-semibold neon-cyan">{achievementRate}%</span>
                     </div>
                     <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                         <div
                             className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-emerald-400 to-emerald-500 transition-all duration-1000"
-                            style={{ width: `${revenueData.achievementRate}%` }}
+                            style={{ width: `${Math.min(100, achievementRate)}%` }}
                         />
                     </div>
                 </div>
@@ -99,9 +102,15 @@ export default function CEODashboard() {
                     <span className="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full font-medium">AI</span>
                 </div>
                 <div className="space-y-2.5">
-                    <p className="text-sm text-slate-300 leading-relaxed">{aiSummary.line1}</p>
-                    <p className="text-sm text-slate-300 leading-relaxed">{aiSummary.line2}</p>
-                    <p className="text-sm text-slate-300 leading-relaxed">{aiSummary.line3}</p>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                        📊 Doanh thu thực tế đạt {achievementRate}% KPI tháng. Pipeline hiện tại {formatCurrencyShort(pipelineValue)} với {metrics.activeLeads} leads đang theo.
+                    </p>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                        ⚠️ Bottleneck: {metrics.milestoneDistribution.find(m => m.milestone >= 4)?.count || 0} deal ở Mốc 4-5 cần chốt. {metrics.sosCount > 0 ? `${metrics.sosCount} SOS alert đang chờ xử lý.` : 'Không có SOS alert.'}
+                    </p>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                        🌟 Cơ hội: {metrics.milestoneDistribution.find(m => m.milestone === 1)?.count || 0} leads mới ở Mốc 1. Tổng giá trị pipeline giai đoạn cuối: {formatCurrencyShort(metrics.milestoneDistribution.filter(m => m.milestone >= 4).reduce((s, m) => s + m.value, 0))}.
+                    </p>
                 </div>
             </div>
 
@@ -112,35 +121,39 @@ export default function CEODashboard() {
                     <h2 className="text-sm font-semibold text-slate-300">Top Warriors</h2>
                 </div>
                 <div className="space-y-3">
-                    {topWarriors.map((w, idx) => (
-                        <div key={w.name} className="flex items-center gap-3">
-                            <div className="relative">
-                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30' :
-                                    idx === 1 ? 'bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30' :
-                                        'bg-slate-600/20 text-slate-500'
-                                    }`}>
-                                    {w.avatar}
+                    {allTeamPerf.length === 0 ? (
+                        <p className="text-sm text-slate-500 text-center py-4">Chưa có dữ liệu team</p>
+                    ) : (
+                        allTeamPerf.slice(0, 5).map((w, idx) => (
+                            <div key={w.id} className="flex items-center gap-3">
+                                <div className="relative">
+                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30' :
+                                        idx === 1 ? 'bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30' :
+                                            'bg-slate-600/20 text-slate-500'
+                                        }`}>
+                                        {w.name.split(' ').pop()?.[0]}
+                                    </div>
+                                    {idx === 0 && (
+                                        <span className="absolute -top-1 -right-1 text-[10px]">👑</span>
+                                    )}
                                 </div>
-                                {idx === 0 && (
-                                    <span className="absolute -top-1 -right-1 text-[10px]">👑</span>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm font-medium text-slate-200">{w.name}</p>
-                                <div className="flex items-center gap-3 text-[10px] text-slate-500">
-                                    <span>✓ {w.closed} chốt</span>
-                                    <span>📊 {w.pipeline} pipeline</span>
+                                <div className="flex-1">
+                                    <p className="text-sm font-medium text-slate-200">{w.name}</p>
+                                    <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                                        <span>✓ {w.wonDeals} chốt</span>
+                                        <span>📊 {w.activeLeads} pipeline</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className={`text-lg font-bold ${w.score >= 80 ? 'neon-green' : w.score >= 50 ? 'neon-gold' : 'neon-red'
+                                        }`}>
+                                        {w.score}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500">score</p>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className={`text-lg font-bold ${w.score >= 80 ? 'neon-green' : w.score >= 50 ? 'neon-gold' : 'neon-red'
-                                    }`}>
-                                    {w.score}
-                                </p>
-                                <p className="text-[10px] text-slate-500">score</p>
-                            </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -148,13 +161,13 @@ export default function CEODashboard() {
             <div className="grid grid-cols-2 gap-3 mb-5">
                 <div className="glass rounded-2xl p-4 text-center">
                     <Activity className="h-5 w-5 neon-cyan mx-auto mb-2" />
-                    <p className="text-2xl font-black text-white">23</p>
-                    <p className="text-[10px] text-slate-500">Tương tác hôm nay</p>
+                    <p className="text-2xl font-black text-white">{metrics.totalLeads}</p>
+                    <p className="text-[10px] text-slate-500">Tổng Leads</p>
                 </div>
                 <div className="glass rounded-2xl p-4 text-center">
                     <Zap className="h-5 w-5 neon-gold mx-auto mb-2" />
-                    <p className="text-2xl font-black text-white">4.2x</p>
-                    <p className="text-[10px] text-slate-500">Burn Rate</p>
+                    <p className="text-2xl font-black text-white">{metrics.wonDeals}</p>
+                    <p className="text-[10px] text-slate-500">Deals Won</p>
                 </div>
             </div>
 
@@ -179,4 +192,53 @@ export default function CEODashboard() {
             </div>
         </div>
     )
+}
+
+// Helper: Get won revenue
+import { prisma } from '@/lib/prisma'
+
+async function getWonRevenue(orgId: string): Promise<number> {
+    const result = await prisma.lead.aggregate({
+        where: { orgId, status: 'WON' },
+        _sum: { dealValue: true },
+    })
+    return result._sum.dealValue || 0
+}
+
+async function getAllTeamPerformance(orgId: string) {
+    const members = await prisma.user.findMany({
+        where: { orgId, role: 'SALE' },
+        select: {
+            id: true,
+            name: true,
+            streakCount: true,
+            assignedLeads: {
+                where: { status: { in: ['ACTIVE', 'WON'] } },
+                select: {
+                    currentMilestone: true,
+                    dealValue: true,
+                    status: true,
+                },
+            },
+        },
+    })
+
+    return members
+        .map(m => ({
+            id: m.id,
+            name: m.name,
+            streak: m.streakCount,
+            totalLeads: m.assignedLeads.length,
+            activeLeads: m.assignedLeads.filter(l => l.status === 'ACTIVE').length,
+            wonDeals: m.assignedLeads.filter(l => l.status === 'WON').length,
+            revenue: m.assignedLeads.filter(l => l.status === 'WON').reduce((s, l) => s + (l.dealValue || 0), 0),
+            pipeline: m.assignedLeads.filter(l => l.status === 'ACTIVE').reduce((s, l) => s + (l.dealValue || 0), 0),
+            score: Math.round(
+                (m.assignedLeads.filter(l => l.status === 'WON').length * 30) +
+                (m.streakCount * 5) +
+                (m.assignedLeads.filter(l => l.status === 'ACTIVE' && l.currentMilestone >= 4).length * 10) +
+                Math.min(30, m.assignedLeads.filter(l => l.status === 'ACTIVE').length * 5)
+            ),
+        }))
+        .sort((a, b) => b.score - a.score)
 }

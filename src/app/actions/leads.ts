@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import type { LeadStatus, BANTLevel } from '@prisma/client'
 
@@ -127,6 +128,7 @@ export async function createLead(data: {
             heatScore: 50,
         },
     })
+    revalidatePath('/sale')
     return lead
 }
 
@@ -159,11 +161,12 @@ export async function updateMilestone(
         }),
     ])
 
+    revalidatePath('/sale')
     return updatedLead
 }
 
 export async function assignLead(leadId: string, userId: string, teamId: string) {
-    return prisma.lead.update({
+    const result = await prisma.lead.update({
         where: { id: leadId },
         data: {
             assignedTo: userId,
@@ -172,14 +175,19 @@ export async function assignLead(leadId: string, userId: string, teamId: string)
             golden72hExpiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
         },
     })
+    revalidatePath('/sale')
+    revalidatePath('/manager')
+    return result
 }
 
 export async function snoozeLead(leadId: string, until: Date, reason: string) {
-    return prisma.lead.update({
+    const result = await prisma.lead.update({
         where: { id: leadId },
         data: {
             snoozeUntil: until,
             snoozeReason: reason as any,
         },
     })
+    revalidatePath('/sale')
+    return result
 }

@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import {
     ArrowLeft, Phone, MessageCircle, Flame, Zap,
     Lightbulb, Shield, ChevronDown, ChevronUp,
     Send, Clock, MapPin, DollarSign, User,
-    AlertTriangle, CheckCircle2, Pause
+    AlertTriangle, CheckCircle2, Pause, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { cn, formatCurrencyShort, getMilestoneLabel, getMilestonePercentage, formatRelativeTime } from '@/lib/utils'
 import type { MockLead } from '@/lib/mock-data'
 import { MilestonePromotionModal } from './milestone-promotion-modal'
@@ -15,37 +16,93 @@ import { VoiceRecorder } from './voice-recorder'
 import { SnoozePopup } from './snooze-popup'
 import { AntiHoardingPopup } from './anti-hoarding-popup'
 import { checkAntiHoarding, getGoldenTimer, calculateSnoozeUntil, type SnoozeOption } from '@/lib/engine'
+import { createInteraction } from '@/app/actions/interactions'
+import { updateMilestone, snoozeLead } from '@/app/actions/leads'
 
 interface Props {
-    lead: MockLead
+    lead: MockLead & { assigneeId?: string }
     aiCoach: { tip: string; objection: string; signal: string }
+    userId: string
 }
 
-export function LeadDetailClient({ lead, aiCoach }: Props) {
+export function LeadDetailClient({ lead, aiCoach, userId }: Props) {
+    const router = useRouter()
+    const [isPending, startTransition] = useTransition()
     const [showAiCoach, setShowAiCoach] = useState(true)
     const [noteText, setNoteText] = useState('')
     const [showPromotion, setShowPromotion] = useState(false)
     const [showSnooze, setShowSnooze] = useState(false)
     const [showAntiHoarding, setShowAntiHoarding] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [saveSuccess, setSaveSuccess] = useState(false)
+    const [interactionType, setInteractionType] = useState<'NOTE' | 'CALL' | 'ZALO_CHAT' | 'MEETING'>('NOTE')
 
     const antiHoardingAlert = checkAntiHoarding(lead)
     const goldenTimer = getGoldenTimer(lead)
 
     function handleVoiceTranscript(text: string) {
         setNoteText(prev => prev ? prev + ' ' + text : text)
+        setInteractionType('VOICE_NOTE' as any)
     }
 
-    function handleSnooze(option: SnoozeOption) {
+    async function handleSnooze(option: SnoozeOption) {
         const until = calculateSnoozeUntil(option)
-        console.log('Snoozed until:', until)
-        setShowSnooze(false)
+        try {
+            await snoozeLead(lead.id, until, option.key === 'tomorrow' ? 'UPDATED' : `UNREACHABLE_1`)
+            setShowSnooze(false)
+            startTransition(() => router.refresh())
+        } catch (err) {
+            console.error('Snooze failed:', err)
+        }
     }
 
     const percentage = getMilestonePercentage(lead.currentMilestone)
 
-    function handleSaveNote() {
-        if (!noteText.trim()) return
-        setShowPromotion(true)
+    async function handleSaveNote() {
+        if (!noteText.trim() || isSaving) return
+        setIsSaving(true)
+        try {
+            await createInteraction({
+                leadId: lead.id,
+                userId,
+                type: interactionType as any,
+                content: noteText.trim(),
+                aiLabels: [],
+            })
+            setSaveSuccess(true)
+            setTimeout(() => {
+                setSaveSuccess(false)
+                setShowPromotion(true)
+            }, 600)
+        } catch (err) {
+            console.error('Save note failed:', err)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    async function handlePromote() {
+        try {
+            await updateMilestone(
+                lead.id,
+                userId,
+                Math.min(lead.currentMilestone + 1, 5),
+                noteText.trim() || undefined
+            )
+            setShowPromotion(false)
+            setNoteText('')
+            setInteractionType('NOTE')
+            startTransition(() => router.refresh())
+        } catch (err) {
+            console.error('Promote failed:', err)
+        }
+    }
+
+    function handleSkipPromotion() {
+        setShowPromotion(false)
+        setNoteText('')
+        setInteractionType('NOTE')
+        startTransition(() => router.refresh())
     }
 
     return (
@@ -275,6 +332,7 @@ export function LeadDetailClient({ lead, aiCoach }: Props) {
                     )}
                     <button
                         onClick={() => setShowSnooze(true)}
+                        disabled={isPending}
                         className="rounded-xl bg-slate-100 px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-200 transition-all flex items-center gap-1.5"
                     >
                         <Pause className="h-3.5 w-3.5" />
@@ -283,9 +341,31 @@ export function LeadDetailClient({ lead, aiCoach }: Props) {
                 </div>
             )}
 
-            {/* Note Input — Fixed Bottom */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 px-4 py-3 safe-bottom">
-                <div className="mx-auto max-w-lg flex items-end gap-2">
+            {/* Interaction Type Selector + Note Input — Fixed Bottom */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 safe-bottom">
+                {/* Type selector */}
+                <div className="mx-auto max-w-lg flex gap-1 px-4 pt-2">
+                    {([
+                        { key: 'NOTE', label: '📝', title: 'Note' },
+                        { key: 'CALL', label: '📞', title: 'Call' },
+                        { key: 'ZALO_CHAT', label: '💬', title: 'Zalo' },
+                        { key: 'MEETING', label: '🤝', title: 'Gặp' },
+                    ] as const).map(t => (
+                        <button
+                            key={t.key}
+                            onClick={() => setInteractionType(t.key)}
+                            className={cn(
+                                'px-2 py-1 rounded-lg text-[10px] font-medium transition-all',
+                                interactionType === t.key
+                                    ? 'bg-primary-100 text-primary-700'
+                                    : 'text-slate-400 hover:bg-slate-50'
+                            )}
+                        >
+                            {t.label} {t.title}
+                        </button>
+                    ))}
+                </div>
+                <div className="mx-auto max-w-lg flex items-end gap-2 px-4 py-2">
                     <VoiceRecorder onTranscript={handleVoiceTranscript} />
                     <div className="relative flex-1">
                         <textarea
@@ -298,10 +378,17 @@ export function LeadDetailClient({ lead, aiCoach }: Props) {
                     </div>
                     <button
                         onClick={handleSaveNote}
-                        disabled={!noteText.trim()}
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-500 text-white shadow-md shadow-primary-500/20 transition-all hover:bg-primary-600 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                        disabled={!noteText.trim() || isSaving}
+                        className={cn(
+                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed',
+                            saveSuccess
+                                ? 'bg-success text-white shadow-success/20'
+                                : 'bg-primary-500 text-white shadow-primary-500/20 hover:bg-primary-600'
+                        )}
                     >
-                        <Send className="h-5 w-5" />
+                        {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> :
+                            saveSuccess ? <CheckCircle2 className="h-5 w-5" /> :
+                                <Send className="h-5 w-5" />}
                     </button>
                 </div>
             </div>
@@ -329,14 +416,10 @@ export function LeadDetailClient({ lead, aiCoach }: Props) {
                 <MilestonePromotionModal
                     currentMilestone={lead.currentMilestone}
                     signal={aiCoach.signal}
-                    onPromote={() => {
-                        setShowPromotion(false)
-                        setNoteText('')
-                    }}
-                    onSkip={() => {
-                        setShowPromotion(false)
-                        setNoteText('')
-                    }}
+                    leadId={lead.id}
+                    userId={userId}
+                    onPromote={handlePromote}
+                    onSkip={handleSkipPromotion}
                     onClose={() => setShowPromotion(false)}
                 />
             )}

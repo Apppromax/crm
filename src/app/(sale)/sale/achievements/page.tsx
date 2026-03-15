@@ -1,20 +1,14 @@
-'use client'
-
-import { useState } from 'react'
-import { ArrowLeft, Flame, Trophy, Star, Target, Zap, Award, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Flame, Trophy, Star, Target, Zap, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { cn, formatCurrencyShort } from '@/lib/utils'
 import { AchievementBadges } from '@/components/shared/gamification'
+import { getUserByRole, getUserStats } from '@/app/actions/users'
 
-export default function AchievementsPage() {
-    const userStats = {
-        streak: 5,
-        totalDeals: 3,
-        totalRevenue: 13_500_000_000,
-        totalInteractions: 156,
-        avgResponseTime: '15 phút',
-        bestMonth: 'Tháng 2/2026',
-    }
+export default async function AchievementsPage() {
+    const user = await getUserByRole('SALE')
+    if (!user) return <div className="p-8 text-center text-slate-400">No user found</div>
+
+    const stats = await getUserStats(user.id)
 
     return (
         <div className="mx-auto max-w-2xl min-h-dvh">
@@ -36,7 +30,7 @@ export default function AchievementsPage() {
                             <Flame className="h-6 w-6" />
                             <span className="text-sm font-semibold">Chuỗi Streak</span>
                         </div>
-                        <span className="text-4xl font-black">{userStats.streak}</span>
+                        <span className="text-4xl font-black">{stats.streak}</span>
                     </div>
                     <div className="flex gap-1">
                         {Array.from({ length: 7 }).map((_, i) => (
@@ -44,21 +38,21 @@ export default function AchievementsPage() {
                                 key={i}
                                 className={cn(
                                     'flex-1 h-2 rounded-full',
-                                    i < userStats.streak ? 'bg-white' : 'bg-white/20'
+                                    i < stats.streak ? 'bg-white' : 'bg-white/20'
                                 )}
                             />
                         ))}
                     </div>
                     <p className="text-xs text-white/70 mt-2">
-                        {userStats.streak >= 7 ? '🏆 1 tuần liên tiếp!' : `Còn ${7 - userStats.streak} ngày nữa để đạt "1 Tuần Streak"`}
+                        {stats.streak >= 7 ? '🏆 1 tuần liên tiếp!' : `Còn ${7 - stats.streak} ngày nữa để đạt "1 Tuần Streak"`}
                     </p>
                 </div>
 
                 {/* Stats Summary */}
                 <div className="grid grid-cols-3 gap-2">
-                    <StatCard icon={<Trophy className="h-4 w-4 text-amber-500" />} value={`${userStats.totalDeals}`} label="Deals chốt" />
-                    <StatCard icon={<TrendingUp className="h-4 w-4 text-emerald-500" />} value={formatCurrencyShort(userStats.totalRevenue)} label="Doanh thu" />
-                    <StatCard icon={<Zap className="h-4 w-4 text-primary-500" />} value={`${userStats.totalInteractions}`} label="Tương tác" />
+                    <StatCard icon={<Trophy className="h-4 w-4 text-amber-500" />} value={`${stats.milestone45}`} label="Deals M4-5" />
+                    <StatCard icon={<TrendingUp className="h-4 w-4 text-emerald-500" />} value={formatCurrencyShort(stats.pipelineValue)} label="Pipeline" />
+                    <StatCard icon={<Zap className="h-4 w-4 text-primary-500" />} value={`${stats.activeLeads}`} label="Active" />
                 </div>
 
                 {/* Badges */}
@@ -71,10 +65,10 @@ export default function AchievementsPage() {
                         Kỷ lục cá nhân
                     </h3>
                     <div className="space-y-2">
-                        <RecordRow label="Tháng xuất sắc nhất" value={userStats.bestMonth} />
-                        <RecordRow label="Thời gian phản hồi TB" value={userStats.avgResponseTime} />
-                        <RecordRow label="Streak dài nhất" value={`${userStats.streak} ngày`} />
-                        <RecordRow label="Deal giá trị nhất" value={formatCurrencyShort(8_200_000_000)} />
+                        <RecordRow label="Streak hiện tại" value={`${stats.streak} ngày`} />
+                        <RecordRow label="Active Leads" value={`${stats.activeLeads}`} />
+                        <RecordRow label="Pipeline Value" value={formatCurrencyShort(stats.pipelineValue)} />
+                        <RecordRow label="Milestone 4-5" value={`${stats.milestone45} leads`} />
                     </div>
                 </div>
             </div>

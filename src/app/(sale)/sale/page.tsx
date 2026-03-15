@@ -1,6 +1,7 @@
 import { getTopPriorityLeads } from '@/app/actions/leads'
 import { getUserByRole, getUserStats } from '@/app/actions/users'
 import { SaleHomeClient } from './home-client'
+import { RealtimeListener } from '@/components/realtime-listener'
 
 function determinePriorityReason(lead: any): 'golden_72h' | 'schedule_due' | 'retry' | 'hot_lead' | 'manager_advice' {
     if (lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()) return 'golden_72h'
@@ -34,14 +35,17 @@ export default async function SaleHomePage() {
     }))
 
     return (
-        <SaleHomeClient
-            topCards={topCards}
-            stats={{
-                totalLeads: stats.activeLeads,
-                milestone45: stats.milestone45,
-                streakCount: stats.streakCount,
-                pipelineValue: stats.pipelineValue,
-            }}
-        />
+        <>
+            <RealtimeListener table="leads" userId={user.id} />
+            <SaleHomeClient
+                topCards={topCards}
+                stats={{
+                    totalLeads: stats.activeLeads,
+                    milestone45: stats.milestone45,
+                    streakCount: stats.streak,
+                    pipelineValue: stats.pipelineValue,
+                }}
+            />
+        </>
     )
 }

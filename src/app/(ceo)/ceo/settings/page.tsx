@@ -1,8 +1,12 @@
-'use client'
+import { Crown, Bell, Shield, ChevronRight, BarChart3, Globe } from 'lucide-react'
+import { ExportLeadsButton } from './export-button'
+import { getUserByRole } from '@/app/actions/users'
+import { LogoutButton } from '@/components/logout-button'
 
-import { Crown, Bell, Shield, Download, LogOut, ChevronRight, BarChart3, Globe } from 'lucide-react'
+export default async function CEOSettingsPage() {
+    const user = await getUserByRole('CEO')
+    if (!user) return <div className="p-8 text-center text-slate-400">Không tìm thấy thông tin profile</div>
 
-export default function CEOSettingsPage() {
     return (
         <div className="mx-auto max-w-2xl">
             <header className="sticky top-0 z-40 bg-slate-950/90 px-4 py-3 backdrop-blur-xl border-b border-white/5">
@@ -14,13 +18,13 @@ export default function CEOSettingsPage() {
                 <div className="rounded-2xl bg-white/5 border border-white/5 p-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-500/20 text-amber-400 text-lg font-bold ring-2 ring-amber-500/30">
-                            D
+                            {user.name.split(' ').pop()?.[0]}
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-base font-semibold text-white">Nguyễn Đức Director</h3>
-                            <p className="text-sm text-slate-500">director@crmpro.vn</p>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-semibold text-white truncate">{user.name}</h3>
+                            <p className="text-sm text-slate-500 truncate">{user.email}</p>
                             <span className="inline-flex items-center mt-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
-                                DIRECTOR
+                                {user.role} {user.org ? `• ${user.org.name}` : ''}
                             </span>
                         </div>
                     </div>
@@ -29,7 +33,9 @@ export default function CEOSettingsPage() {
                 {/* Groups */}
                 <SettingsGroup title="Báo cáo">
                     <SettingItem icon={<BarChart3 className="h-5 w-5" />} label="Tần suất báo cáo" subtitle="Hàng ngày, 8:00 AM" />
-                    <SettingItem icon={<Download className="h-5 w-5" />} label="Export dữ liệu" subtitle="CSV, PDF" />
+
+                    <ExportLeadsButton />
+
                     <SettingItem icon={<Globe className="h-5 w-5" />} label="Ngôn ngữ" subtitle="Tiếng Việt" />
                 </SettingsGroup>
 
@@ -41,10 +47,11 @@ export default function CEOSettingsPage() {
                     <SettingItem icon={<Shield className="h-5 w-5" />} label="Đổi mật khẩu" subtitle="Lần cuối: 30 ngày trước" />
                 </SettingsGroup>
 
-                <button className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/5 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors">
-                    <LogOut className="h-4 w-4" />
-                    Đăng xuất
-                </button>
+                <LogoutButton />
+
+                <p className="text-center text-[10px] text-slate-600 pb-4 mt-8">
+                    CRM Pro V2 — Version 0.1.0
+                </p>
             </div>
         </div>
     )

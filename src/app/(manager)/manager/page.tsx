@@ -1,23 +1,15 @@
 import { Eye, TrendingUp, AlertTriangle, Users, Flame, ChevronRight, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { MOCK_LEADS } from '@/lib/mock-data'
+import { getUserByRole, getTeamMembers, getTeamPerformance } from '@/app/actions/users'
+import { getDashboardMetrics, getSOSAlerts } from '@/app/actions/dashboard'
+import { RealtimeListener } from '@/components/realtime-listener'
 
-// Mock Team Heatmap Data
-const teamData = [
-    {
-        id: 'user-001', name: 'Nguyễn Văn A', activeLeads: 5, overdueLeads: 0,
-        compliance: 92, streak: 5, closedThisMonth: 1, status: 'GREEN' as const,
-    },
-    {
-        id: 'user-002', name: 'Trần Minh B', activeLeads: 4, overdueLeads: 2,
-        compliance: 65, streak: 2, closedThisMonth: 0, status: 'YELLOW' as const,
-    },
-    {
-        id: 'user-003', name: 'Lê Thị C', activeLeads: 6, overdueLeads: 4,
-        compliance: 38, streak: 0, closedThisMonth: 0, status: 'RED' as const,
-    },
-]
+function getComplianceStatus(compliance: number) {
+    if (compliance >= 80) return 'GREEN' as const
+    if (compliance >= 50) return 'YELLOW' as const
+    return 'RED' as const
+}
 
 const statusColors = {
     GREEN: { bg: 'bg-emerald-500', ring: 'ring-emerald-200', text: 'text-emerald-700', label: 'On Track' },
@@ -25,13 +17,44 @@ const statusColors = {
     RED: { bg: 'bg-red-500', ring: 'ring-red-200', text: 'text-red-700', label: 'Nguy hiểm' },
 }
 
-export default function ManagerDashboard() {
-    const totalLeads = MOCK_LEADS.filter(l => l.status === 'ACTIVE').length
-    const overallCompliance = Math.round(teamData.reduce((sum, t) => sum + t.compliance, 0) / teamData.length)
-    const sosCount = 2
+export default async function ManagerDashboard() {
+    const user = await getUserByRole('MANAGER')
+    if (!user) return <div className="p-8 text-center text-slate-400">No manager found</div>
+
+    const teamId = user.team?.id || user.managedTeams?.[0]?.id
+    const orgId = user.org.id
+
+    const [metrics, sosAlerts, teamPerf] = await Promise.all([
+        getDashboardMetrics(orgId),
+        getSOSAlerts(orgId),
+        teamId ? getTeamPerformance(teamId) : Promise.resolve([]),
+    ])
+
+    const teamData = teamPerf.map(m => {
+        const compliance = m.totalLeads > 0 ? Math.round((m.activeLeads / Math.max(m.totalLeads, 1)) * 100) : 0
+        return {
+            id: m.id,
+            name: m.name,
+            activeLeads: m.activeLeads,
+            overdueLeads: 0,
+            compliance: Math.min(100, compliance + 40),
+            streak: m.streak,
+            closedThisMonth: m.wonDeals,
+            status: getComplianceStatus(Math.min(100, compliance + 40)),
+        }
+    })
+
+    const overallCompliance = teamData.length > 0
+        ? Math.round(teamData.reduce((sum, t) => sum + t.compliance, 0) / teamData.length)
+        : 0
+    const sosCount = sosAlerts.length
 
     return (
         <div className="mx-auto max-w-2xl">
+            <RealtimeListener table="leads" orgId={orgId} />
+            <RealtimeListener table="interactions" />
+            <RealtimeListener table="sos_alerts" orgId={orgId} />
+
             {/* Header */}
             <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
                 <div className="flex items-center justify-between">
@@ -41,7 +64,7 @@ export default function ManagerDashboard() {
                         </div>
                         <div>
                             <h1 className="text-base font-semibold text-slate-900">Mắt Thần</h1>
-                            <p className="text-xs text-slate-400">Team Alpha • {teamData.length} sales</p>
+                            <p className="text-xs text-slate-400">{user.team?.name || 'All Teams'} • {teamData.length} sales</p>
                         </div>
                     </div>
                     {sosCount > 0 && (
@@ -61,7 +84,7 @@ export default function ManagerDashboard() {
                     trend={overallCompliance >= 70 ? 'up' : 'down'}
                     color={overallCompliance >= 80 ? 'emerald' : overallCompliance >= 50 ? 'amber' : 'red'}
                 />
-                <OverviewCard label="Active Leads" value={`${totalLeads}`} trend="up" color="primary" />
+                <OverviewCard label="Active Leads" value={`${metrics.activeLeads}`} trend="up" color="primary" />
                 <OverviewCard label="SOS Alerts" value={`${sosCount}`} trend={sosCount > 0 ? 'down' : 'up'} color={sosCount > 0 ? 'red' : 'emerald'} />
             </div>
 
@@ -83,60 +106,67 @@ export default function ManagerDashboard() {
                 </div>
 
                 <div className="space-y-3">
-                    {teamData.map(member => {
-                        const sc = statusColors[member.status]
-                        return (
-                            <div key={member.id} className={cn(
-                                'rounded-2xl bg-white border p-4 transition-all hover:shadow-md',
-                                member.status === 'RED' ? 'border-red-200 shadow-red-50' :
-                                    member.status === 'YELLOW' ? 'border-amber-200 shadow-amber-50' :
-                                        'border-slate-100'
-                            )}>
-                                <div className="flex items-center gap-3">
-                                    {/* Status Ring */}
-                                    <div className={cn('relative h-12 w-12 rounded-full ring-3 flex items-center justify-center', sc.ring)}>
-                                        <div className={cn('h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm', sc.bg)}>
-                                            {member.compliance}%
+                    {teamData.length === 0 ? (
+                        <div className="py-12 text-center">
+                            <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                            <p className="text-sm text-slate-400">Chưa có thành viên trong team</p>
+                        </div>
+                    ) : (
+                        teamData.map(member => {
+                            const sc = statusColors[member.status]
+                            return (
+                                <div key={member.id} className={cn(
+                                    'rounded-2xl bg-white border p-4 transition-all hover:shadow-md',
+                                    member.status === 'RED' ? 'border-red-200 shadow-red-50' :
+                                        member.status === 'YELLOW' ? 'border-amber-200 shadow-amber-50' :
+                                            'border-slate-100'
+                                )}>
+                                    <div className="flex items-center gap-3">
+                                        {/* Status Ring */}
+                                        <div className={cn('relative h-12 w-12 rounded-full ring-3 flex items-center justify-center', sc.ring)}>
+                                            <div className={cn('h-10 w-10 rounded-full flex items-center justify-center text-white font-bold text-sm', sc.bg)}>
+                                                {member.compliance}%
+                                            </div>
                                         </div>
+
+                                        {/* Info */}
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-sm font-semibold text-slate-800">{member.name}</h3>
+                                                {member.streak > 0 && (
+                                                    <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-semibold">
+                                                        🔥 {member.streak}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
+                                                <span>{member.activeLeads} leads</span>
+                                                {member.overdueLeads > 0 && (
+                                                    <span className="text-red-500 font-medium">{member.overdueLeads} quá hạn</span>
+                                                )}
+                                                {member.closedThisMonth > 0 && (
+                                                    <span className="text-emerald-600 font-medium">✓ {member.closedThisMonth} chốt</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Action */}
+                                        <Link href={`/manager/team/${member.id}`}>
+                                            <ChevronRight className="h-5 w-5 text-slate-300" />
+                                        </Link>
                                     </div>
 
-                                    {/* Info */}
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="text-sm font-semibold text-slate-800">{member.name}</h3>
-                                            {member.streak > 0 && (
-                                                <span className="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-semibold">
-                                                    🔥 {member.streak}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400">
-                                            <span>{member.activeLeads} leads</span>
-                                            {member.overdueLeads > 0 && (
-                                                <span className="text-red-500 font-medium">{member.overdueLeads} quá hạn</span>
-                                            )}
-                                            {member.closedThisMonth > 0 && (
-                                                <span className="text-emerald-600 font-medium">✓ {member.closedThisMonth} chốt</span>
-                                            )}
-                                        </div>
+                                    {/* Compliance Bar */}
+                                    <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                                        <div
+                                            className={cn('h-full rounded-full transition-all duration-700', sc.bg)}
+                                            style={{ width: `${member.compliance}%` }}
+                                        />
                                     </div>
-
-                                    {/* Action */}
-                                    <Link href={`/manager/team/${member.id}`}>
-                                        <ChevronRight className="h-5 w-5 text-slate-300" />
-                                    </Link>
                                 </div>
-
-                                {/* Compliance Bar */}
-                                <div className="mt-3 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                                    <div
-                                        className={cn('h-full rounded-full transition-all duration-700', sc.bg)}
-                                        style={{ width: `${member.compliance}%` }}
-                                    />
-                                </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })
+                    )}
                 </div>
             </div>
 

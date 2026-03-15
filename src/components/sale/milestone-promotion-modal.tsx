@@ -1,22 +1,44 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowUp, X, Calendar, Clock } from 'lucide-react'
+import { ArrowUp, X, Calendar, Clock, Loader2 } from 'lucide-react'
 import { cn, getMilestoneLabel } from '@/lib/utils'
 
 interface Props {
     currentMilestone: number
     signal: string
-    onPromote: () => void
-    onSkip: () => void
+    leadId: string
+    userId: string
+    onPromote: () => void | Promise<void>
+    onSkip: () => void | Promise<void>
     onClose: () => void
 }
 
-export function MilestonePromotionModal({ currentMilestone, signal, onPromote, onSkip, onClose }: Props) {
+export function MilestonePromotionModal({ currentMilestone, signal, leadId, userId, onPromote, onSkip, onClose }: Props) {
     const [scheduleType, setScheduleType] = useState<string>('none')
     const [scheduleDate, setScheduleDate] = useState('')
     const [scheduleTime, setScheduleTime] = useState('')
+    const [isPromoting, setIsPromoting] = useState(false)
+    const [isSkipping, setIsSkipping] = useState(false)
     const nextMilestone = Math.min(currentMilestone + 1, 5)
+
+    async function handlePromote() {
+        setIsPromoting(true)
+        try {
+            await onPromote()
+        } finally {
+            setIsPromoting(false)
+        }
+    }
+
+    async function handleSkip() {
+        setIsSkipping(true)
+        try {
+            await onSkip()
+        } finally {
+            setIsSkipping(false)
+        }
+    }
 
     return (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
@@ -104,17 +126,25 @@ export function MilestonePromotionModal({ currentMilestone, signal, onPromote, o
                     {/* Action Buttons */}
                     <div className="flex gap-3">
                         <button
-                            onClick={onSkip}
-                            className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98]"
+                            onClick={handleSkip}
+                            disabled={isSkipping || isPromoting}
+                            className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-1.5"
                         >
-                            Giữ mốc
+                            {isSkipping ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Giữ mốc'}
                         </button>
                         <button
-                            onClick={onPromote}
-                            className="flex-1 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 py-3 text-sm font-bold text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-primary-500/40 active:scale-[0.98] flex items-center justify-center gap-1.5"
+                            onClick={handlePromote}
+                            disabled={isPromoting || isSkipping}
+                            className="flex-1 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 py-3 text-sm font-bold text-white shadow-lg shadow-primary-500/25 transition-all hover:shadow-primary-500/40 active:scale-[0.98] flex items-center justify-center gap-1.5 disabled:opacity-40"
                         >
-                            <ArrowUp className="h-4 w-4" />
-                            Thăng lên Mốc {nextMilestone}
+                            {isPromoting ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <>
+                                    <ArrowUp className="h-4 w-4" />
+                                    Thăng lên Mốc {nextMilestone}
+                                </>
+                            )}
                         </button>
                     </div>
                 </div>

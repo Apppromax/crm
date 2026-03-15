@@ -1,14 +1,39 @@
 'use server'
 
 import { prisma } from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 
+// Get the currently authenticated user from DB
+export async function getCurrentUser() {
+    const supabase = await createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    if (!authUser) return null
+
+    return prisma.user.findUnique({
+        where: { supabaseId: authUser.id },
+        include: {
+            team: { select: { id: true, name: true } },
+            org: { select: { id: true, name: true } },
+            managedTeams: { select: { id: true, name: true } },
+        },
+    })
+}
+
+// Fallback: Get user by role (for dev/testing when auth is bypassed)
 export async function getUserByRole(role: 'SALE' | 'MANAGER' | 'CEO') {
+    // First try to get the authenticated user
+    const currentUser = await getCurrentUser()
+    if (currentUser) return currentUser
+
+    // Fallback to findFirst by role (dev mode)
     const prismaRole = role === 'CEO' ? 'CEO' : role === 'MANAGER' ? 'MANAGER' : 'SALE'
     return prisma.user.findFirst({
         where: { role: prismaRole },
         include: {
             team: { select: { id: true, name: true } },
             org: { select: { id: true, name: true } },
+            managedTeams: { select: { id: true, name: true } },
         },
     })
 }
@@ -36,7 +61,7 @@ export async function getUserStats(userId: string) {
         activeLeads,
         milestone45,
         pipelineValue: pipelineAgg._sum.dealValue || 0,
-        streakCount: user?.streakCount || 0,
+        streak: user?.streakCount || 0,
     }
 }
 
