@@ -5,7 +5,7 @@
   "description": "CRM Pro V2 — Hệ điều hành bán hàng BĐS",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "npx prisma generate",
