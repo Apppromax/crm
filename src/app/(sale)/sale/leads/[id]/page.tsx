@@ -1,14 +1,24 @@
+import { Suspense } from 'react'
 import { getLeadDetail } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
 import { MOCK_AI_COACH } from '@/lib/mock-data'
 import { notFound } from 'next/navigation'
 import { LeadDetailClient } from '@/components/sale/lead-detail-client'
+import Loading from '@/app/(sale)/loading'
 
 interface Props {
     params: Promise<{ id: string }>
 }
 
-export default async function LeadDetailPage({ params }: Props) {
+export default function LeadDetailWrapper({ params }: Props) {
+    return (
+        <Suspense fallback={<Loading />}>
+            <LeadDetailPage params={params} />
+        </Suspense>
+    )
+}
+
+async function LeadDetailPage({ params }: Props) {
     const { id } = await params
 
     const [dbLead, user] = await Promise.all([

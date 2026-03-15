@@ -16,16 +16,15 @@ export function SOSClientActions({ alertId, userId }: Props) {
     const [resolved, setResolved] = useState(false)
 
     async function handleResolve() {
-        setIsResolving(true)
-        try {
-            await resolveSOSAlert(alertId, userId)
-            setResolved(true)
-            setTimeout(() => router.refresh(), 500)
-        } catch (err) {
-            console.error('Resolve failed:', err)
-        } finally {
-            setIsResolving(false)
-        }
+        // INSTANT feedback
+        setResolved(true)
+        // Server call in background
+        resolveSOSAlert(alertId, userId)
+            .then(() => setTimeout(() => router.refresh(), 300))
+            .catch(err => {
+                console.error('Resolve failed:', err)
+                setResolved(false)
+            })
     }
 
     if (resolved) {

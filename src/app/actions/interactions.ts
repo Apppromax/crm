@@ -16,7 +16,11 @@ export async function createInteraction(data: {
 }) {
     const lead = await prisma.lead.findUnique({
         where: { id: data.leadId },
-        include: { interactions: { orderBy: { createdAt: 'desc' }, take: 5 } }
+        select: {
+            id: true,
+            name: true,
+            golden72hExpiresAt: true,
+        }
     })
 
     if (!lead) throw new Error('Lead not found')
@@ -25,42 +29,16 @@ export async function createInteraction(data: {
         ? new Date() < lead.golden72hExpiresAt
         : false
 
-    // AI Processing
-    let finalLabels = data.aiLabels || []
-    let finalContent = data.content
-
-    if (!data.aiLabels || data.aiLabels.length === 0) {
-        const parsed = await parseInteractionNote(data.content)
-        if (parsed.cleanSummary) finalContent = parsed.cleanSummary
-        if (parsed.sentiment) finalLabels.push(parsed.sentiment)
-        if (parsed.actionItems && parsed.actionItems.length > 0) {
-            finalLabels.push(...parsed.actionItems.map((a: string) => `TODO: ${a}`))
-        }
-    }
-
-    // Combine history for summary
-    const history = lead.interactions.map(i => ({
-        date: i.createdAt.toISOString(),
-        type: i.type,
-        content: i.content
-    }))
-    history.unshift({
-        date: new Date().toISOString(),
-        type: data.type,
-        content: finalContent
-    })
-
-    const newSummary = await summarizeLeadInteractions(lead.name, history)
-
+    // INSTANT SAVE — no waiting for AI
     const [interaction] = await prisma.$transaction([
         prisma.interaction.create({
             data: {
                 leadId: data.leadId,
                 userId: data.userId,
                 type: data.type,
-                content: finalContent,
+                content: data.content,
                 rawVoiceText: data.rawVoiceText,
-                aiLabels: finalLabels,
+                aiLabels: data.aiLabels || [],
                 isGolden72h,
             },
         }),
@@ -69,14 +47,70 @@ export async function createInteraction(data: {
             data: {
                 lastInteractionAt: new Date(),
                 consecutiveMissCount: 0,
-                aiSummary: newSummary,
             },
         }),
     ])
 
     revalidatePath('/sale')
     revalidatePath(`/sale/leads/${data.leadId}`)
+
+    // FIRE-AND-FORGET: AI processing runs in background, does NOT block the user
+    processAIInBackground(data.leadId, lead.name, data.content, data.aiLabels, interaction.id)
+        .catch(err => console.error('[AI Background] Error:', err))
+
     return interaction
+}
+
+async function processAIInBackground(
+    leadId: string,
+    leadName: string,
+    content: string,
+    existingLabels: string[] | undefined,
+    interactionId: string,
+) {
+    // Parse note for labels
+    let aiLabels: string[] = []
+    let cleanContent = content
+
+    if (!existingLabels || existingLabels.length === 0) {
+        const parsed = await parseInteractionNote(content)
+        if (parsed.cleanSummary) cleanContent = parsed.cleanSummary
+        if (parsed.sentiment) aiLabels.push(parsed.sentiment)
+        if (parsed.actionItems && parsed.actionItems.length > 0) {
+            aiLabels.push(...parsed.actionItems.map((a: string) => `TODO: ${a}`))
+        }
+    }
+
+    // Fetch recent interactions for summary
+    const recentInteractions = await prisma.interaction.findMany({
+        where: { leadId },
+        orderBy: { createdAt: 'desc' },
+        take: 6,
+        select: { createdAt: true, type: true, content: true },
+    })
+
+    const history = recentInteractions.map(i => ({
+        date: i.createdAt.toISOString(),
+        type: i.type,
+        content: i.content,
+    }))
+
+    const newSummary = await summarizeLeadInteractions(leadName, history)
+
+    // Update with AI results
+    await prisma.$transaction([
+        prisma.interaction.update({
+            where: { id: interactionId },
+            data: {
+                content: cleanContent,
+                aiLabels: aiLabels.length > 0 ? aiLabels : undefined,
+            },
+        }),
+        prisma.lead.update({
+            where: { id: leadId },
+            data: { aiSummary: newSummary },
+        }),
+    ])
 }
 
 export async function getInteractionsByLead(leadId: string) {

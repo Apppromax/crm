@@ -1,21 +1,33 @@
+import { Suspense } from 'react'
 import { formatCurrencyShort } from '@/lib/utils'
 import { Crown, TrendingUp, Target, Zap, Users, ArrowUpRight, ArrowDownRight, Sparkles, BarChart3, Activity, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getUserByRole, getTeamPerformance } from '@/app/actions/users'
 import { getDashboardMetrics } from '@/app/actions/dashboard'
 import { RealtimeListener } from '@/components/realtime-listener'
+import Loading from '@/app/(ceo)/loading'
+import { prisma } from '@/lib/prisma'
 
-export default async function CEODashboard() {
+export default function CEOPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <CEODashboard />
+        </Suspense>
+    )
+}
+
+async function CEODashboard() {
     const user = await getUserByRole('CEO')
     if (!user) return <div className="p-8 text-center text-slate-400">No CEO user found</div>
 
     const orgId = user.org.id
 
-    const [metrics, wonRevenue, allTeamPerf] = await Promise.all([
+    const [metrics, wonRevenueResult, allTeamPerf] = await Promise.all([
         getDashboardMetrics(orgId),
-        getWonRevenue(orgId),
+        prisma.lead.aggregate({ where: { orgId, status: 'WON' }, _sum: { dealValue: true } }),
         getAllTeamPerformance(orgId)
     ])
+    const wonRevenue = wonRevenueResult._sum.dealValue || 0
 
     const pipelineValue = metrics.pipelineValue
     const target = 20_000_000_000
@@ -194,16 +206,7 @@ export default async function CEODashboard() {
     )
 }
 
-// Helper: Get won revenue
-import { prisma } from '@/lib/prisma'
 
-async function getWonRevenue(orgId: string): Promise<number> {
-    const result = await prisma.lead.aggregate({
-        where: { orgId, status: 'WON' },
-        _sum: { dealValue: true },
-    })
-    return result._sum.dealValue || 0
-}
 
 async function getAllTeamPerformance(orgId: string) {
     const members = await prisma.user.findMany({

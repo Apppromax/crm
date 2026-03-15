@@ -42,17 +42,18 @@ export function LeadPoolClient({ leads, teamMembers, teamId }: Props) {
     )
 
     async function handleAssign(leadId: string, memberId: string) {
-        setBusyAssign(memberId)
-        try {
-            await assignLead(leadId, memberId, teamId)
-            setAssignedIds(prev => [...prev, leadId])
-            setAssigningId(null)
-            router.refresh()
-        } catch (err) {
-            console.error('Assign failed:', err)
-        } finally {
-            setBusyAssign(null)
-        }
+        // INSTANT feedback — hide lead from pool
+        setAssignedIds(prev => [...prev, leadId])
+        setAssigningId(null)
+
+        // Server call in background
+        assignLead(leadId, memberId, teamId)
+            .then(() => router.refresh())
+            .catch(err => {
+                console.error('Assign failed:', err)
+                // Rollback on failure
+                setAssignedIds(prev => prev.filter(id => id !== leadId))
+            })
     }
 
     return (

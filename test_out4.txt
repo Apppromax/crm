@@ -1,0 +1,42 @@
+
+Running 2 tests using 1 worker
+
+  ???  1 [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights (3.8s)
+  ???  2 [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale (3.7s)
+
+
+  1) [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login
+    Call log:
+    [2m  - navigating to "http://localhost:3000/login", waiting until "load"[22m
+
+
+       5 |     test('CEO Account: View Dashboard and Strategy Insights', async ({ page }) => {
+       6 |         // 1. Login as Director/CEO
+    >  7 |         await page.goto('/login');
+         |                    ^
+       8 |         await page.fill('input[type="email"]', 'director@crmpro.vn');
+       9 |         await page.fill('input[type="password"]', 'password123');
+      10 |         await page.click('button[type="submit"]');
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\ceo.spec.ts:7:20
+
+  2) [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/login
+    Call log:
+    [2m  - navigating to "http://localhost:3000/login", waiting until "load"[22m
+
+
+       5 |     test('Manager Account: View Teams, SOS Alerts, and Shadow Sale', async ({ page }) => {
+       6 |         // 1. Login as Manager
+    >  7 |         await page.goto('/login');
+         |                    ^
+       8 |         await page.fill('input[type="email"]', 'manager@crmpro.vn');
+       9 |         await page.fill('input[type="password"]', 'password123');
+      10 |         await page.click('button[type="submit"]');
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\manager.spec.ts:7:20
+
+  2 failed
+    [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights 
+    [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale 

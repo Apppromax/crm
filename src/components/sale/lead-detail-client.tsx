@@ -47,55 +47,60 @@ export function LeadDetailClient({ lead, aiCoach, userId }: Props) {
 
     async function handleSnooze(option: SnoozeOption) {
         const until = calculateSnoozeUntil(option)
-        try {
-            await snoozeLead(lead.id, until, option.key === 'tomorrow' ? 'UPDATED' : `UNREACHABLE_1`)
-            setShowSnooze(false)
-            startTransition(() => router.refresh())
-        } catch (err) {
-            console.error('Snooze failed:', err)
-        }
+        setShowSnooze(false)
+        // Navigate immediately — don't wait for server
+        router.push('/sale')
+        snoozeLead(lead.id, until, option.key === 'tomorrow' ? 'UPDATED' : `UNREACHABLE_1`)
+            .catch(err => console.error('Snooze failed:', err))
     }
 
     const percentage = getMilestonePercentage(lead.currentMilestone)
 
     async function handleSaveNote() {
         if (!noteText.trim() || isSaving) return
-        setIsSaving(true)
-        try {
-            await createInteraction({
-                leadId: lead.id,
-                userId,
-                type: interactionType as any,
-                content: noteText.trim(),
-                aiLabels: [],
-            })
-            setSaveSuccess(true)
-            setTimeout(() => {
-                setSaveSuccess(false)
-                setShowPromotion(true)
-            }, 600)
-        } catch (err) {
+        const savedNote = noteText.trim()
+        const savedType = interactionType
+
+        // INSTANT UI feedback
+        setSaveSuccess(true)
+        setNoteText('')
+        setInteractionType('NOTE')
+
+        setTimeout(() => {
+            setSaveSuccess(false)
+            setShowPromotion(true)
+        }, 400)
+
+        // Server call in background
+        createInteraction({
+            leadId: lead.id,
+            userId,
+            type: savedType as any,
+            content: savedNote,
+            aiLabels: [],
+        }).catch(err => {
             console.error('Save note failed:', err)
-        } finally {
-            setIsSaving(false)
-        }
+            // Restore note on failure
+            setNoteText(savedNote)
+            setSaveSuccess(false)
+        })
     }
 
     async function handlePromote() {
-        try {
-            await updateMilestone(
-                lead.id,
-                userId,
-                Math.min(lead.currentMilestone + 1, 5),
-                noteText.trim() || undefined
-            )
-            setShowPromotion(false)
-            setNoteText('')
-            setInteractionType('NOTE')
+        // INSTANT close modal
+        setShowPromotion(false)
+
+        // Server call — refresh happens in background
+        updateMilestone(
+            lead.id,
+            userId,
+            Math.min(lead.currentMilestone + 1, 5),
+            undefined
+        ).then(() => {
             startTransition(() => router.refresh())
-        } catch (err) {
+        }).catch(err => {
             console.error('Promote failed:', err)
-        }
+        })
     }
 
     function handleSkipPromotion() {

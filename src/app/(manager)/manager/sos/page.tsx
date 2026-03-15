@@ -1,11 +1,21 @@
+import { Suspense } from 'react'
 import { AlertTriangle, Eye, MessageSquare, CheckCircle, Flame } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
 import Link from 'next/link'
 import { getUserByRole } from '@/app/actions/users'
 import { getSOSAlerts } from '@/app/actions/dashboard'
 import { SOSClientActions } from './sos-client'
+import Loading from '@/app/(manager)/loading'
 
-export default async function SOSPage() {
+export default function SOSPageWrapper() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <SOSPage />
+        </Suspense>
+    )
+}
+
+async function SOSPage() {
     const user = await getUserByRole('MANAGER')
     if (!user) return <div className="p-8 text-center text-slate-400">No manager found</div>
 

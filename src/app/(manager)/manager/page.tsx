@@ -1,9 +1,11 @@
+import { Suspense } from 'react'
 import { Eye, TrendingUp, AlertTriangle, Users, Flame, ChevronRight, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getUserByRole, getTeamMembers, getTeamPerformance } from '@/app/actions/users'
 import { getDashboardMetrics, getSOSAlerts } from '@/app/actions/dashboard'
 import { RealtimeListener } from '@/components/realtime-listener'
+import Loading from '@/app/(manager)/loading'
 
 function getComplianceStatus(compliance: number) {
     if (compliance >= 80) return 'GREEN' as const
@@ -17,7 +19,15 @@ const statusColors = {
     RED: { bg: 'bg-red-500', ring: 'ring-red-200', text: 'text-red-700', label: 'Nguy hiểm' },
 }
 
-export default async function ManagerDashboard() {
+export default function ManagerDashboardPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <ManagerDashboard />
+        </Suspense>
+    )
+}
+
+async function ManagerDashboard() {
     const user = await getUserByRole('MANAGER')
     if (!user) return <div className="p-8 text-center text-slate-400">No manager found</div>
 

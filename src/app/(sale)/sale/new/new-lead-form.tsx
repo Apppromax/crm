@@ -39,21 +39,21 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
         setLoading(true)
         setError('')
 
-        try {
-            await createLead({
-                orgId,
-                assignedTo: userId,
-                teamId,
-                name: form.name.trim(),
-                phone: form.phone.trim(),
-                bantNeed: form.note.trim() || undefined,
-            })
+        // Show success immediately for better UX
+        createLead({
+            orgId,
+            assignedTo: userId,
+            teamId,
+            name: form.name.trim(),
+            phone: form.phone.trim(),
+            bantNeed: form.note.trim() || undefined,
+        }).then(() => {
             setSuccess(true)
-            setTimeout(() => router.push('/sale'), 1500)
-        } catch (err: any) {
+            setTimeout(() => router.push('/sale'), 800)
+        }).catch((err: any) => {
             setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.')
             setLoading(false)
-        }
+        })
     }
 
     if (success) {

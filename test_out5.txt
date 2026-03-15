@@ -1,0 +1,60 @@
+
+Running 2 tests using 1 worker
+
+  ???  1 [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights (22.1s)
+  ???  2 [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale (13.1s)
+
+
+  1) [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=B???n ????? Ph??n T??ch Th???c Chi???n')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=B???n ????? Ph??n T??ch Th???c Chi???n')[22m
+
+
+      19 |         // 3. Drill down to Analytics
+      20 |         await page.goto('/ceo/analytics');
+    > 21 |         await expect(page.locator('text=B???n ????? Ph??n T??ch Th???c Chi???n')).toBeVisible();
+         |                                                                        ^
+      22 |
+      23 |         // 4. Team view
+      24 |         await page.goto('/ceo/team');
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\ceo.spec.ts:21:72
+
+    Error Context: test-results\ceo-Phase-4-CEO-Workflow-C-b69b0-board-and-Strategy-Insights-chromium\error-context.md
+
+  2) [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=Ch??? Huy Chi???n D???ch')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('text=Ch??? Huy Chi???n D???ch')[22m
+
+
+      13 |
+      14 |         // 2. Check Manager Dashboard
+    > 15 |         await expect(page.locator('text=Ch??? Huy Chi???n D???ch')).toBeVisible({ timeout: 10000 });
+         |                                                               ^
+      16 |
+      17 |         // 3. Navigate to Teams to see Top-down heatmap
+      18 |         await page.goto('/manager/team');
+        at C:\Onedrive\OneDrive - NU Viet Nam\New folder\CRMPROV2\e2e\manager.spec.ts:15:63
+
+    Error Context: test-results\manager-Phase-3-Manager-Wo-297d0--SOS-Alerts-and-Shadow-Sale-chromium\error-context.md
+
+  2 failed
+    [chromium] ??? e2e\ceo.spec.ts:5:9 ??? Phase 4: CEO Workflow ??? CEO Account: View Dashboard and Strategy Insights 
+    [chromium] ??? e2e\manager.spec.ts:5:9 ??? Phase 3: Manager Workflow ??? Manager Account: View Teams, SOS Alerts, and Shadow Sale 

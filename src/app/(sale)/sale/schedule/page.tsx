@@ -3,6 +3,7 @@ import { getUserByRole } from '@/app/actions/users'
 import { getSchedulesByUser } from '@/app/actions/dashboard'
 import { ScheduleClient } from './schedule-client'
 import Loading from '@/app/(sale)/loading'
+import { prisma } from '@/lib/prisma'
 
 export default function SchedulePage() {
     return (
@@ -16,15 +17,15 @@ async function ScheduleDataLoader() {
     const user = await getUserByRole('SALE')
     if (!user) return <div className="p-8 text-center text-slate-400">No user found</div>
 
-    const schedules = await getSchedulesByUser(user.id)
-
-    // Also get all active leads for "create schedule" modal
-    const { prisma } = await import('@/lib/prisma')
-    const activeLeads = await prisma.lead.findMany({
-        where: { assignedTo: user.id, status: 'ACTIVE' },
-        select: { id: true, name: true, currentMilestone: true, dealValue: true },
-        orderBy: { priorityScore: 'desc' },
-    })
+    // PARALLEL fetch — no more waterfall
+    const [schedules, activeLeads] = await Promise.all([
+        getSchedulesByUser(user.id),
+        prisma.lead.findMany({
+            where: { assignedTo: user.id, status: 'ACTIVE' },
+            select: { id: true, name: true, currentMilestone: true, dealValue: true },
+            orderBy: { priorityScore: 'desc' },
+        }),
+    ])
 
     const serializedSchedules = schedules.map(s => ({
         id: s.id,

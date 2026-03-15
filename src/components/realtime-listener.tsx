@@ -1,20 +1,29 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+const supabase = createClient()
+
 export function RealtimeListener({ table, orgId, userId }: { table?: string, orgId?: string, userId?: string }) {
     const router = useRouter()
-    const supabase = createClient()
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const debouncedRefresh = useCallback(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        debounceRef.current = setTimeout(() => {
+            router.refresh()
+        }, 500)
+    }, [router])
 
     useEffect(() => {
-        // Build the filter
         let filter = ''
         if (orgId) filter = `org_id=eq.${orgId}`
         else if (userId) filter = `user_id=eq.${userId}`
 
-        const channel = supabase.channel(`realtime_${table || 'leads'}`)
+        const channelName = `rt_${table || 'leads'}_${orgId || userId || 'all'}`
+        const channel = supabase.channel(channelName)
             .on(
                 'postgres_changes',
                 {
@@ -23,17 +32,15 @@ export function RealtimeListener({ table, orgId, userId }: { table?: string, org
                     table: table || 'leads',
                     ...(filter ? { filter } : {})
                 },
-                (payload: any) => {
-                    console.log('Realtime change received!', payload)
-                    router.refresh()
-                }
+                () => debouncedRefresh()
             )
             .subscribe()
 
         return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current)
             supabase.removeChannel(channel)
         }
-    }, [table, orgId, userId, router, supabase])
+    }, [table, orgId, userId, debouncedRefresh])
 
-    return null // Invisible component purely for side effects
+    return null
 }
