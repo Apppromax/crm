@@ -21,13 +21,30 @@ export const getCurrentUser = cache(async () => {
     })
 })
 
+import { redirect } from 'next/navigation'
+
 export async function getUserByRole(role: 'SALE' | 'MANAGER' | 'CEO') {
     const currentUser = await getCurrentUser()
-    if (!currentUser) return null
+    if (!currentUser) {
+        redirect('/login')
+    }
 
-    // Ensure the user actually has the requested role
-    if (currentUser.role !== role) {
-        return null
+    // Map internal DB roles to access levels
+    let hasAccess = false;
+    if (role === 'CEO' && currentUser.role === 'CEO') hasAccess = true;
+    if (role === 'SALE' && currentUser.role === 'SALE') hasAccess = true;
+    if (role === 'MANAGER' && ['MANAGER', 'ADMIN', 'LEADER'].includes(currentUser.role)) hasAccess = true;
+
+    if (!hasAccess) {
+        // Redirect unauthorized users to their proper home
+        switch (currentUser.role) {
+            case 'CEO': redirect('/ceo'); break;
+            case 'MANAGER':
+            case 'ADMIN':
+            case 'LEADER': redirect('/manager'); break;
+            case 'SALE': redirect('/sale'); break;
+            default: redirect('/login');
+        }
     }
 
     return currentUser
