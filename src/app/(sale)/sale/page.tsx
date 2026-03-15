@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { getTopPriorityLeads } from '@/app/actions/leads'
 import { getUserByRole, getUserStats } from '@/app/actions/users'
 import { SaleHomeClient } from './home-client'
 import { RealtimeListener } from '@/components/realtime-listener'
+import Loading from '../loading'
 
 function determinePriorityReason(lead: any): 'golden_72h' | 'schedule_due' | 'retry' | 'hot_lead' | 'manager_advice' {
     if (lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()) return 'golden_72h'
@@ -10,7 +12,15 @@ function determinePriorityReason(lead: any): 'golden_72h' | 'schedule_due' | 're
     return 'hot_lead'
 }
 
-export default async function SaleHomePage() {
+export default function SaleHomePage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <SaleHomeDataLoader />
+        </Suspense>
+    )
+}
+
+async function SaleHomeDataLoader() {
     const user = await getUserByRole('SALE')
     if (!user) return <div className="p-8 text-center text-slate-400">No sale user found</div>
 

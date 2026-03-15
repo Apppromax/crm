@@ -1,8 +1,18 @@
+import { Suspense } from 'react'
 import { getLeadsByUser } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
 import { LeadsListClient } from './leads-list-client'
+import Loading from '../../loading'
 
-export default async function MyLeadsPage() {
+export default function MyLeadsPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <LeadsDataLoader />
+        </Suspense>
+    )
+}
+
+async function LeadsDataLoader() {
     const user = await getUserByRole('SALE')
     if (!user) return <div className="p-8 text-center text-slate-400">No sale user found</div>
 

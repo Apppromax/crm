@@ -1,8 +1,18 @@
+import { Suspense } from 'react'
 import { getUserByRole } from '@/app/actions/users'
 import { getSchedulesByUser } from '@/app/actions/dashboard'
 import { ScheduleClient } from './schedule-client'
+import Loading from '../../loading'
 
-export default async function SchedulePage() {
+export default function SchedulePage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <ScheduleDataLoader />
+        </Suspense>
+    )
+}
+
+async function ScheduleDataLoader() {
     const user = await getUserByRole('SALE')
     if (!user) return <div className="p-8 text-center text-slate-400">No user found</div>
 
