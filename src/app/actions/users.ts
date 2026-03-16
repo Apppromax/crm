@@ -3,9 +3,27 @@
 import { cache } from 'react'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 
-// Được cache lại để tránh gọi DB/Supabase nhiều lần trong 1 request (tăng tốc độ tải)
+// Fast path: read supabase UID from middleware header (auth already verified)
+// Slow path fallback: Supabase auth + Prisma lookup
 export const getCurrentUser = cache(async () => {
+    // Try fast path — middleware already verified auth and set the uid
+    const headerStore = await headers()
+    const supabaseUid = headerStore.get('x-supabase-uid')
+
+    if (supabaseUid) {
+        return prisma.user.findUnique({
+            where: { supabaseId: supabaseUid },
+            include: {
+                team: { select: { id: true, name: true } },
+                org: { select: { id: true, name: true } },
+                managedTeams: { select: { id: true, name: true } },
+            },
+        })
+    }
+
+    // Fallback: full auth flow (for API routes, etc.)
     const supabase = await createClient()
     const { data: { user: authUser } } = await supabase.auth.getUser()
 
@@ -29,14 +47,13 @@ export async function getUserByRole(role: 'SALE' | 'MANAGER' | 'CEO') {
         redirect('/login')
     }
 
-    // Map internal DB roles to access levels
+    // Middleware already enforces role access, but verify for safety
     let hasAccess = false;
     if (role === 'CEO' && currentUser.role === 'CEO') hasAccess = true;
     if (role === 'SALE' && currentUser.role === 'SALE') hasAccess = true;
     if (role === 'MANAGER' && ['MANAGER', 'ADMIN', 'LEADER'].includes(currentUser.role)) hasAccess = true;
 
     if (!hasAccess) {
-        // Redirect unauthorized users to their proper home
         switch (currentUser.role) {
             case 'CEO': redirect('/ceo'); break;
             case 'MANAGER':

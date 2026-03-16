@@ -1,36 +1,48 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function HomePage() {
+  // Fast path: supabase UID from middleware header
+  const headerStore = await headers()
+  const supabaseUid = headerStore.get('x-supabase-uid')
+
+  if (supabaseUid) {
+    const dbUser = await prisma.user.findUnique({
+      where: { supabaseId: supabaseUid },
+      select: { role: true },
+    })
+    if (dbUser) {
+      switch (dbUser.role) {
+        case 'CEO': redirect('/ceo')
+        case 'MANAGER':
+        case 'ADMIN':
+        case 'LEADER': redirect('/manager')
+        default: redirect('/sale')
+      }
+    }
+  }
+
+  // Fallback: full auth flow
   const supabase = await createClient()
   const { data: { user: authUser } } = await supabase.auth.getUser()
 
-  if (!authUser) {
-    redirect('/login')
-  }
+  if (!authUser) redirect('/login')
 
-  // Find user role from database
   const dbUser = await prisma.user.findUnique({
     where: { supabaseId: authUser.id },
     select: { role: true },
   })
 
-  if (!dbUser) {
-    // User exists in Supabase but not in DB — default to sale
-    redirect('/sale')
-  }
+  if (!dbUser) redirect('/sale')
 
-  // Redirect based on role
   switch (dbUser.role) {
-    case 'CEO':
-      redirect('/ceo')
+    case 'CEO': redirect('/ceo')
     case 'MANAGER':
     case 'ADMIN':
-      redirect('/manager')
-    case 'LEADER':
-      redirect('/manager')
-    default:
-      redirect('/sale')
+    case 'LEADER': redirect('/manager')
+    default: redirect('/sale')
   }
 }
+

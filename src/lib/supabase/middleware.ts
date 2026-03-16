@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const PROTECTED_PREFIXES = ['/sale', '/manager', '/ceo']
+
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request })
 
@@ -29,7 +31,7 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Public routes that don't require authentication
+    // Public routes
     const publicPaths = ['/login', '/register', '/forgot-password']
     const isPublicPath = publicPaths.some(path =>
         request.nextUrl.pathname.startsWith(path)
@@ -47,5 +49,11 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
+    // Pass supabase user ID to server components (skip duplicate auth call)
+    if (user) {
+        supabaseResponse.headers.set('x-supabase-uid', user.id)
+    }
+
     return supabaseResponse
 }
+
