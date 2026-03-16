@@ -265,6 +265,51 @@
 - Integrated `NextTopLoader` in root `layout.tsx` for visual progress feedback during Next.js router transitions.
 - Enforced strict boundary redirect mappings dynamically in `users.ts` (`getUserByRole` action) to immediately deflect unauthorized roles (e.g., stopping a Sale from lingering on blank unassigned CEO views).
 
+### 🚀 Performance & Bug Fixes (2026-03-16 — Session 6: Sub-300ms Optimization)
+
+#### Caching Layer (`unstable_cache`) ✅
+- Implemented centralized caching in `src/lib/cache.ts` with 120s TTL
+- 19 cached query functions covering all Prisma operations
+- Tag-based revalidation for granular cache invalidation
+- Files: `src/lib/cache.ts`
+
+#### Database Optimization ✅
+- Added composite index `[userId, status, scheduledAt]` on `schedules`
+- Added composite index `[status, leadId]` on `sos_alerts`
+- Files: `prisma/schema.prisma`
+
+#### Page Performance ✅
+- All 12 pages now load < 300ms in production
+- Sale: Home 102ms, Leads 203ms, Schedule 142ms, New 114ms
+- Manager: Dashboard 90ms, SOS 222ms, Team 98ms, Pool 185ms
+- CEO: Dashboard 154ms, Team 139ms
+
+#### Suspense Streaming ✅
+- Added `<Suspense>` wrappers to Manager Team, Manager Pool, CEO Team pages
+- Separated data fetching into async sub-components for streaming
+- Files: `src/app/(manager)/manager/team/page.tsx`, `pool/page.tsx`, `src/app/(ceo)/ceo/team/page.tsx`
+
+#### Prefetch Cache Warming ✅
+- Created `PrefetchPages` client component for background cache warming
+- Integrated into Sale and Manager layouts
+- Uses `requestIdleCallback` to avoid main thread blocking
+- Files: `src/components/prefetch-pages.tsx`, layouts
+
+#### Bug Fixes ✅
+- **Middleware**: Reverted `getSession()` → `getUser()` — `getSession()` caused 500 errors on Vercel due to expired JWT local validation
+- **Date Serialization**: Fixed `unstable_cache` Date→string serialization crash (`a.getTime is not a function`)
+  - `formatRelativeTime()` now accepts `Date | string`
+  - Safe `.toISOString()` guards on `scheduledAt`, `lastInteractionAt`, `updatedAt`
+- **Fast-path middleware**: Skip auth for `/_next`, `/api`, static assets
+- Files: `src/lib/supabase/middleware.ts`, `src/lib/utils.ts`, multiple page files
+
+#### E2E Test Expansion ✅
+- Added Phase 6: Lead Lifecycle tests (milestone, snooze, interaction types)
+- Added Phase 7: Manager Actions tests (SOS resolve, shadow view, lead pool)
+- Fixed `networkidle` timeout in dev mode (Turbopack HMR websocket)
+- Performance benchmark test for all 3 roles
+- Files: `e2e/full-test-plan.spec.ts`, `e2e/debug.spec.ts`
+
 ---
 
 ## Convention

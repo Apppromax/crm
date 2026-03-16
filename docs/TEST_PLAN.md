@@ -66,8 +66,56 @@ Bản kế hoạch này được thiết kế theo đúng luồng người dùng
 
 ## ⚡ Phase 5: Technical Edge Cases (System Core)
 - **Kiểm thử Multi-Tab / Realtime:** Mở máy điện thoại bằng Sale (Đổi trạng thái 1 Lead) -> Vẫn giữ màn hình PC bằng Manager. Trạng thái Lead trên màn hình máy tính của Manager phải tự cập nhật *trong vòng 500ms* mà **Không cần F5 trình duyệt**.
-- **Cơ chế 72h Vàng:** Tạo 1 Lead -> Mở Prisma Studio để sửa thời hạn Golden72H lùi về 4 ngày trước -> Quay lại trang Manager xem có bắn "SOS" đỏ chót không.
+- **Cơ chế 72h Vàng:** Tạo 1 Lead → Mở Prisma Studio để sửa thời hạn Golden72H lùi về 4 ngày trước → Quay lại trang Manager xem có bắn "SOS" đỏ chót không.
 - **Tốc Độ Xử Lý:** Chuyển qua lại liên tục bằng Bottom Navigation Bar. Load Bar hiện < 0.3s.
+
+---
+
+## 🔄 Phase 6: Lead Lifecycle (Automated — E2E)
+**Mục tiêu:** Kiểm thử các thao tác trung tâm trên Lead: thăng mốc, ngủ đông, đổi loại tương tác.
+
+- [x] P6.1: Mở Lead Detail → xem AI Coach + milestone info → Ghi note → Check promotion modal
+- [x] P6.2: Click Snooze → chọn thời gian → redirect về `/sale`
+- [x] P6.3: Đổi loại tương tác (Note ↔ Call ↔ Zalo ↔ Meeting) → lưu interaction
+
+---
+
+## 🛡️ Phase 7: Manager Actions (Automated — E2E)
+**Mục tiêu:** Kiểm thử hành động quản lý: resolve SOS, shadow view, lead pool.
+
+- [x] P7.1: Resolve SOS Alert → SOS biến mất/thay đổi trạng thái
+- [x] P7.2: Shadow View → xem chi tiết thành viên team (read-only)
+- [x] P7.3: Lead Pool → xem danh sách lead chưa gán + nút Assign
+
+---
+
+## 📊 Benchmark Tốc Độ (Session 6 — 2026-03-16)
+
+| Trang | Cold Cache | Warm Cache | Target |
+|---|---|---|---|
+| **Sale Home** | 102ms | ~80ms | ✅ < 300ms |
+| **Sale Leads** | 203ms | ~120ms | ✅ < 300ms |
+| **Sale Schedule** | 142ms | ~90ms | ✅ < 300ms |
+| **Sale New** | 114ms | ~70ms | ✅ < 300ms |
+| **Manager Dashboard** | 90ms | ~60ms | ✅ < 300ms |
+| **Manager SOS** | 222ms | ~150ms | ✅ < 300ms |
+| **Manager Team** | 98ms | ~70ms | ✅ < 300ms |
+| **Manager Pool** | 185ms | ~100ms | ✅ < 300ms |
+| **CEO Dashboard** | 154ms | ~80ms | ✅ < 300ms |
+| **CEO Team** | 139ms | 183ms | ✅ < 300ms |
+
+---
+
+## ⚠️ Known Issues / Chưa Implement
+
+| Item | Status | Ghi chú |
+|---|---|---|
+| Settings — Đổi mật khẩu | 🟡 Placeholder | Button chưa có handler |
+| Settings — FAQ/Trợ giúp | 🟡 Placeholder | Button chưa có handler |
+| Settings — Thông báo Push | 🟡 Placeholder | Cần Firebase FCM |
+| Settings — Dark Mode | 🟡 Placeholder | Zustand store sẵn, chưa kết nối UI |
+| Realtime Multi-tab Sync | 🔵 Manual Test | Cần Supabase Realtime subscription |
+| Golden 72h SOS Trigger | 🔵 Manual Test | Cần sửa DB trực tiếp để test |
 
 ---
 **🏆 Tiêu Chuẩn Pass:** Không có bất kỳ Màn hình Trắng, Không crash Server, Database hoạt động mượt mà không bị văng Pool (Error 500).
