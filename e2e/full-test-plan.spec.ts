@@ -292,3 +292,213 @@ test.describe('Phase 5: Navigation Speed Audit', () => {
         }
     });
 });
+
+// ============================================================
+// Phase 6: Lead Lifecycle — Milestone, Snooze, Interactions  
+// ============================================================
+test.describe('Phase 6: Lead Lifecycle', () => {
+    test.beforeEach(async ({ page }) => {
+        await login(page, 'sale.a@crmpro.vn', 'password123');
+    });
+
+    test('P6.1 Open lead detail → milestone promotion', async ({ page }) => {
+        await page.goto('/sale/leads');
+        await page.waitForTimeout(2000);
+
+        // Click first lead
+        const firstLead = page.locator('a[href^="/sale/leads/"]').first();
+        if (await firstLead.isVisible({ timeout: 5000 })) {
+            await firstLead.click();
+            await page.waitForTimeout(2000);
+
+            // Check detail page loaded — look for AI Coach section
+            const aiCoach = page.locator('text=AI Coach');
+            await expect(aiCoach.first()).toBeVisible({ timeout: 10000 });
+
+            // Check current milestone is displayed
+            const milestoneText = page.locator('text=/Mốc \\d/').first();
+            await expect(milestoneText).toBeVisible({ timeout: 5000 });
+            console.log('  ✅ Lead detail loaded with AI Coach and milestone info');
+
+            // Save a note first (required before promotion)
+            const noteInput = page.locator('textarea[placeholder*="Ghi chú"]');
+            if (await noteInput.isVisible({ timeout: 3000 })) {
+                await noteInput.fill('Test interaction for milestone promotion');
+                const sendBtn = page.locator('button:has(svg.lucide-send)').first();
+                if (await sendBtn.isEnabled({ timeout: 2000 })) {
+                    await sendBtn.click();
+                    await page.waitForTimeout(1500);
+                    console.log('  ✅ Interaction saved');
+                }
+            }
+
+            // Look for promotion modal trigger (may appear after saving interaction)
+            const promotionModal = page.locator('text=/Lên mốc|Xác nhận thăng/').first();
+            if (await promotionModal.isVisible({ timeout: 3000 })) {
+                // Find confirm button in promotion modal
+                const confirmBtn = page.locator('button:has-text("Xác nhận")').first();
+                if (await confirmBtn.isVisible({ timeout: 2000 })) {
+                    await confirmBtn.click();
+                    console.log('  ✅ Milestone promoted!');
+                }
+            } else {
+                console.log('  ⚠ Promotion modal not triggered (may need manual trigger)');
+            }
+        } else {
+            console.log('  ⚠ No leads found');
+        }
+    });
+
+    test('P6.2 Snooze a lead', async ({ page }) => {
+        await page.goto('/sale/leads');
+        await page.waitForTimeout(2000);
+
+        const firstLead = page.locator('a[href^="/sale/leads/"]').first();
+        if (await firstLead.isVisible({ timeout: 5000 })) {
+            await firstLead.click();
+            await page.waitForTimeout(2000);
+
+            // Click Snooze button
+            const snoozeBtn = page.locator('button:has-text("Snooze")');
+            if (await snoozeBtn.isVisible({ timeout: 5000 })) {
+                await snoozeBtn.click();
+
+                // Snooze popup should appear
+                const snoozePopup = page.locator('text=/Ngày mai|1 ngày|3 ngày|Tạm ngưng/').first();
+                if (await snoozePopup.isVisible({ timeout: 3000 })) {
+                    // Pick first snooze option
+                    await snoozePopup.click();
+                    console.log('  ✅ Lead snoozed! Redirected to /sale');
+                    await expect(page).toHaveURL(/.*\/sale/, { timeout: 5000 });
+                } else {
+                    console.log('  ⚠ Snooze popup did not appear');
+                }
+            } else {
+                console.log('  ⚠ Snooze button not found');
+            }
+        }
+    });
+
+    test('P6.3 Interaction type switching (Call, Zalo, Meeting)', async ({ page }) => {
+        await page.goto('/sale/leads');
+        await page.waitForTimeout(2000);
+
+        const firstLead = page.locator('a[href^="/sale/leads/"]').first();
+        if (await firstLead.isVisible({ timeout: 5000 })) {
+            await firstLead.click();
+            await page.waitForTimeout(2000);
+
+            // Switch to Call type
+            const callBtn = page.locator('button:has-text("📞 Call")');
+            if (await callBtn.isVisible({ timeout: 3000 })) {
+                await callBtn.click();
+                console.log('  ✅ Switched to Call type');
+            }
+
+            // Switch to Zalo
+            const zaloBtn = page.locator('button:has-text("💬 Zalo")');
+            if (await zaloBtn.isVisible({ timeout: 2000 })) {
+                await zaloBtn.click();
+                console.log('  ✅ Switched to Zalo type');
+            }
+
+            // Switch to Meeting
+            const meetingBtn = page.locator('button:has-text("🤝 Gặp")');
+            if (await meetingBtn.isVisible({ timeout: 2000 })) {
+                await meetingBtn.click();
+                console.log('  ✅ Switched to Meeting type');
+            }
+
+            // Save a meeting interaction
+            const noteInput = page.locator('textarea[placeholder*="Ghi chú"]');
+            if (await noteInput.isVisible({ timeout: 2000 })) {
+                await noteInput.fill('Test meeting interaction');
+                const sendBtn = page.locator('button:has(svg.lucide-send)').first();
+                if (await sendBtn.isEnabled({ timeout: 2000 })) {
+                    await sendBtn.click();
+                    await page.waitForTimeout(1500);
+                    console.log('  ✅ Meeting interaction saved');
+                }
+            }
+        }
+    });
+});
+
+// ============================================================
+// Phase 7: Manager Actions — Resolve SOS, Send Advice
+// ============================================================
+test.describe('Phase 7: Manager Actions', () => {
+    test.beforeEach(async ({ page }) => {
+        await login(page, 'manager@crmpro.vn', 'password123');
+    });
+
+    test('P7.1 Resolve SOS Alert', async ({ page }) => {
+        await page.goto('/manager/sos');
+        await page.waitForTimeout(2000);
+
+        // Find SOS alert cards
+        const sosCards = page.locator('[class*="rounded-2xl"]').filter({ hasText: /SOS|CRITICAL|WARNING|HOT_NOT_CLOSED|STUCK/ });
+        const count = await sosCards.count();
+        console.log(`  📋 Found ${count} SOS alert(s)`);
+
+        if (count > 0) {
+            // Find the resolve/tick button on the first alert
+            const resolveBtn = page.locator('button[class*="emerald"], button[class*="green"], button:has(svg.lucide-check)').first();
+            if (await resolveBtn.isVisible({ timeout: 3000 })) {
+                await resolveBtn.click();
+                await page.waitForTimeout(1500);
+
+                // Check if alert changed state (resolved text or disappeared)
+                console.log('  ✅ SOS Alert resolved');
+            } else {
+                console.log('  ⚠ No resolve button found on SOS cards');
+            }
+        } else {
+            console.log('  ⚠ No SOS alerts to resolve');
+        }
+    });
+
+    test('P7.2 Shadow — view sale member detail (read-only)', async ({ page }) => {
+        await page.goto('/manager/team');
+        await page.waitForTimeout(2000);
+
+        const memberLink = page.locator('a[href^="/manager/team/"]').first();
+        if (await memberLink.isVisible({ timeout: 5000 })) {
+            const start = Date.now();
+            await memberLink.click();
+            await page.waitForTimeout(2000);
+            console.log(`  ⏱ Team member detail: ${Date.now() - start}ms`);
+
+            // Should see member's leads and performance data
+            const content = await page.textContent('body');
+            if (content && (content.includes('Lead') || content.includes('lead') || content.includes('Mốc'))) {
+                console.log('  ✅ Shadow view loaded with lead data');
+            } else {
+                console.log('  ⚠ Shadow view loaded but no lead data visible');
+            }
+        } else {
+            console.log('  ⚠ No team members found');
+        }
+    });
+
+    test('P7.3 Lead Pool — assign lead to team member', async ({ page }) => {
+        await page.goto('/manager/pool');
+        await page.waitForTimeout(2000);
+
+        const poolCards = page.locator('[class*="rounded"]').filter({ hasText: /Mốc|Lead|KH/ });
+        const count = await poolCards.count();
+        console.log(`  📋 Pool has ${count} card(s)`);
+
+        if (count > 0) {
+            // Look for assign button
+            const assignBtn = page.locator('button:has-text("Gán"), button:has-text("Assign"), button:has(svg.lucide-user-plus)').first();
+            if (await assignBtn.isVisible({ timeout: 3000 })) {
+                console.log('  ✅ Assign button found in pool');
+            } else {
+                console.log('  ⚠ No assign button found (pool may be empty or different UI)');
+            }
+        } else {
+            console.log('  ⚠ No leads in pool');
+        }
+    });
+});

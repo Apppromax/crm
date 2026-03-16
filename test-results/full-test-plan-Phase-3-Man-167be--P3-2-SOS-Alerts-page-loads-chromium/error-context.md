@@ -1,0 +1,125 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic "Latest available version is detected (16.1.6)." [ref=e20]: Next.js 16.1.6
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Runtime TypeError" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e29]:
+                - generic [ref=e30]: Runtime TypeError
+                - generic [ref=e31]: Server
+              - generic [ref=e32]:
+                - button "Copy Error Info" [ref=e33] [cursor=pointer]:
+                  - img [ref=e34]
+                - button "No related documentation found" [disabled] [ref=e36]:
+                  - img [ref=e37]
+                - button "Attach Node.js inspector" [ref=e39] [cursor=pointer]:
+                  - img [ref=e40]
+            - generic [ref=e49]: date.getTime is not a function
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - paragraph [ref=e53]:
+                - img [ref=e55]
+                - generic [ref=e59]: src\lib\utils.ts (27:39) @ formatRelativeTime
+                - button "Open in editor" [ref=e60] [cursor=pointer]:
+                  - img [ref=e62]
+              - generic [ref=e65]:
+                - generic [ref=e66]: "25 | export function formatRelativeTime(date: Date): string {"
+                - generic [ref=e67]: 26 | const now = new Date()
+                - generic [ref=e68]: "> 27 | const diff = now.getTime() - date.getTime()"
+                - generic [ref=e69]: "| ^"
+                - generic [ref=e70]: 28 | const minutes = Math.floor(diff / 60000)
+                - generic [ref=e71]: 29 | const hours = Math.floor(diff / 3600000)
+                - generic [ref=e72]: 30 | const days = Math.floor(diff / 86400000)
+            - generic [ref=e73]:
+              - paragraph [ref=e75]:
+                - text: Call Stack
+                - generic [ref=e76]: "9"
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - text: formatRelativeTime
+                  - button "Open formatRelativeTime in editor" [ref=e79] [cursor=pointer]:
+                    - img [ref=e80]
+                - text: src\lib\utils.ts (27:39)
+              - generic [ref=e82]:
+                - generic [ref=e83]:
+                  - text: <anonymous>
+                  - button "Open <anonymous> in editor" [ref=e84] [cursor=pointer]:
+                    - img [ref=e85]
+                - text: src\app\(manager)\manager\sos\page.tsx (58:101)
+              - generic [ref=e87]:
+                - generic [ref=e88]: Array.map
+                - text: <anonymous>
+              - generic [ref=e89]:
+                - generic [ref=e90]:
+                  - text: SOSPage
+                  - button "Open SOSPage in editor" [ref=e91] [cursor=pointer]:
+                    - img [ref=e92]
+                - text: src\app\(manager)\manager\sos\page.tsx (42:31)
+              - generic [ref=e94]:
+                - generic [ref=e95]:
+                  - text: resolveErrorDev
+                  - button "Sourcemapping failed. Click to log cause of error." [ref=e96] [cursor=pointer]:
+                    - img [ref=e97]
+                - text: file:///C:/Onedrive/OneDrive%20-%20NU%20Viet%20Nam/New%20folder/CRMPROV2/.next/dev/static/chunks/42e1e_next_dist_compiled_react-server-dom-turbopack_36e4a1b6._.js (1894:148)
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - text: processFullStringRow
+                  - button "Sourcemapping failed. Click to log cause of error." [ref=e101] [cursor=pointer]:
+                    - img [ref=e102]
+                - text: file:///C:/Onedrive/OneDrive%20-%20NU%20Viet%20Nam/New%20folder/CRMPROV2/.next/dev/static/chunks/42e1e_next_dist_compiled_react-server-dom-turbopack_36e4a1b6._.js (2402:29)
+              - generic [ref=e104]:
+                - generic [ref=e105]:
+                  - text: processFullBinaryRow
+                  - button "Sourcemapping failed. Click to log cause of error." [ref=e106] [cursor=pointer]:
+                    - img [ref=e107]
+                - text: file:///C:/Onedrive/OneDrive%20-%20NU%20Viet%20Nam/New%20folder/CRMPROV2/.next/dev/static/chunks/42e1e_next_dist_compiled_react-server-dom-turbopack_36e4a1b6._.js (2361:9)
+              - generic [ref=e109]:
+                - generic [ref=e110]:
+                  - text: processBinaryChunk
+                  - button "Sourcemapping failed. Click to log cause of error." [ref=e111] [cursor=pointer]:
+                    - img [ref=e112]
+                - text: file:///C:/Onedrive/OneDrive%20-%20NU%20Viet%20Nam/New%20folder/CRMPROV2/.next/dev/static/chunks/42e1e_next_dist_compiled_react-server-dom-turbopack_36e4a1b6._.js (2470:221)
+              - generic [ref=e114]:
+                - generic [ref=e115]:
+                  - text: progress
+                  - button "Sourcemapping failed. Click to log cause of error." [ref=e116] [cursor=pointer]:
+                    - img [ref=e117]
+                - text: file:///C:/Onedrive/OneDrive%20-%20NU%20Viet%20Nam/New%20folder/CRMPROV2/.next/dev/static/chunks/42e1e_next_dist_compiled_react-server-dom-turbopack_36e4a1b6._.js (2640:13)
+        - generic [ref=e119]: "1"
+        - generic [ref=e120]: "2"
+    - generic [ref=e125] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e126]:
+        - img [ref=e127]
+      - generic [ref=e130]:
+        - button "Open issues overlay" [ref=e131]:
+          - generic [ref=e132]:
+            - generic [ref=e133]: "0"
+            - generic [ref=e134]: "1"
+          - generic [ref=e135]: Issue
+        - button "Collapse issues badge" [ref=e136]:
+          - img [ref=e137]
+  - generic [ref=e140]:
+    - 'heading "Application error: a server-side exception has occurred while loading localhost (see the server logs for more information)." [level=2] [ref=e141]'
+    - paragraph [ref=e142]: "Digest: 931473553"
+```

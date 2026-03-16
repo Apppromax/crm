@@ -4,6 +4,17 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PROTECTED_PREFIXES = ['/sale', '/manager', '/ceo']
 
 export async function updateSession(request: NextRequest) {
+    const { pathname } = request.nextUrl
+
+    // FAST PATH: skip auth entirely for static assets, API routes, and _next
+    if (
+        pathname.startsWith('/_next') ||
+        pathname.startsWith('/api') ||
+        pathname.includes('.') // static files like .ico, .png, etc.
+    ) {
+        return NextResponse.next()
+    }
+
     let supabaseResponse = NextResponse.next({ request })
 
     const supabase = createServerClient(
@@ -27,19 +38,16 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // FAST: getSession() validates JWT locally (0ms), no network call
-    // getUser() calls Supabase Auth API over network (~300-500ms) — too slow for middleware
-    // Role verification still happens in server components via Prisma (getUserByRole)
+    // Use getUser() for production reliability — it validates with Supabase Auth server
+    // getSession() was causing auth failures on Vercel because expired JWT still decoded
     const {
-        data: { session },
-    } = await supabase.auth.getSession()
-
-    const user = session?.user ?? null
+        data: { user },
+    } = await supabase.auth.getUser()
 
     // Public routes
     const publicPaths = ['/login', '/register', '/forgot-password']
     const isPublicPath = publicPaths.some(path =>
-        request.nextUrl.pathname.startsWith(path)
+        pathname.startsWith(path)
     )
 
     if (!user && !isPublicPath) {
