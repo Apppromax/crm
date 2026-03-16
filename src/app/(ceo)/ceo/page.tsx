@@ -7,6 +7,7 @@ import { getDashboardMetrics } from '@/app/actions/dashboard'
 import { RealtimeListener } from '@/components/realtime-listener'
 import Loading from '@/app/(ceo)/loading'
 import { getCachedWonRevenue, getCachedAllTeamPerformance } from '@/lib/cache'
+import { PipelineFunnel } from '@/components/ceo/pipeline-funnel'
 
 export default function CEOPage() {
     return (
@@ -180,6 +181,18 @@ async function CEODashboard() {
                     <p className="text-2xl font-black text-white">{metrics.wonDeals}</p>
                     <p className="text-[10px] text-slate-500">Deals Won</p>
                 </div>
+            </div>
+
+            {/* Pipeline Funnel */}
+            <div className="mb-6">
+                <PipelineFunnel data={{
+                    m1: metrics.milestoneDistribution.find(m => m.milestone === 1)?.count || 0,
+                    m2: metrics.milestoneDistribution.find(m => m.milestone === 2)?.count || 0,
+                    m3: metrics.milestoneDistribution.find(m => m.milestone === 3)?.count || 0,
+                    m4: metrics.milestoneDistribution.find(m => m.milestone === 4)?.count || 0,
+                    m5: metrics.milestoneDistribution.find(m => m.milestone === 5)?.count || 0,
+                    lost: 0,
+                }} />
             </div>
 
             {/* Deep Dive Links */}
