@@ -1,5 +1,6 @@
 import { User, Bell, Smartphone, Globe, Trophy, BarChart3, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 import { getUserByRole } from '@/app/actions/users'
 import { LogoutButton } from '@/components/logout-button'
 import { PasswordButton, HelpButton, DarkModeToggle } from '@/components/shared/settings-items'
@@ -34,8 +35,8 @@ export default async function SettingsPage() {
 
                 {/* Settings Groups */}
                 <SettingsGroup title="Ưu tiên">
-                    <SettingItem icon={<Bell className="h-5 w-5" />} label="Thông báo" subtitle="Push, in-app, email" />
-                    <SettingItem icon={<Smartphone className="h-5 w-5" />} label="Cài đặt PWA" subtitle="Cài app về điện thoại" />
+                    <SettingItem icon={<Bell className="h-5 w-5" />} label="Thông báo" subtitle="Sắp ra mắt" disabled />
+                    <SettingItem icon={<Smartphone className="h-5 w-5" />} label="Cài đặt PWA" subtitle="Sắp ra mắt" disabled />
                 </SettingsGroup>
 
                 <SettingsGroup title="Giao diện">
@@ -79,9 +80,12 @@ function SettingsGroup({ title, children }: { title: string; children: React.Rea
     )
 }
 
-function SettingItem({ icon, label, subtitle }: { icon: React.ReactNode; label: string; subtitle: string }) {
+function SettingItem({ icon, label, subtitle, disabled }: { icon: React.ReactNode; label: string; subtitle: string; disabled?: boolean }) {
     return (
-        <button className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50/50 transition-colors">
+        <button disabled={disabled} className={cn(
+            'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
+            disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50/50'
+        )}>
             <span className="text-slate-400">{icon}</span>
             <div className="flex-1">
                 <p className="text-sm font-medium text-slate-700">{label}</p>

@@ -3,6 +3,9 @@ import { getLeadsByUser } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
 import { LeadsListClient } from './leads-list-client'
 import Loading from '@/app/(sale)/loading'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Leads — CRM Pro V2' }
 
 export default function MyLeadsPage() {
     return (

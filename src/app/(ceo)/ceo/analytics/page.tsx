@@ -1,9 +1,19 @@
+import { Suspense } from 'react'
 import { ArrowLeft, TrendingUp, TrendingDown, Target, Users, Flame, ArrowUpRight, ArrowDownRight, BarChart3 } from 'lucide-react'
 import Link from 'next/link'
 import { cn, formatCurrencyShort } from '@/lib/utils'
 import { getUserByRole } from '@/app/actions/users'
 import { getDashboardMetrics } from '@/app/actions/dashboard'
 import { prisma } from '@/lib/prisma'
+import Loading from '@/app/(ceo)/loading'
+
+export default function CEOAnalyticsWrapper() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <CEOAnalyticsPage />
+        </Suspense>
+    )
+}
 
 async function getLeadSourceAnalytics(orgId: string) {
     const sources = await prisma.leadSource.findMany({
@@ -42,7 +52,7 @@ function getSourceColor(name: string): string {
     return colorMap[name] || 'bg-cyan-400'
 }
 
-export default async function CEOAnalyticsPage() {
+async function CEOAnalyticsPage() {
     const user = await getUserByRole('CEO')
     if (!user) return <div className="p-8 text-center text-slate-400">No CEO found</div>
 
