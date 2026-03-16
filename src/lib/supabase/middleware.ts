@@ -27,9 +27,14 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
+    // FAST: getSession() validates JWT locally (0ms), no network call
+    // getUser() calls Supabase Auth API over network (~300-500ms) — too slow for middleware
+    // Role verification still happens in server components via Prisma (getUserByRole)
     const {
-        data: { user },
-    } = await supabase.auth.getUser()
+        data: { session },
+    } = await supabase.auth.getSession()
+
+    const user = session?.user ?? null
 
     // Public routes
     const publicPaths = ['/login', '/register', '/forgot-password']
