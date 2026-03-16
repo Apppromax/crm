@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { getLeadDetail } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
-import { MOCK_AI_COACH } from '@/lib/mock-data'
+import { getAICoachTips } from '@/lib/ai'
 import { notFound } from 'next/navigation'
 import { LeadDetailClient } from '@/components/sale/lead-detail-client'
 import Loading from '@/app/(sale)/loading'
@@ -67,7 +67,10 @@ async function LeadDetailPage({ params }: Props) {
         })),
     }
 
-    const aiCoach = MOCK_AI_COACH[lead.currentMilestone] || MOCK_AI_COACH[1]
+    const aiCoach = await getAICoachTips(lead.currentMilestone, lead.name, {
+        dealValue: lead.dealValue ?? undefined,
+        heatScore: lead.heatScore,
+    })
 
     return <LeadDetailClient lead={lead as any} aiCoach={aiCoach} userId={user.id} />
 }
