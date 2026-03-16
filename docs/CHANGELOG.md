@@ -16,6 +16,10 @@
 - **Security Headers**: CSP, HSTS, X-Frame-Options, rate limiting (100 req/min)
 - **Error Monitoring**: Vercel Analytics + Speed Insights, /api/health endpoint
 - **RLS Policies**: SQL file ready for Supabase (role-based data access)
+- **Win-Rate Predictor**: Score-based prediction (BANT, milestone, heat, interactions). Expandable card UI
+- **Burnout Detection**: Activity pattern analysis (drop-off, streak, overload). 4-level severity
+- **Pipeline Funnel**: Pure CSS funnel in CEO dashboard with conversion rates
+- **PWA Offline**: Service worker with stale-while-revalidate, offline page, SW registration
 
 ### 🔧 Fixed
 - All 25 E2E tests pass (networkidle → waitForTimeout, Snooze button scroll fix)
