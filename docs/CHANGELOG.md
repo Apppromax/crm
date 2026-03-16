@@ -20,6 +20,9 @@
 - **Burnout Detection**: Activity pattern analysis (drop-off, streak, overload). 4-level severity
 - **Pipeline Funnel**: Pure CSS funnel in CEO dashboard with conversion rates
 - **PWA Offline**: Service worker with stale-while-revalidate, offline page, SW registration
+- **Weekly Snapshot**: Auto-generated report with text for Zalo/Telegram (CEO + Manager)
+- **Team Report**: Per-member breakdown with burnout detection for Manager
+- **Copy-to-Clipboard**: One-click copy report to Zalo/Telegram
 
 ### 🔧 Fixed
 - All 25 E2E tests pass (networkidle → waitForTimeout, Snooze button scroll fix)

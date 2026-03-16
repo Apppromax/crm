@@ -13,8 +13,8 @@
 ```
 Phase 1: Foundation (MVP Core)     ████████████████  ✅ DONE
 Phase 2: Intelligence (AI Layer)   ████████████████  ✅ DONE (AI Coach, Win-Rate, Burnout)
-Phase 3: Manager & CEO             ████████████████  ✅ DONE (Funnel, Teams)
-Phase 4: Polish & Launch           ███████████████░  ~95% (PWA ✅, Security ✅, Monitoring ✅)
+Phase 3: Manager & CEO             ████████████████  ✅ DONE (Funnel, Teams, Reports)
+Phase 4: Polish & Launch           ████████████████  ✅ DONE (PWA, Security, Monitoring, Snapshot)
                                                 Total: ~12 tuần
 ```
 

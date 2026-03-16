@@ -213,6 +213,14 @@ async function CEODashboard() {
                     </div>
                     <ChevronRight className="h-5 w-5 text-slate-600" />
                 </Link>
+                <Link href="/ceo/weekly" className="glass rounded-2xl p-4 flex items-center gap-3 hover:bg-white/10 transition-all active:scale-[0.99]">
+                    <span className="text-lg">📊</span>
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-200">Báo Cáo Tuần</p>
+                        <p className="text-[10px] text-slate-500">Copy & paste vào Zalo/Telegram</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-slate-600" />
+                </Link>
             </div>
         </div>
     )
