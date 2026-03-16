@@ -22,9 +22,10 @@ export function formatCurrencyShort(amount: number): string {
     return formatCurrency(amount)
 }
 
-export function formatRelativeTime(date: Date): string {
+export function formatRelativeTime(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date
     const now = new Date()
-    const diff = now.getTime() - date.getTime()
+    const diff = now.getTime() - d.getTime()
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
     const days = Math.floor(diff / 86400000)
@@ -33,7 +34,7 @@ export function formatRelativeTime(date: Date): string {
     if (minutes < 60) return `${minutes} phút trước`
     if (hours < 24) return `${hours} giờ trước`
     if (days < 7) return `${days} ngày trước`
-    return date.toLocaleDateString('vi-VN')
+    return d.toLocaleDateString('vi-VN')
 }
 
 export function getMilestoneLabel(milestone: number): string {

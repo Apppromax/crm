@@ -32,7 +32,7 @@ async function PoolContent() {
         heatScore: l.heatScore,
         dealValue: l.dealValue,
         previousOwner: l.assignee?.name || 'N/A',
-        updatedAt: l.updatedAt.toISOString(),
+        updatedAt: typeof l.updatedAt === 'string' ? l.updatedAt : l.updatedAt.toISOString(),
     }))
 
     const teamMembers = members.map(m => ({

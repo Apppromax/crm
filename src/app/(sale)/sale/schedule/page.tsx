@@ -29,7 +29,7 @@ async function ScheduleDataLoader() {
         leadName: s.lead.name,
         type: s.type,
         note: s.note,
-        scheduledAt: s.scheduledAt.toISOString(),
+        scheduledAt: typeof s.scheduledAt === 'string' ? s.scheduledAt : s.scheduledAt.toISOString(),
         status: s.status,
         milestone: s.lead.currentMilestone,
         dealValue: s.lead.dealValue,

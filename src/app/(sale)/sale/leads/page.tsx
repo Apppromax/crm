@@ -26,7 +26,7 @@ async function LeadsDataLoader() {
         heatScore: lead.heatScore,
         status: lead.status,
         dealValue: lead.dealValue,
-        lastInteractionAt: lead.lastInteractionAt?.toISOString() || null,
+        lastInteractionAt: lead.lastInteractionAt ? (typeof lead.lastInteractionAt === 'string' ? lead.lastInteractionAt : lead.lastInteractionAt.toISOString()) : null,
         interactionCount: lead._count.interactions,
     }))
 
