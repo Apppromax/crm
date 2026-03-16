@@ -18,7 +18,7 @@ export const CACHE_TAGS = {
     schedules: (userId: string) => `schedules-${userId}`,
 }
 
-const REVALIDATE_SECONDS = 30
+const REVALIDATE_SECONDS = 120
 
 // ============================================
 // CACHED USER QUERIES

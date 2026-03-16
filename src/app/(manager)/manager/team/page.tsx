@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { Users, ChevronRight, Flame, Target } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getUserByRole, getTeamPerformance } from '@/app/actions/users'
+import Loading from '@/app/(manager)/loading'
 
 function getStatusConfig(compliance: number) {
     if (compliance >= 80) return { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' }
@@ -9,7 +11,15 @@ function getStatusConfig(compliance: number) {
     return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' }
 }
 
-export default async function TeamPage() {
+export default function TeamPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <TeamContent />
+        </Suspense>
+    )
+}
+
+async function TeamContent() {
     const user = await getUserByRole('MANAGER')
     if (!user) return <div className="p-8 text-center text-slate-400">No manager found</div>
 
@@ -82,3 +92,4 @@ export default async function TeamPage() {
         </div>
     )
 }
+

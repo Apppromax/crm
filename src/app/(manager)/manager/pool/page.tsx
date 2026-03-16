@@ -1,8 +1,18 @@
+import { Suspense } from 'react'
 import { getUserByRole, getTeamMembers } from '@/app/actions/users'
 import { getLeadPool } from '@/app/actions/leads'
 import { LeadPoolClient } from './pool-client'
+import Loading from '@/app/(manager)/loading'
 
-export default async function LeadPoolPage() {
+export default function LeadPoolPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <PoolContent />
+        </Suspense>
+    )
+}
+
+async function PoolContent() {
     const user = await getUserByRole('MANAGER')
     if (!user) return <div className="p-8 text-center text-slate-400">No manager found</div>
 
@@ -39,3 +49,4 @@ export default async function LeadPoolPage() {
         />
     )
 }
+
