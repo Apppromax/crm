@@ -317,7 +317,7 @@ model Schedule {
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
 
-  @@index([userId, scheduledAt])
+  @@index([userId, status, scheduledAt])
   @@index([status, scheduledAt])
   @@map("schedules")
 }
@@ -341,6 +341,7 @@ model SOSAlert {
   resolver User? @relation("ResolvedBy", fields: [resolvedBy], references: [id])
 
   @@index([status, severity])
+  @@index([status, leadId])
   @@index([createdAt(sort: Desc)])
   @@map("sos_alerts")
 }

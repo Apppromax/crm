@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, ClipboardList, Plus, Calendar, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PrefetchPages } from '@/components/prefetch-pages'
+
+const SALE_PREFETCH = ['/sale', '/sale/leads', '/sale/schedule', '/sale/new']
 
 const navItems = [
     { href: '/sale', icon: Home, label: 'Home' },
@@ -21,6 +24,7 @@ export default function SaleLayout({ children }: { children: React.ReactNode }) 
 
     return (
         <div className="flex min-h-dvh flex-col bg-slate-50">
+            <PrefetchPages paths={SALE_PREFETCH} />
             {/* Main Content */}
             <main className={cn('flex-1', !isDetailPage && 'pb-20')}>
                 {children}
