@@ -15,6 +15,13 @@ export function PWAInstallPrompt() {
     const [dismissed, setDismissed] = useState(false)
 
     useEffect(() => {
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {
+                // SW registration failed (dev mode or no HTTPS)
+            })
+        }
+
         // Check if already dismissed
         const wasDismissed = localStorage.getItem('pwa-install-dismissed')
         if (wasDismissed) return

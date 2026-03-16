@@ -15,6 +15,7 @@ import { MilestonePromotionModal } from './milestone-promotion-modal'
 import { VoiceRecorder } from './voice-recorder'
 import { SnoozePopup } from './snooze-popup'
 import { AntiHoardingPopup } from './anti-hoarding-popup'
+import { WinRateCard } from './win-rate-card'
 import { checkAntiHoarding, getGoldenTimer, calculateSnoozeUntil, type SnoozeOption } from '@/lib/engine'
 import { createInteraction } from '@/app/actions/interactions'
 import { updateMilestone, snoozeLead } from '@/app/actions/leads'
@@ -22,10 +23,11 @@ import { updateMilestone, snoozeLead } from '@/app/actions/leads'
 interface Props {
     lead: MockLead & { assigneeId?: string }
     aiCoach: { tip: string; objection: string; signal: string }
+    winRate?: { probability: number; confidence: string; label: string; factors: any[]; recommendation: string }
     userId: string
 }
 
-export function LeadDetailClient({ lead, aiCoach, userId }: Props) {
+export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [showAiCoach, setShowAiCoach] = useState(true)
@@ -161,6 +163,9 @@ export function LeadDetailClient({ lead, aiCoach, userId }: Props) {
                     ))}
                 </div>
             </div>
+
+            {/* Win Rate Predictor */}
+            {winRate && <WinRateCard prediction={winRate as any} />}
 
             {/* AI Coach Panel */}
             <div className="mx-4 mt-4">

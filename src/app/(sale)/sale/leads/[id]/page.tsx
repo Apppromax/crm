@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { getLeadDetail } from '@/app/actions/leads'
 import { getUserByRole } from '@/app/actions/users'
 import { getAICoachTips } from '@/lib/ai'
+import { predictWinRate } from '@/lib/win-rate'
 import { notFound } from 'next/navigation'
 import { LeadDetailClient } from '@/components/sale/lead-detail-client'
 import Loading from '@/app/(sale)/loading'
@@ -67,10 +68,24 @@ async function LeadDetailPage({ params }: Props) {
         })),
     }
 
-    const aiCoach = await getAICoachTips(lead.currentMilestone, lead.name, {
-        dealValue: lead.dealValue ?? undefined,
-        heatScore: lead.heatScore,
-    })
+    const [aiCoach, winRate] = await Promise.all([
+        getAICoachTips(lead.currentMilestone, lead.name, {
+            dealValue: lead.dealValue ?? undefined,
+            heatScore: lead.heatScore,
+        }),
+        Promise.resolve(predictWinRate({
+            milestone: lead.currentMilestone,
+            heatScore: lead.heatScore,
+            bantBudget: lead.bantBudget ?? 'UNKNOWN',
+            bantAuthority: lead.bantAuthority ?? 'UNKNOWN',
+            bantNeed: lead.bantNeed ?? 'UNKNOWN',
+            bantTimeline: lead.bantTimeline ?? 'UNKNOWN',
+            daysSinceCreated: Math.floor((Date.now() - new Date(lead.createdAt).getTime()) / 86400000),
+            interactionCount: lead.interactions.length,
+            consecutiveMissCount: lead.consecutiveMissCount,
+            dealValue: lead.dealValue,
+        })),
+    ])
 
-    return <LeadDetailClient lead={lead as any} aiCoach={aiCoach} userId={user.id} />
+    return <LeadDetailClient lead={lead as any} aiCoach={aiCoach} winRate={winRate} userId={user.id} />
 }
