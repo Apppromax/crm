@@ -4,6 +4,25 @@
 > Format: [Semantic Versioning](https://semver.org/)
 
 ---
+## [0.2.0] - 2026-03-16 — Session 7: Feature Completion
+
+### 🚀 Added
+- **Settings**: Change password (Supabase Auth), FAQ/Help modal (8 questions), Dark mode toggle (Zustand)
+- **Gemini AI Coach**: Real Gemini 2.0 Flash integration with smart fallback to curated BĐS tips
+- **AI Executive Summary**: CEO dashboard AI insights generation
+- **Cron Jobs**: Auto snooze expiry, 72h SOS trigger, stale M4/M5 warnings (15 min interval)
+- **In-app Notifications**: DB-backed notification system with Prisma model, server actions, optimistic UI
+- **Supabase Realtime**: React hooks for live updates (notifications, leads, SOS)
+- **Security Headers**: CSP, HSTS, X-Frame-Options, rate limiting (100 req/min)
+- **Error Monitoring**: Vercel Analytics + Speed Insights, /api/health endpoint
+- **RLS Policies**: SQL file ready for Supabase (role-based data access)
+
+### 🔧 Fixed
+- All 25 E2E tests pass (networkidle → waitForTimeout, Snooze button scroll fix)
+- Date serialization from unstable_cache (getTime/toISOString)
+- Middleware reverted to getUser() for Vercel production stability
+
+---
 
 ## [Unreleased]
 
