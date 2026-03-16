@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /* ============================================
-   CRM Pro V2 — Global Design System
+   CRM Pro V2 — Global Design System v2
+   Premium Animation & Performance Edition
    ============================================ */
 
 @theme {
@@ -45,16 +46,30 @@
   --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.12);
   --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* Animation Timing (Spring-like curves) */
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snap: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Duration Scale */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
 }
 
 /* ============================================
-   Base Styles
+   Base Styles — GPU Acceleration
    ============================================ */
 
 html {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -63,31 +78,122 @@ body {
   min-height: 100dvh;
 }
 
+/* Force GPU layer for smooth scrolling */
+main {
+  will-change: scroll-position;
+}
+
+/* ============================================
+   View Transition API (Page Transitions)
+   ============================================ */
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: var(--duration-normal) var(--ease-smooth) both fade-out;
+}
+
+::view-transition-new(root) {
+  animation: var(--duration-normal) var(--ease-smooth) both fade-in;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
 /* ============================================
    Milestone Progress Bar
    ============================================ */
 
 .milestone-bar {
-  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: width var(--duration-slower) var(--ease-bounce);
 }
 
 /* ============================================
-   Card Animations
+   Premium Keyframes — GPU Only (transform + opacity)
    ============================================ */
 
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translate3d(0, 24px, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
-@keyframes fadeOut {
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(30px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-30px, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut-card {
   from {
     opacity: 1;
     transform: scale(1);
@@ -95,7 +201,35 @@ body {
 
   to {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.96);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  60% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -107,7 +241,7 @@ body {
   }
 
   50% {
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
@@ -118,22 +252,30 @@ body {
     transform: translateX(0);
   }
 
-  25% {
-    transform: translateX(-4px);
+  20% {
+    transform: translateX(-3px);
   }
 
-  75% {
-    transform: translateX(4px);
+  40% {
+    transform: translateX(3px);
+  }
+
+  60% {
+    transform: translateX(-2px);
+  }
+
+  80% {
+    transform: translateX(2px);
   }
 }
 
 @keyframes glow {
   from {
-    text-shadow: 0 0 10px currentColor;
+    text-shadow: 0 0 8px currentColor;
   }
 
   to {
-    text-shadow: 0 0 30px currentColor, 0 0 60px currentColor;
+    text-shadow: 0 0 24px currentColor, 0 0 48px currentColor;
   }
 }
 
@@ -145,36 +287,212 @@ body {
   }
 
   50% {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
   }
 }
 
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-.animate-fade-out {
-  animation: fadeOut 0.25s ease-in forwards;
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-pulse-golden {
-  animation: pulse 2s ease-in-out infinite;
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
-.animate-shake {
-  animation: shake 0.5s ease-in-out;
-}
+@keyframes progress-stripe {
+  0% {
+    background-position: 0 0;
+  }
 
-.animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-.animate-bounce-soft {
-  animation: bounce-soft 1s ease infinite;
+  100% {
+    background-position: 40px 0;
+  }
 }
 
 /* ============================================
-   Glassmorphism (CEO Dashboard)
+   Animation Utility Classes
+   ============================================ */
+
+.animate-slide-up {
+  animation: slideUp var(--duration-slow) var(--ease-spring);
+}
+
+.animate-slide-down {
+  animation: slideDown var(--duration-normal) var(--ease-spring);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--duration-slow) var(--ease-spring);
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft var(--duration-slow) var(--ease-spring);
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-smooth);
+}
+
+.animate-fade-out {
+  animation: fadeOut-card var(--duration-normal) var(--ease-smooth) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-slow) var(--ease-spring);
+}
+
+.animate-pop-in {
+  animation: popIn var(--duration-slow) var(--ease-spring);
+}
+
+.animate-pulse-golden {
+  animation: pulse 2s var(--ease-smooth) infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s var(--ease-smooth);
+}
+
+.animate-glow {
+  animation: glow 2s var(--ease-smooth) infinite alternate;
+}
+
+.animate-bounce-soft {
+  animation: bounce-soft 2s var(--ease-smooth) infinite;
+}
+
+.animate-float {
+  animation: float 3s var(--ease-smooth) infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}
+
+/* Staggered children animations */
+.stagger-children>* {
+  opacity: 0;
+  animation: slideUp var(--duration-slow) var(--ease-spring) forwards;
+}
+
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 300ms;
+}
+
+.stagger-children>*:nth-child(7) {
+  animation-delay: 360ms;
+}
+
+.stagger-children>*:nth-child(8) {
+  animation-delay: 420ms;
+}
+
+/* ============================================
+   Skeleton Loading (replaces spinners inline)
+   ============================================ */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+.skeleton-dark {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+}
+
+/* ============================================
+   Interactive Feedback — Micro-interactions
+   ============================================ */
+
+/* Premium button press */
+.press-effect {
+  transition: transform var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-smooth);
+}
+
+.press-effect:active {
+  transform: scale(0.97);
+}
+
+/* Card hover lift — GPU accelerated */
+.hover-lift {
+  transition: transform var(--duration-normal) var(--ease-spring),
+    box-shadow var(--duration-normal) var(--ease-smooth);
+  will-change: transform;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.hover-lift:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Smooth color transitions for interactive elements */
+a,
+button,
+[role="button"] {
+  transition: color var(--duration-fast) var(--ease-smooth),
+    background-color var(--duration-fast) var(--ease-smooth),
+    border-color var(--duration-fast) var(--ease-smooth),
+    opacity var(--duration-fast) var(--ease-smooth);
+}
+
+/* ============================================
+   Glassmorphism (CEO Dashboard) — Enhanced
    ============================================ */
 
 .glass {
@@ -183,10 +501,18 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-glass-border);
   box-shadow: var(--shadow-glass);
+  transition: background var(--duration-normal) var(--ease-smooth),
+    border-color var(--duration-normal) var(--ease-smooth),
+    transform var(--duration-normal) var(--ease-spring);
 }
 
 .glass:hover {
   background: var(--color-glass-hover);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.glass:active {
+  transform: scale(0.99);
 }
 
 .neon-cyan {
@@ -218,12 +544,75 @@ body {
 }
 
 /* ============================================
+   Bottom Navigation — Smooth Indicator
+   ============================================ */
+
+nav a,
+nav button {
+  position: relative;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+
+/* ============================================
+   Page Content Entrance
+   ============================================ */
+
+.page-enter {
+  animation: slideUp var(--duration-slow) var(--ease-spring);
+}
+
+/* ============================================
+   Modal / Sheet Overlay
+   ============================================ */
+
+.overlay-enter {
+  animation: fadeIn var(--duration-fast) var(--ease-smooth);
+}
+
+.sheet-enter {
+  animation: slideUp var(--duration-slow) var(--ease-spring);
+}
+
+/* ============================================
+   Progress Bars — Animated
+   ============================================ */
+
+.progress-animated {
+  transition: width var(--duration-slower) var(--ease-bounce);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-animated::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.25),
+      transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================
+   Number Counter Animation
+   ============================================ */
+
+.number-counter {
+  display: inline-block;
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+
+.number-counter[data-changed="true"] {
+  animation: popIn var(--duration-slow) var(--ease-spring);
+}
+
+/* ============================================
    Mobile Optimizations
    ============================================ */
 
 @media (max-width: 640px) {
 
-  /* Larger touch targets */
   button,
   [role="button"],
   a {
@@ -231,14 +620,18 @@ body {
     min-width: 44px;
   }
 
-  /* Safe area for PWA */
   .safe-bottom {
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+
+  /* Momentum scrolling on iOS */
+  .scroll-smooth {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
 /* ============================================
-   Reduced Motion
+   Reduced Motion — Accessibility
    ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
@@ -250,6 +643,11 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .stagger-children>* {
+    opacity: 1;
+    animation: none;
+  }
 }
 
 /* ============================================
@@ -257,7 +655,7 @@ body {
    ============================================ */
 
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -266,7 +664,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -274,7 +672,7 @@ body {
 }
 
 /* ============================================
-   Form Utilities
+   Form Utilities — Enhanced
    ============================================ */
 
 .form-input {
@@ -286,7 +684,9 @@ body {
   font-size: 0.875rem;
   color: #334155;
   outline: none;
-  transition: all 0.2s;
+  transition: border-color var(--duration-fast) var(--ease-smooth),
+    background-color var(--duration-fast) var(--ease-smooth),
+    box-shadow var(--duration-fast) var(--ease-smooth);
 }
 
 .form-input:focus {
@@ -306,4 +706,31 @@ body {
 
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* ============================================
+   Haptic Touch Feedback (Visual)
+   ============================================ */
+
+.tap-highlight {
+  -webkit-tap-highlight-color: rgba(14, 165, 233, 0.1);
+}
+
+/* Ripple effect for premium taps */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255, 255, 255, 0.15), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+
+.ripple:active::after {
+  opacity: 1;
 }

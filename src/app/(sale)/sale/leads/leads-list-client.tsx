@@ -100,9 +100,9 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                 </div>
             </header>
 
-            <div className="px-4 py-3 space-y-2">
+            <div className="px-4 py-3 space-y-2 stagger-children">
                 {filtered.length === 0 ? (
-                    <div className="py-16 text-center">
+                    <div className="py-16 text-center animate-fade-in">
                         <Filter className="h-10 w-10 text-slate-200 mx-auto mb-3" />
                         <p className="text-sm text-slate-400">Không tìm thấy khách hàng</p>
                     </div>

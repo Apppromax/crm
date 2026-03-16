@@ -132,7 +132,7 @@ async function CEODashboard() {
                     <Users className="h-5 w-5 neon-cyan" />
                     <h2 className="text-sm font-semibold text-slate-300">Top Warriors</h2>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 stagger-children">
                     {allTeamPerf.length === 0 ? (
                         <p className="text-sm text-slate-500 text-center py-4">Chưa có dữ liệu team</p>
                     ) : (
@@ -196,7 +196,7 @@ async function CEODashboard() {
             </div>
 
             {/* Deep Dive Links */}
-            <div className="space-y-2 mb-6">
+            <div className="space-y-2 mb-6 stagger-children">
                 <Link href="/ceo/analytics" className="glass rounded-2xl p-4 flex items-center gap-3 hover:bg-white/10 transition-all active:scale-[0.99]">
                     <BarChart3 className="h-5 w-5 neon-cyan" />
                     <div className="flex-1">

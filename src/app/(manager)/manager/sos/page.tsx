@@ -31,7 +31,7 @@ async function SOSPage() {
                 <p className="text-xs text-slate-400 mt-0.5">{sosAlerts.length} cảnh báo cần xử lý</p>
             </header>
 
-            <div className="px-4 py-4 space-y-3">
+            <div className="px-4 py-4 space-y-3 stagger-children">
                 {sosAlerts.length === 0 ? (
                     <div className="py-20 text-center">
                         <CheckCircle className="h-16 w-16 text-emerald-200 mx-auto mb-4" />

@@ -36,8 +36,8 @@ export default function LoginPage() {
     return (
         <div className="flex min-h-dvh flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-primary-900 px-4">
             {/* Logo / Brand */}
-            <div className="mb-8 text-center">
-                <div className="mb-3 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-500 shadow-lg shadow-primary-500/30">
+            <div className="mb-8 text-center animate-slide-down">
+                <div className="mb-3 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-500 shadow-lg shadow-primary-500/30 animate-float">
                     <span className="text-2xl font-bold text-white">C</span>
                 </div>
                 <h1 className="text-2xl font-bold text-white">CRM Pro V2</h1>
@@ -46,7 +46,7 @@ export default function LoginPage() {
 
             {/* Login Form */}
             <div className="w-full max-w-sm">
-                <form onSubmit={handleLogin} className="rounded-2xl bg-white/10 p-6 shadow-xl backdrop-blur-xl border border-white/10">
+                <form onSubmit={handleLogin} className="rounded-2xl bg-white/10 p-6 shadow-xl backdrop-blur-xl border border-white/10 animate-scale-in">
                     <div className="mb-5">
                         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-300">
                             Email

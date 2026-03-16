@@ -68,20 +68,20 @@ export function SaleHomeClient({ userId, topCards, stats }: Props) {
             </header>
 
             {/* Top 3 Cards — from DB */}
-            <div className="px-4 pt-4 space-y-3">
+            <div className="px-4 pt-4 space-y-3 stagger-children">
                 {topCards.map((card, index) => (
                     <SmartCard key={card.id} card={card as any} rank={index + 1} />
                 ))}
             </div>
 
             {topCards.length > 0 && (
-                <div className="px-4 pt-5 pb-4">
+                <div className="px-4 pt-5 pb-4 animate-pop-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
                     <BigButton leadName={topCards[0].name} leadId={topCards[0].id} />
                 </div>
             )}
 
             {/* Quick Stats — from DB */}
-            <div className="mx-4 mb-6 rounded-2xl bg-white p-4 shadow-sm border border-slate-100">
+            <div className="mx-4 mb-6 rounded-2xl bg-white p-4 shadow-sm border border-slate-100 animate-scale-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
                 <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
                         <p className="text-2xl font-bold text-primary-600">{stats.totalLeads}</p>
