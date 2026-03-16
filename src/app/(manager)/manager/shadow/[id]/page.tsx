@@ -1,165 +1,197 @@
-'use client'
-
-import { useState } from 'react'
-import { Eye, EyeOff, ArrowLeft, Phone, MessageSquare, FileText, Clock, Target, Flame, MapPin } from 'lucide-react'
-import { cn, formatRelativeTime, getMilestoneLabel } from '@/lib/utils'
+import { Suspense } from 'react'
+import { ArrowLeft, Phone, MessageSquare, FileText, Clock, Target, Flame, Eye, TrendingUp } from 'lucide-react'
+import { cn, formatRelativeTime, getMilestoneLabel, formatCurrencyShort } from '@/lib/utils'
 import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
+import { notFound } from 'next/navigation'
+import Loading from '@/app/(manager)/loading'
 
-// Mock: Manager's view of what Sale is doing in real-time
-const SHADOW_ACTIVITY = [
-    {
-        id: 'act-1', time: new Date(Date.now() - 180000),
-        type: 'NOTE' as const, icon: FileText,
-        description: 'Ghi chú: "Khách quan tâm căn 2PN, hỏi thêm về view sông"',
-        leadName: 'Trần Thị Bảo Ngọc', milestone: 3,
-    },
-    {
-        id: 'act-2', time: new Date(Date.now() - 600000),
-        type: 'CALL' as const, icon: Phone,
-        description: 'Gọi điện 4 phút 32 giây — Đã kết nối',
-        leadName: 'Nguyễn Văn Đức', milestone: 2,
-    },
-    {
-        id: 'act-3', time: new Date(Date.now() - 1800000),
-        type: 'SCHEDULE' as const, icon: Clock,
-        description: 'Đặt lịch hẹn gặp mặt thứ 7, 14:00 tại nhà mẫu',
-        leadName: 'Trần Thị Bảo Ngọc', milestone: 3,
-    },
-    {
-        id: 'act-4', time: new Date(Date.now() - 3600000),
-        type: 'MILESTONE' as const, icon: Target,
-        description: 'Thăng mốc: Mốc 2 → Mốc 3 (Niềm tin)',
-        leadName: 'Trần Thị Bảo Ngọc', milestone: 3,
-    },
-    {
-        id: 'act-5', time: new Date(Date.now() - 5400000),
-        type: 'CHAT' as const, icon: MessageSquare,
-        description: 'Gửi Zalo: Bảng tính dòng tiền chi tiết',
-        leadName: 'Hoàng Anh Kiệt', milestone: 4,
-    },
-]
-
-const typeColors: Record<string, string> = {
-    NOTE: 'bg-blue-50 text-blue-500',
-    CALL: 'bg-emerald-50 text-emerald-500',
-    SCHEDULE: 'bg-amber-50 text-amber-500',
-    MILESTONE: 'bg-primary-50 text-primary-500',
-    CHAT: 'bg-indigo-50 text-indigo-500',
+interface Props {
+    params: Promise<{ id: string }>
 }
 
-export default function ShadowModePage() {
-    const [isLive, setIsLive] = useState(true)
-    const saleName = 'Nguyễn Văn A'
+export default function ShadowWrapper({ params }: Props) {
+    return (
+        <Suspense fallback={<Loading />}>
+            <ShadowPage params={params} />
+        </Suspense>
+    )
+}
+
+async function ShadowPage({ params }: Props) {
+    const { id } = await params
+
+    // Fetch lead with detail + interactions + assignee
+    const lead = await prisma.lead.findUnique({
+        where: { id },
+        include: {
+            assignee: { select: { name: true, email: true, streakCount: true } },
+            source: { select: { name: true } },
+            interactions: {
+                orderBy: { createdAt: 'desc' },
+                take: 10,
+                select: {
+                    id: true,
+                    type: true,
+                    content: true,
+                    createdAt: true,
+                },
+            },
+            milestoneHistory: {
+                orderBy: { changedAt: 'desc' },
+                take: 5,
+                select: {
+                    fromMilestone: true,
+                    toMilestone: true,
+                    changedAt: true,
+                    reason: true,
+                },
+            },
+            schedules: {
+                where: { status: 'PENDING' },
+                orderBy: { scheduledAt: 'asc' },
+                take: 3,
+                select: {
+                    type: true,
+                    scheduledAt: true,
+                    note: true,
+                },
+            },
+        },
+    })
+
+    if (!lead) notFound()
+
+    const milestonePercent = lead.currentMilestone * 20
+
+    const typeIcons: Record<string, { icon: string; color: string }> = {
+        CALL: { icon: '📞', color: 'bg-emerald-50 text-emerald-600' },
+        CHAT: { icon: '💬', color: 'bg-blue-50 text-blue-600' },
+        MEETING: { icon: '🤝', color: 'bg-amber-50 text-amber-600' },
+        NOTE: { icon: '📝', color: 'bg-slate-50 text-slate-600' },
+        EMAIL: { icon: '✉️', color: 'bg-indigo-50 text-indigo-600' },
+    }
 
     return (
-        <div className="mx-auto max-w-2xl min-h-dvh bg-slate-950">
+        <div className="mx-auto max-w-2xl min-h-dvh">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-slate-950/90 px-4 py-3 backdrop-blur-xl border-b border-white/5">
-                <Link href="/manager" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-white/5 transition-colors">
+            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
+                <Link href="/manager" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors press-effect">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-emerald-400" />
-                        <h1 className="text-base font-semibold text-white">Shadow Mode</h1>
+                        <Eye className="h-4 w-4 text-indigo-500" />
+                        <h1 className="text-base font-semibold text-slate-900">{lead.name}</h1>
                     </div>
-                    <p className="text-xs text-slate-500">Đang theo dõi: {saleName}</p>
+                    <p className="text-xs text-slate-400">
+                        {lead.assignee?.name || 'Chưa gán'} • {lead.source?.name || 'Unknown'}
+                    </p>
                 </div>
-                <button
-                    onClick={() => setIsLive(!isLive)}
-                    className={cn(
-                        'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
-                        isLive
-                            ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                            : 'bg-red-500/20 text-red-400 ring-1 ring-red-500/30'
-                    )}
-                >
-                    <span className={cn('h-2 w-2 rounded-full', isLive ? 'bg-emerald-400 animate-pulse' : 'bg-red-400')} />
-                    {isLive ? 'LIVE' : 'PAUSED'}
-                </button>
+                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-600">
+                    Chế độ xem
+                </span>
             </header>
 
-            {/* Live Stats */}
-            <div className="grid grid-cols-3 gap-2 px-4 pt-4">
-                <div className="rounded-xl bg-white/5 border border-white/5 p-3 text-center">
-                    <p className="text-lg font-bold text-white">5</p>
-                    <p className="text-[10px] text-slate-500">Leads hôm nay</p>
+            {/* Milestone Bar */}
+            <div className="px-4 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-slate-600">
+                        M{lead.currentMilestone} — {getMilestoneLabel(lead.currentMilestone)}
+                    </span>
+                    <span className="text-[10px] text-slate-400">{milestonePercent}%</span>
                 </div>
-                <div className="rounded-xl bg-white/5 border border-white/5 p-3 text-center">
-                    <p className="text-lg font-bold text-emerald-400">3</p>
-                    <p className="text-[10px] text-slate-500">Gọi + Chat</p>
-                </div>
-                <div className="rounded-xl bg-white/5 border border-white/5 p-3 text-center">
-                    <p className="text-lg font-bold text-amber-400">15m</p>
-                    <p className="text-[10px] text-slate-500">Avg response</p>
+                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-primary-400 to-primary-600 milestone-bar"
+                        style={{ width: `${milestonePercent}%` }}
+                    />
                 </div>
             </div>
 
-            {/* Activity Feed */}
-            <div className="px-4 mt-5">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Hoạt động real-time</p>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-2 px-4 pt-4 stagger-children">
+                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                    <p className={cn(
+                        'text-lg font-bold',
+                        lead.heatScore >= 70 ? 'text-red-500' : lead.heatScore >= 40 ? 'text-orange-500' : 'text-slate-600'
+                    )}>
+                        🔥 {lead.heatScore}
+                    </p>
+                    <p className="text-[10px] text-slate-400">Heat Score</p>
+                </div>
+                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                    <p className="text-lg font-bold text-slate-800">{lead.interactions.length}</p>
+                    <p className="text-[10px] text-slate-400">Tương tác</p>
+                </div>
+                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                    <p className="text-lg font-bold text-emerald-600">
+                        {lead.dealValue ? formatCurrencyShort(lead.dealValue) : 'N/A'}
+                    </p>
+                    <p className="text-[10px] text-slate-400">Giá trị</p>
+                </div>
+            </div>
 
+            {/* BANT */}
+            {(lead.bantBudget || lead.bantAuthority || lead.bantNeed || lead.bantTimeline) && (
+                <div className="mx-4 mt-4 rounded-xl bg-white border border-slate-100 p-4">
+                    <h3 className="text-xs font-bold text-slate-600 mb-2">BANT</h3>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div><span className="text-slate-400">Budget:</span> <span className="font-medium text-slate-700">{lead.bantBudget || '-'}</span></div>
+                        <div><span className="text-slate-400">Authority:</span> <span className="font-medium text-slate-700">{lead.bantAuthority || '-'}</span></div>
+                        <div><span className="text-slate-400">Need:</span> <span className="font-medium text-slate-700">{lead.bantNeed || '-'}</span></div>
+                        <div><span className="text-slate-400">Timeline:</span> <span className="font-medium text-slate-700">{lead.bantTimeline || '-'}</span></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Upcoming Schedules */}
+            {lead.schedules.length > 0 && (
+                <div className="mx-4 mt-4 rounded-xl bg-amber-50 border border-amber-100 p-4">
+                    <h3 className="text-xs font-bold text-amber-700 mb-2 flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" /> Lịch hẹn sắp tới
+                    </h3>
+                    <div className="space-y-2">
+                        {lead.schedules.map((s, i) => (
+                            <div key={i} className="flex items-center justify-between text-xs">
+                                <span className="text-amber-800">{s.type} {s.note ? `— ${s.note}` : ''}</span>
+                                <span className="text-amber-600 font-medium">
+                                    {new Date(s.scheduledAt).toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Interaction History */}
+            <div className="px-4 mt-5 mb-24">
+                <h3 className="text-sm font-bold text-slate-700 mb-3">
+                    Lịch sử tương tác ({lead.interactions.length})
+                </h3>
                 <div className="relative">
-                    {/* Timeline Line */}
-                    <div className="absolute left-5 top-0 bottom-0 w-px bg-white/5" />
-
-                    <div className="space-y-1">
-                        {SHADOW_ACTIVITY.map((act, idx) => {
-                            const Icon = act.icon
-                            const colorClass = typeColors[act.type] || 'bg-slate-50 text-slate-500'
+                    <div className="absolute left-5 top-0 bottom-0 w-px bg-slate-100" />
+                    <div className="space-y-1 stagger-children">
+                        {lead.interactions.map((act) => {
+                            const ti = typeIcons[act.type] || typeIcons['NOTE']
                             return (
-                                <div key={act.id} className={cn(
-                                    'relative flex gap-3 rounded-xl p-3 transition-all',
-                                    idx === 0 && isLive ? 'bg-white/5 ring-1 ring-emerald-500/20' : ''
-                                )}>
-                                    {/* Icon */}
-                                    <div className={cn('relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', colorClass)}>
-                                        <Icon className="h-4 w-4" />
+                                <div key={act.id} className="relative flex gap-3 rounded-xl p-3">
+                                    <div className={cn('relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm', ti.color)}>
+                                        {ti.icon}
                                     </div>
-
-                                    {/* Content */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm text-slate-200 leading-relaxed">{act.description}</p>
-                                        <div className="flex items-center gap-2 mt-1.5">
-                                            <span className="text-xs text-primary-400 font-medium">{act.leadName}</span>
-                                            <span className="text-[10px] text-slate-600">M{act.milestone}</span>
-                                            <span className="text-[10px] text-slate-600 ml-auto">{formatRelativeTime(act.time)}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Live indicator */}
-                                    {idx === 0 && isLive && (
-                                        <span className="absolute top-3 right-3 flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                                        <p className="text-sm text-slate-700 leading-relaxed">{act.content || act.type}</p>
+                                        <span className="text-[10px] text-slate-400">
+                                            {formatRelativeTime(typeof act.createdAt === 'string' ? act.createdAt : act.createdAt.toISOString())}
                                         </span>
-                                    )}
+                                    </div>
                                 </div>
                             )
                         })}
-                    </div>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-xl border-t border-white/5 px-4 py-3 safe-bottom">
-                <div className="mx-auto max-w-2xl flex gap-2">
-                    <button className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-500/20 py-3 text-sm font-medium text-indigo-400 hover:bg-indigo-500/30 transition-all">
-                        <MessageSquare className="h-4 w-4" />
-                        Gửi lệnh
-                    </button>
-                    <button
-                        onClick={() => setIsLive(!isLive)}
-                        className={cn(
-                            'flex-1 flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium transition-all',
-                            isLive
-                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                        {lead.interactions.length === 0 && (
+                            <p className="text-sm text-slate-400 text-center py-8">Chưa có tương tác nào</p>
                         )}
-                    >
-                        {isLive ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        {isLive ? 'Tắt theo dõi' : 'Bật theo dõi'}
-                    </button>
+                    </div>
                 </div>
             </div>
         </div>
