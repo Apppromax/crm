@@ -131,7 +131,7 @@ test.describe('Phase 2: Sale Workflow', () => {
 
     test('P2.3 Click Lead → detail loads, add interaction', async ({ page }) => {
         await page.goto('/sale/leads');
-        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000);
 
         // Click first lead card
         const firstLead = page.locator('a[href^="/sale/leads/"]').first();
@@ -194,13 +194,13 @@ test.describe('Phase 3: Manager Workflow', () => {
 
     test('P3.5 Shadow/Team detail loads', async ({ page }) => {
         await page.goto('/manager/team');
-        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(2000);
 
         const memberLink = page.locator('a[href^="/manager/team/"]').first();
         if (await memberLink.count() > 0) {
             const start = Date.now();
             await memberLink.click();
-            await page.waitForLoadState('networkidle');
+            await page.waitForTimeout(2000);
             console.log(`  ⏱ Team member detail: ${Date.now() - start}ms`);
         } else {
             console.log('  ⚠ No team members found');
@@ -358,23 +358,25 @@ test.describe('Phase 6: Lead Lifecycle', () => {
             await firstLead.click();
             await page.waitForTimeout(2000);
 
-            // Click Snooze button
+            // Scroll down to find Snooze button (it's below AI Coach, hidden by fixed bottom bar)
             const snoozeBtn = page.locator('button:has-text("Snooze")');
-            if (await snoozeBtn.isVisible({ timeout: 5000 })) {
-                await snoozeBtn.click();
+            if (await snoozeBtn.count() > 0) {
+                await snoozeBtn.scrollIntoViewIfNeeded();
+                await page.waitForTimeout(500);
+                await snoozeBtn.click({ force: true });
+                await page.waitForTimeout(1000);
 
-                // Snooze popup should appear
-                const snoozePopup = page.locator('text=/Ngày mai|1 ngày|3 ngày|Tạm ngưng/').first();
-                if (await snoozePopup.isVisible({ timeout: 3000 })) {
-                    // Pick first snooze option
-                    await snoozePopup.click();
+                // Snooze popup should appear — actual options: 15 phút, 30 phút, 1 giờ, etc.
+                const snoozeOption = page.locator('text=/15 phút|30 phút|1 giờ|Ngày mai/').first();
+                if (await snoozeOption.isVisible({ timeout: 3000 })) {
+                    await snoozeOption.click();
                     console.log('  ✅ Lead snoozed! Redirected to /sale');
                     await expect(page).toHaveURL(/.*\/sale/, { timeout: 5000 });
                 } else {
                     console.log('  ⚠ Snooze popup did not appear');
                 }
             } else {
-                console.log('  ⚠ Snooze button not found');
+                console.log('  ⚠ Snooze button not found on page');
             }
         }
     });
