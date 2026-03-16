@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { Bell, X, Check, AlertTriangle, MessageSquare, ArrowUp, Clock, CheckCheck } from 'lucide-react'
+import { useState, useEffect, useTransition } from 'react'
+import { Bell, X, AlertTriangle, MessageSquare, ArrowUp, Clock, CheckCheck } from 'lucide-react'
 import { cn, formatRelativeTime } from '@/lib/utils'
+import { markNotificationRead, markAllNotificationsRead, getNotifications } from '@/app/actions/notifications'
 
 interface Notification {
     id: string
@@ -10,37 +11,9 @@ interface Notification {
     title: string
     message: string
     read: boolean
-    createdAt: Date
-    leadId?: string
+    createdAt: Date | string
+    leadId?: string | null
 }
-
-const MOCK_NOTIFICATIONS: Notification[] = [
-    {
-        id: 'n1', type: 'SOS', title: 'SOS: Lead quá hạn',
-        message: 'Phạm Minh Tuấn (Mốc 4) — Lịch hẹn bị hủy 2 lần. Cần can thiệp.',
-        read: false, createdAt: new Date(Date.now() - 3600000), leadId: 'lead-004',
-    },
-    {
-        id: 'n2', type: 'MILESTONE', title: 'Thăng mốc thành công!',
-        message: 'Trần Thị Bảo Ngọc đã thăng lên Mốc 3: Niềm tin ✨',
-        read: false, createdAt: new Date(Date.now() - 7200000), leadId: 'lead-001',
-    },
-    {
-        id: 'n3', type: 'ADVICE', title: 'Lệnh sếp mới',
-        message: 'Manager đã gửi chỉ thị cho lead Trần Thị Bảo Ngọc. Xem ngay.',
-        read: false, createdAt: new Date(Date.now() - 14400000), leadId: 'lead-001',
-    },
-    {
-        id: 'n4', type: 'SCHEDULE', title: 'Lịch hẹn sắp tới',
-        message: 'Bạn có cuộc hẹn với Nguyễn Văn Đức trong 1 giờ.',
-        read: true, createdAt: new Date(Date.now() - 28800000), leadId: 'lead-002',
-    },
-    {
-        id: 'n5', type: 'SYSTEM', title: 'Chuỗi streak 5 ngày! 🔥',
-        message: 'Chúc mừng! Bạn đã tương tác đủ leads 5 ngày liên tiếp.',
-        read: true, createdAt: new Date(Date.now() - 86400000),
-    },
-]
 
 const typeConfig = {
     SOS: { icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-50' },
@@ -53,19 +26,37 @@ const typeConfig = {
 interface Props {
     isOpen: boolean
     onClose: () => void
+    userId: string
+    initialNotifications?: Notification[]
 }
 
-export function NotificationPanel({ isOpen, onClose }: Props) {
-    const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS)
+export function NotificationPanel({ isOpen, onClose, userId, initialNotifications }: Props) {
+    const [isPending, startTransition] = useTransition()
+    const [notifications, setNotifications] = useState<Notification[]>(initialNotifications || [])
 
     const unreadCount = notifications.filter(n => !n.read).length
 
-    function markAllRead() {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    // Fetch notifications when opened
+    useEffect(() => {
+        if (isOpen && userId) {
+            getNotifications(userId).then(data => {
+                setNotifications(data as Notification[])
+            }).catch(() => { })
+        }
+    }, [isOpen, userId])
+
+    function handleMarkAllRead() {
+        startTransition(async () => {
+            await markAllNotificationsRead(userId)
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+        })
     }
 
-    function markRead(id: string) {
+    function handleMarkRead(id: string) {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
+        startTransition(async () => {
+            await markNotificationRead(id)
+        })
     }
 
     if (!isOpen) return null
@@ -90,8 +81,9 @@ export function NotificationPanel({ isOpen, onClose }: Props) {
                     <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
                             <button
-                                onClick={markAllRead}
-                                className="text-xs text-primary-600 font-medium flex items-center gap-1 hover:text-primary-700"
+                                onClick={handleMarkAllRead}
+                                disabled={isPending}
+                                className="text-xs text-primary-600 font-medium flex items-center gap-1 hover:text-primary-700 disabled:opacity-50"
                             >
                                 <CheckCheck className="h-3.5 w-3.5" />
                                 Đọc hết
@@ -105,34 +97,41 @@ export function NotificationPanel({ isOpen, onClose }: Props) {
 
                 {/* Notification List */}
                 <div className="divide-y divide-slate-50">
-                    {notifications.map(notif => {
-                        const config = typeConfig[notif.type]
-                        const Icon = config.icon
-                        return (
-                            <div
-                                key={notif.id}
-                                onClick={() => markRead(notif.id)}
-                                className={cn(
-                                    'px-4 py-3 flex gap-3 transition-colors cursor-pointer',
-                                    !notif.read ? 'bg-primary-50/30' : 'hover:bg-slate-50/50'
-                                )}
-                            >
-                                <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', config.bg)}>
-                                    <Icon className={cn('h-4 w-4', config.color)} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                        <p className={cn('text-sm font-medium truncate', !notif.read ? 'text-slate-900' : 'text-slate-600')}>
-                                            {notif.title}
-                                        </p>
-                                        {!notif.read && <span className="h-2 w-2 rounded-full bg-primary-500 shrink-0" />}
+                    {notifications.length === 0 ? (
+                        <div className="py-16 text-center">
+                            <Bell className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                            <p className="text-sm text-slate-400">Chưa có thông báo nào</p>
+                        </div>
+                    ) : (
+                        notifications.map(notif => {
+                            const config = typeConfig[notif.type]
+                            const Icon = config.icon
+                            return (
+                                <div
+                                    key={notif.id}
+                                    onClick={() => handleMarkRead(notif.id)}
+                                    className={cn(
+                                        'px-4 py-3 flex gap-3 transition-colors cursor-pointer',
+                                        !notif.read ? 'bg-primary-50/30' : 'hover:bg-slate-50/50'
+                                    )}
+                                >
+                                    <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', config.bg)}>
+                                        <Icon className={cn('h-4 w-4', config.color)} />
                                     </div>
-                                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{notif.message}</p>
-                                    <p className="text-[10px] text-slate-300 mt-1">{formatRelativeTime(notif.createdAt)}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <p className={cn('text-sm font-medium truncate', !notif.read ? 'text-slate-900' : 'text-slate-600')}>
+                                                {notif.title}
+                                            </p>
+                                            {!notif.read && <span className="h-2 w-2 rounded-full bg-primary-500 shrink-0" />}
+                                        </div>
+                                        <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{notif.message}</p>
+                                        <p className="text-[10px] text-slate-300 mt-1">{formatRelativeTime(notif.createdAt)}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })
+                    )}
                 </div>
             </div>
         </div>

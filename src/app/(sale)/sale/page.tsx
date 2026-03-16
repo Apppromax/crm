@@ -48,6 +48,7 @@ async function SaleHomeDataLoader() {
         <>
             <RealtimeListener table="leads" userId={user.id} />
             <SaleHomeClient
+                userId={user.id}
                 topCards={topCards}
                 stats={{
                     totalLeads: stats.activeLeads,

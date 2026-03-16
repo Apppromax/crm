@@ -24,6 +24,7 @@ interface CardData {
 }
 
 interface Props {
+    userId: string
     topCards: CardData[]
     stats: {
         totalLeads: number
@@ -33,7 +34,7 @@ interface Props {
     }
 }
 
-export function SaleHomeClient({ topCards, stats }: Props) {
+export function SaleHomeClient({ userId, topCards, stats }: Props) {
     const [showNotifications, setShowNotifications] = useState(false)
 
     return (
@@ -101,7 +102,7 @@ export function SaleHomeClient({ topCards, stats }: Props) {
                 </div>
             </div>
 
-            <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+            <NotificationPanel isOpen={showNotifications} onClose={() => setShowNotifications(false)} userId={userId} />
         </div>
     )
 }

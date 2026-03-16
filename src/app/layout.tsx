@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { PWAInstallPrompt } from '@/components/shared/pwa-install-prompt'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -40,6 +42,8 @@ export default function RootLayout({
         <NextTopLoader color="#0ea5e9" showSpinner={false} speed={300} />
         {children}
         <PWAInstallPrompt />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

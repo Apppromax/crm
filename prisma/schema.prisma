@@ -163,6 +163,7 @@ model User {
   resolvedSOS      SOSAlert[]         @relation("ResolvedBy")
   auditLogs        AuditLog[]
   dailyMetrics     DailyMetrics[]
+  notifications    Notification[]
 
   @@index([orgId])
   @@index([teamId])
@@ -226,6 +227,7 @@ model Lead {
   schedules        Schedule[]
   sosAlerts        SOSAlert[]
   advices          ManagerAdvice[]
+  notifications    Notification[]
 
   @@index([orgId, status])
   @@index([assignedTo, status])
@@ -455,4 +457,34 @@ model SystemConfig {
   note  String?
 
   @@map("system_configs")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+enum NotificationType {
+  SOS
+  MILESTONE
+  ADVICE
+  SCHEDULE
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  leadId    String?          @map("lead_id")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
 }
