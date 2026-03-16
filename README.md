@@ -81,7 +81,7 @@ CRMPROV2/
 | **Manager** | 7 pages | ✅ SSR + Cache | ✅ < 300ms | 🟢 Live |
 | **CEO** | 4 pages | ✅ SSR + Cache | ✅ < 300ms | 🟢 Live |
 | **Auth** | 1 page | ✅ Supabase Auth | N/A | 🟢 Live |
-| **E2E Tests** | 25 tests | N/A | N/A | 🟢 22/25 Pass |
+| **E2E Tests** | 25 tests | N/A | N/A | 🟢 25/25 Pass |
 
 ---
 
