@@ -1,60 +1,45 @@
+import { Suspense } from 'react'
 import { ArrowLeft, Users, Trophy, TrendingUp, Target, Flame, Crown, Medal } from 'lucide-react'
 import Link from 'next/link'
 import { cn, formatCurrencyShort } from '@/lib/utils'
 import { getUserByRole } from '@/app/actions/users'
-import { prisma } from '@/lib/prisma'
-
-async function getTeamPerformanceDetailed(orgId: string) {
-    const members = await prisma.user.findMany({
-        where: { orgId, role: 'SALE' },
-        select: {
-            id: true,
-            name: true,
-            streakCount: true,
-            assignedLeads: {
-                select: {
-                    currentMilestone: true,
-                    dealValue: true,
-                    status: true,
-                },
-            },
-        },
-    })
-
-    return members
-        .map(m => {
-            const activeLeads = m.assignedLeads.filter(l => l.status === 'ACTIVE')
-            const wonLeads = m.assignedLeads.filter(l => l.status === 'WON')
-            const revenue = wonLeads.reduce((s, l) => s + (l.dealValue || 0), 0)
-            const pipeline = activeLeads.reduce((s, l) => s + (l.dealValue || 0), 0)
-            const target = 10_000_000_000
-            const compliance = m.assignedLeads.length > 0
-                ? Math.min(100, Math.round((activeLeads.length / Math.max(m.assignedLeads.length, 1)) * 100) + 40)
-                : 0
-
-            return {
-                id: m.id,
-                name: m.name,
-                revenue,
-                target,
-                pipeline,
-                deals: wonLeads.length,
-                leads: activeLeads.length,
-                streak: m.streakCount,
-                compliance,
-            }
-        })
-        .sort((a, b) => b.revenue - a.revenue || b.deals - a.deals || b.streak - a.streak)
-}
+import { getCachedAllTeamPerformance } from '@/lib/cache'
+import Loading from '@/app/(ceo)/loading'
 
 const rankIcons = [Crown, Medal, Medal]
 const rankColors = ['text-amber-400', 'text-slate-300', 'text-amber-700']
 
-export default async function CEOTeamPage() {
+export default function CEOTeamPage() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <CEOTeamContent />
+        </Suspense>
+    )
+}
+
+async function CEOTeamContent() {
     const user = await getUserByRole('CEO')
     if (!user) return <div className="p-8 text-center text-slate-400">No CEO found</div>
 
-    const teamPerf = await getTeamPerformanceDetailed(user.org.id)
+    const allPerf = await getCachedAllTeamPerformance(user.org.id)
+
+    const teamPerf = allPerf.map(m => {
+        const target = 10_000_000_000
+        const compliance = (m.activeLeads + m.wonDeals) > 0
+            ? Math.min(100, Math.round((m.activeLeads / Math.max(m.activeLeads + m.wonDeals, 1)) * 100) + 40)
+            : 0
+        return {
+            id: m.id,
+            name: m.name,
+            revenue: m.revenue,
+            target,
+            pipeline: m.pipeline,
+            deals: m.wonDeals,
+            leads: m.activeLeads,
+            streak: m.streak,
+            compliance,
+        }
+    }).sort((a, b) => b.revenue - a.revenue || b.deals - a.deals || b.streak - a.streak)
 
     const totalRevenue = teamPerf.reduce((s, t) => s + t.revenue, 0)
     const totalTarget = teamPerf.reduce((s, t) => s + t.target, 0)
@@ -174,3 +159,4 @@ function MiniStat({ icon, value, label, className }: {
         </div>
     )
 }
+

@@ -46,7 +46,7 @@ test('Manager Speed', async ({ page }) => {
 
 test('CEO Speed', async ({ page }) => {
     await page.goto('/login');
-    await page.fill('input[type="email"]', 'ceo@crmpro.vn');
+    await page.fill('input[type="email"]', 'director@crmpro.vn');
     await page.fill('input[type="password"]', 'password123');
     await page.click('button[type="submit"]');
     await expect(page).toHaveURL(/.*\/ceo/, { timeout: 15000 });
