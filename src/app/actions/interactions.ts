@@ -1,10 +1,11 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import type { InteractionType } from '@prisma/client'
 
 import { parseInteractionNote, summarizeLeadInteractions } from '@/lib/gemini'
+import { CACHE_TAGS } from '@/lib/cache'
 
 export async function createInteraction(data: {
     leadId: string
@@ -20,6 +21,7 @@ export async function createInteraction(data: {
             id: true,
             name: true,
             golden72hExpiresAt: true,
+            assignedTo: true,
         }
     })
 
@@ -51,8 +53,8 @@ export async function createInteraction(data: {
         }),
     ])
 
-    revalidatePath('/sale')
-    revalidatePath(`/sale/leads/${data.leadId}`)
+    updateTag(CACHE_TAGS.leadDetail(data.leadId))
+    if (lead.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
 
     // FIRE-AND-FORGET: AI processing runs in background, does NOT block the user
     processAIInBackground(data.leadId, lead.name, data.content, data.aiLabels, interaction.id)

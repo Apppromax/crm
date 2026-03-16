@@ -6,7 +6,7 @@ import { getUserByRole, getTeamPerformance } from '@/app/actions/users'
 import { getDashboardMetrics } from '@/app/actions/dashboard'
 import { RealtimeListener } from '@/components/realtime-listener'
 import Loading from '@/app/(ceo)/loading'
-import { prisma } from '@/lib/prisma'
+import { getCachedWonRevenue, getCachedAllTeamPerformance } from '@/lib/cache'
 
 export default function CEOPage() {
     return (
@@ -22,12 +22,11 @@ async function CEODashboard() {
 
     const orgId = user.org.id
 
-    const [metrics, wonRevenueResult, allTeamPerf] = await Promise.all([
+    const [metrics, wonRevenue, allTeamPerf] = await Promise.all([
         getDashboardMetrics(orgId),
-        prisma.lead.aggregate({ where: { orgId, status: 'WON' }, _sum: { dealValue: true } }),
-        getAllTeamPerformance(orgId)
+        getCachedWonRevenue(orgId),
+        getCachedAllTeamPerformance(orgId)
     ])
-    const wonRevenue = wonRevenueResult._sum.dealValue || 0
 
     const pipelineValue = metrics.pipelineValue
     const target = 20_000_000_000
@@ -207,41 +206,3 @@ async function CEODashboard() {
 }
 
 
-
-async function getAllTeamPerformance(orgId: string) {
-    const members = await prisma.user.findMany({
-        where: { orgId, role: 'SALE' },
-        select: {
-            id: true,
-            name: true,
-            streakCount: true,
-            assignedLeads: {
-                where: { status: { in: ['ACTIVE', 'WON'] } },
-                select: {
-                    currentMilestone: true,
-                    dealValue: true,
-                    status: true,
-                },
-            },
-        },
-    })
-
-    return members
-        .map(m => ({
-            id: m.id,
-            name: m.name,
-            streak: m.streakCount,
-            totalLeads: m.assignedLeads.length,
-            activeLeads: m.assignedLeads.filter(l => l.status === 'ACTIVE').length,
-            wonDeals: m.assignedLeads.filter(l => l.status === 'WON').length,
-            revenue: m.assignedLeads.filter(l => l.status === 'WON').reduce((s, l) => s + (l.dealValue || 0), 0),
-            pipeline: m.assignedLeads.filter(l => l.status === 'ACTIVE').reduce((s, l) => s + (l.dealValue || 0), 0),
-            score: Math.round(
-                (m.assignedLeads.filter(l => l.status === 'WON').length * 30) +
-                (m.streakCount * 5) +
-                (m.assignedLeads.filter(l => l.status === 'ACTIVE' && l.currentMilestone >= 4).length * 10) +
-                Math.min(30, m.assignedLeads.filter(l => l.status === 'ACTIVE').length * 5)
-            ),
-        }))
-        .sort((a, b) => b.score - a.score)
-}

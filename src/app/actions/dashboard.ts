@@ -1,33 +1,23 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
+import {
+    getCachedDashboardMetrics,
+    getCachedSOSAlerts,
+    getCachedSchedules,
+    CACHE_TAGS,
+} from '@/lib/cache'
 
 export async function getSOSAlerts(orgId?: string) {
-    return prisma.sOSAlert.findMany({
-        where: {
-            status: { in: ['ACTIVE', 'ACKNOWLEDGED'] },
-            ...(orgId ? { lead: { orgId } } : {}),
-        },
-        include: {
-            lead: {
-                select: {
-                    id: true,
-                    name: true,
-                    currentMilestone: true,
-                    dealValue: true,
-                    assignee: { select: { id: true, name: true } },
-                },
-            },
-        },
-        orderBy: [
-            { severity: 'desc' },
-            { createdAt: 'desc' },
-        ],
-    })
+    return getCachedSOSAlerts(orgId)
 }
 
 export async function resolveSOSAlert(alertId: string, userId: string) {
+    const alert = await prisma.sOSAlert.findUnique({
+        where: { id: alertId },
+        select: { lead: { select: { orgId: true } } },
+    })
     const result = await prisma.sOSAlert.update({
         where: { id: alertId },
         data: {
@@ -36,7 +26,10 @@ export async function resolveSOSAlert(alertId: string, userId: string) {
             resolvedAt: new Date(),
         },
     })
-    revalidatePath('/manager')
+    if (alert?.lead?.orgId) {
+        updateTag(CACHE_TAGS.sos(alert.lead.orgId))
+        updateTag(CACHE_TAGS.dashboard(alert.lead.orgId))
+    }
     return result
 }
 
@@ -54,29 +47,12 @@ export async function sendAdvice(data: {
             content: data.content,
         },
     })
-    revalidatePath('/sale')
-    revalidatePath('/manager')
+    updateTag(CACHE_TAGS.leadDetail(data.leadId))
     return result
 }
 
 export async function getSchedulesByUser(userId: string, includeCompleted = false) {
-    return prisma.schedule.findMany({
-        where: {
-            userId,
-            ...(includeCompleted ? {} : { status: { in: ['PENDING', 'OVERDUE'] } }),
-        },
-        include: {
-            lead: {
-                select: {
-                    id: true,
-                    name: true,
-                    currentMilestone: true,
-                    dealValue: true,
-                },
-            },
-        },
-        orderBy: { scheduledAt: 'asc' },
-    })
+    return getCachedSchedules(userId, includeCompleted)
 }
 
 export async function createSchedule(data: {
@@ -95,12 +71,16 @@ export async function createSchedule(data: {
             note: data.note || null,
         },
     })
-    revalidatePath('/sale/schedule')
-    revalidatePath('/sale')
+    updateTag(CACHE_TAGS.schedules(data.userId))
+    updateTag(CACHE_TAGS.leadDetail(data.leadId))
     return result
 }
 
 export async function completeSchedule(scheduleId: string) {
+    const schedule = await prisma.schedule.findUnique({
+        where: { id: scheduleId },
+        select: { userId: true, leadId: true },
+    })
     const result = await prisma.schedule.update({
         where: { id: scheduleId },
         data: {
@@ -108,39 +88,14 @@ export async function completeSchedule(scheduleId: string) {
             completedAt: new Date(),
         },
     })
-    revalidatePath('/sale/schedule')
-    revalidatePath('/sale')
+    if (schedule) {
+        updateTag(CACHE_TAGS.schedules(schedule.userId))
+        updateTag(CACHE_TAGS.leadDetail(schedule.leadId))
+    }
     return result
 }
 
 export async function getDashboardMetrics(orgId: string) {
-    const [totalLeads, activeLeads, wonDeals, pipeline, sosCount, milestoneDistribution] = await Promise.all([
-        prisma.lead.count({ where: { orgId } }),
-        prisma.lead.count({ where: { orgId, status: 'ACTIVE' } }),
-        prisma.lead.count({ where: { orgId, status: 'WON' } }),
-        prisma.lead.aggregate({
-            where: { orgId, status: 'ACTIVE' },
-            _sum: { dealValue: true },
-        }),
-        prisma.sOSAlert.count({ where: { status: 'ACTIVE', lead: { orgId } } }),
-        prisma.lead.groupBy({
-            by: ['currentMilestone'],
-            where: { orgId, status: 'ACTIVE' },
-            _count: true,
-            _sum: { dealValue: true },
-        })
-    ])
-
-    return {
-        totalLeads,
-        activeLeads,
-        wonDeals,
-        pipelineValue: pipeline._sum.dealValue || 0,
-        sosCount,
-        milestoneDistribution: milestoneDistribution.map(m => ({
-            milestone: m.currentMilestone,
-            count: m._count,
-            value: m._sum.dealValue || 0,
-        })),
-    }
+    return getCachedDashboardMetrics(orgId)
 }
+

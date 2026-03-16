@@ -1,105 +1,38 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { updateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import type { LeadStatus, BANTLevel } from '@prisma/client'
+import type { BANTLevel } from '@prisma/client'
+import {
+    getCachedTopPriorityLeads,
+    getCachedLeadsByUser,
+    getCachedLeadDetail,
+    getCachedLeadPool,
+    CACHE_TAGS,
+} from '@/lib/cache'
 
 // ============================================
-// GET LEADS
+// GET LEADS (cached)
 // ============================================
 
 export async function getTopPriorityLeads(userId: string, limit = 3) {
-    return prisma.lead.findMany({
-        where: {
-            assignedTo: userId,
-            status: 'ACTIVE',
-            OR: [
-                { snoozeUntil: null },
-                { snoozeUntil: { lt: new Date() } },
-            ],
-        },
-        include: {
-            source: { select: { name: true } },
-            interactions: {
-                orderBy: { createdAt: 'desc' },
-                take: 1,
-                select: { createdAt: true, type: true },
-            },
-            _count: { select: { interactions: true } },
-        },
-        orderBy: { priorityScore: 'desc' },
-        take: limit,
-    })
+    return getCachedTopPriorityLeads(userId, limit)
 }
 
 export async function getLeadsByUser(userId: string) {
-    return prisma.lead.findMany({
-        where: {
-            assignedTo: userId,
-            status: { in: ['ACTIVE', 'WON'] },
-        },
-        include: {
-            source: { select: { name: true } },
-            _count: { select: { interactions: true } },
-        },
-        orderBy: { priorityScore: 'desc' },
-    })
+    return getCachedLeadsByUser(userId)
 }
 
 export async function getLeadDetail(leadId: string) {
-    return prisma.lead.findUnique({
-        where: { id: leadId },
-        include: {
-            source: { select: { name: true } },
-            assignee: { select: { id: true, name: true } },
-            interactions: {
-                orderBy: { createdAt: 'desc' },
-                include: {
-                    user: { select: { name: true } },
-                },
-            },
-            milestoneHistory: {
-                orderBy: { changedAt: 'desc' },
-                include: {
-                    user: { select: { name: true } },
-                },
-            },
-            schedules: {
-                where: { status: { in: ['PENDING', 'OVERDUE'] } },
-                orderBy: { scheduledAt: 'asc' },
-            },
-            advices: {
-                where: { isRead: false },
-                orderBy: { createdAt: 'desc' },
-                take: 1,
-                include: {
-                    fromUser: { select: { name: true } },
-                },
-            },
-        },
-    })
+    return getCachedLeadDetail(leadId)
 }
-
-// ============================================
-// LEAD POOL (unassigned / retracted)
-// ============================================
 
 export async function getLeadPool(orgId: string) {
-    return prisma.lead.findMany({
-        where: {
-            orgId,
-            status: 'POOL',
-        },
-        include: {
-            source: { select: { name: true } },
-            assignee: { select: { name: true } },
-        },
-        orderBy: { updatedAt: 'desc' },
-    })
+    return getCachedLeadPool(orgId)
 }
 
 // ============================================
-// MUTATIONS
+// MUTATIONS (invalidate cache tags)
 // ============================================
 
 export async function createLead(data: {
@@ -128,7 +61,9 @@ export async function createLead(data: {
             heatScore: 50,
         },
     })
-    revalidatePath('/sale')
+    updateTag(CACHE_TAGS.leads(data.assignedTo))
+    updateTag(CACHE_TAGS.userStats(data.assignedTo))
+    updateTag(CACHE_TAGS.dashboard(data.orgId))
     return lead
 }
 
@@ -161,11 +96,14 @@ export async function updateMilestone(
         }),
     ])
 
-    revalidatePath('/sale')
+    updateTag(CACHE_TAGS.leadDetail(leadId))
+    if (lead.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
+    if (lead.orgId) updateTag(CACHE_TAGS.dashboard(lead.orgId))
     return updatedLead
 }
 
 export async function assignLead(leadId: string, userId: string, teamId: string) {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { orgId: true, assignedTo: true } })
     const result = await prisma.lead.update({
         where: { id: leadId },
         data: {
@@ -175,12 +113,19 @@ export async function assignLead(leadId: string, userId: string, teamId: string)
             golden72hExpiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
         },
     })
-    revalidatePath('/sale')
-    revalidatePath('/manager')
+    updateTag(CACHE_TAGS.leads(userId))
+    updateTag(CACHE_TAGS.leadDetail(leadId))
+    if (lead?.orgId) {
+        updateTag(CACHE_TAGS.leadPool(lead.orgId))
+        updateTag(CACHE_TAGS.dashboard(lead.orgId))
+    }
+    if (lead?.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
+    updateTag(CACHE_TAGS.team(teamId))
     return result
 }
 
 export async function snoozeLead(leadId: string, until: Date, reason: string) {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { assignedTo: true } })
     const result = await prisma.lead.update({
         where: { id: leadId },
         data: {
@@ -188,6 +133,8 @@ export async function snoozeLead(leadId: string, until: Date, reason: string) {
             snoozeReason: reason as any,
         },
     })
-    revalidatePath('/sale')
+    updateTag(CACHE_TAGS.leadDetail(leadId))
+    if (lead?.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
     return result
 }
+

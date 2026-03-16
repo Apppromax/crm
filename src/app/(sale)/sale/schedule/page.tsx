@@ -3,7 +3,7 @@ import { getUserByRole } from '@/app/actions/users'
 import { getSchedulesByUser } from '@/app/actions/dashboard'
 import { ScheduleClient } from './schedule-client'
 import Loading from '@/app/(sale)/loading'
-import { prisma } from '@/lib/prisma'
+import { getCachedActiveLeads } from '@/lib/cache'
 
 export default function SchedulePage() {
     return (
@@ -20,11 +20,7 @@ async function ScheduleDataLoader() {
     // PARALLEL fetch — no more waterfall
     const [schedules, activeLeads] = await Promise.all([
         getSchedulesByUser(user.id),
-        prisma.lead.findMany({
-            where: { assignedTo: user.id, status: 'ACTIVE' },
-            select: { id: true, name: true, currentMilestone: true, dealValue: true },
-            orderBy: { priorityScore: 'desc' },
-        }),
+        getCachedActiveLeads(user.id),
     ])
 
     const serializedSchedules = schedules.map(s => ({
