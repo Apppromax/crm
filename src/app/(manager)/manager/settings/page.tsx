@@ -1,6 +1,7 @@
-import { User, Bell, Shield, Users, Eye, ChevronRight, Clock, Target } from 'lucide-react'
+import { Users, Bell, Eye, ChevronRight, Clock, Target } from 'lucide-react'
 import { getUserByRole } from '@/app/actions/users'
 import { LogoutButton } from '@/components/logout-button'
+import { PasswordButton, HelpButton } from '@/components/shared/settings-items'
 
 export default async function ManagerSettingsPage() {
     const user = await getUserByRole('MANAGER')
@@ -42,13 +43,14 @@ export default async function ManagerSettingsPage() {
                 </SettingsGroup>
 
                 <SettingsGroup title="Khác">
-                    <SettingItem icon={<Shield className="h-5 w-5" />} label="Bảo mật" subtitle="Đổi mật khẩu" />
+                    <PasswordButton />
+                    <HelpButton />
                 </SettingsGroup>
 
                 <LogoutButton />
 
                 <p className="text-center text-[10px] text-slate-300 pb-4 mt-8">
-                    CRM Pro V2 — Version 0.1.0
+                    CRM Pro V2 — Version 0.2.0
                 </p>
             </div>
         </div>

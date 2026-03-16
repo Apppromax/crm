@@ -1,7 +1,8 @@
-import { User, Bell, Shield, Palette, HelpCircle, ChevronRight, Smartphone, Moon, Globe, Trophy, BarChart3 } from 'lucide-react'
+import { User, Bell, Smartphone, Globe, Trophy, BarChart3, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { getUserByRole } from '@/app/actions/users'
 import { LogoutButton } from '@/components/logout-button'
+import { PasswordButton, HelpButton, DarkModeToggle } from '@/components/shared/settings-items'
 
 export default async function SettingsPage() {
     const user = await getUserByRole('SALE')
@@ -38,7 +39,7 @@ export default async function SettingsPage() {
                 </SettingsGroup>
 
                 <SettingsGroup title="Giao diện">
-                    <SettingItem icon={<Moon className="h-5 w-5" />} label="Dark Mode" subtitle="Tắt" />
+                    <DarkModeToggle />
                     <SettingItem icon={<Globe className="h-5 w-5" />} label="Ngôn ngữ" subtitle="Tiếng Việt" />
                 </SettingsGroup>
 
@@ -52,15 +53,15 @@ export default async function SettingsPage() {
                 </SettingsGroup>
 
                 <SettingsGroup title="Khác">
-                    <SettingItem icon={<Shield className="h-5 w-5" />} label="Bảo mật" subtitle="Đổi mật khẩu" />
-                    <SettingItem icon={<HelpCircle className="h-5 w-5" />} label="Trợ giúp" subtitle="FAQ & Hỗ trợ" />
+                    <PasswordButton />
+                    <HelpButton />
                 </SettingsGroup>
 
                 {/* Logout */}
                 <LogoutButton />
 
                 <p className="text-center text-[10px] text-slate-300 pb-4 mt-8">
-                    CRM Pro V2 — Version 0.1.0
+                    CRM Pro V2 — Version 0.2.0
                 </p>
             </div>
         </div>
