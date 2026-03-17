@@ -12,7 +12,7 @@ export default async function AchievementsPage() {
 
     return (
         <div className="mx-auto max-w-2xl min-h-dvh">
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/40 backdrop-blur-xl px-4 py-3">
+            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/20 backdrop-blur-2xl border-b border-white/30 px-4 py-3">
                 <Link href="/sale/settings" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/50">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>

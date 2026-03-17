@@ -94,7 +94,7 @@ export function ScheduleClient({
 
     return (
         <div className="mx-auto max-w-lg min-h-dvh">
-            <header className="sticky top-0 z-40 bg-white/40 backdrop-blur-xl px-4 py-3">
+            <header className="sticky top-0 z-40 bg-white/20 backdrop-blur-2xl border-b border-white/30 px-4 py-3">
                 <div className="flex items-center justify-between">
                     <h1 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-primary-500" />

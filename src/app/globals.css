@@ -490,6 +490,85 @@ main {
   transform: translateY(0) scale(0.99);
 }
 
+/* ============================================
+   Sale Glass Interactive Effects
+   ============================================ */
+
+/* Glass card hover — lift + glow border */
+.glass-interactive {
+  position: relative;
+  transition: transform 280ms var(--ease-spring),
+    box-shadow 280ms var(--ease-smooth),
+    border-color 280ms var(--ease-smooth),
+    background-color 280ms var(--ease-smooth);
+  will-change: transform;
+  overflow: hidden;
+}
+
+.glass-interactive::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 55%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.glass-interactive:hover::after {
+  opacity: 1;
+  animation: shimmerSlide 1.2s ease-out forwards;
+}
+
+.glass-interactive:active {
+  transform: translateY(0px) scale(0.975);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition-duration: 100ms;
+}
+
+@keyframes shimmerSlide {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Glass nav item hover */
+.glass-nav-item {
+  position: relative;
+  transition: transform 200ms var(--ease-spring),
+    color 200ms var(--ease-smooth);
+}
+
+.glass-nav-item:hover {
+  transform: translateY(-2px);
+}
+
+.glass-nav-item:active {
+  transform: translateY(0) scale(0.92);
+  transition-duration: 80ms;
+}
+
 /* Smooth color transitions for interactive elements */
 a,
 button,
@@ -757,24 +836,64 @@ nav button {
 }
 
 .sale-glass-card {
-  background: var(--color-sale-glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--color-sale-glass-border);
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 1.25rem;
-  box-shadow: var(--shadow-sale-glass);
-  transition: background var(--duration-normal) var(--ease-smooth),
-    transform var(--duration-normal) var(--ease-spring),
-    box-shadow var(--duration-normal) var(--ease-smooth);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: background 280ms var(--ease-smooth),
+    transform 280ms var(--ease-spring),
+    box-shadow 280ms var(--ease-smooth),
+    border-color 280ms var(--ease-smooth);
+}
+
+/* Shimmer highlight on hover */
+.sale-glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.35) 55%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .sale-glass-card:hover {
-  background: var(--color-sale-glass-hover);
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.42);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+}
+
+.sale-glass-card:hover::after {
+  opacity: 1;
+  animation: shimmerSlide 1.2s ease-out forwards;
 }
 
 .sale-glass-card:active {
-  transform: scale(0.985);
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  transition-duration: 100ms;
 }
 
 /* Stats card — softer glass + warm gradient tint */
@@ -796,13 +915,55 @@ nav button {
   100% { transform: rotate(360deg); }
 }
 
+@keyframes breatheGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(109, 234, 217, 0.35))
+            drop-shadow(0 0 24px rgba(249, 163, 83, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(109, 234, 217, 0.55))
+            drop-shadow(0 0 40px rgba(249, 163, 83, 0.25));
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
 .big-button-ring {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  animation: breatheGlow 3s ease-in-out infinite;
 }
 
+/* Pulsing outer aura ring */
+.big-button-ring::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(109, 234, 217, 0.4);
+  animation: pulseRing 2.5s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Rainbow gradient border ring */
 .big-button-ring::before {
   content: '';
   position: absolute;
@@ -830,9 +991,9 @@ nav button {
   height: 100px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 40%,
-    rgba(255,255,255,0.9) 0%,
-    rgba(236,253,245,0.8) 40%,
-    rgba(209,250,229,0.6) 100%);
+    rgba(255,255,255,0.95) 0%,
+    rgba(236,253,245,0.85) 40%,
+    rgba(209,250,229,0.65) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -840,17 +1001,22 @@ nav button {
     0 4px 20px rgba(0,0,0,0.06),
     inset 0 -2px 6px rgba(0,0,0,0.04);
   cursor: pointer;
-  transition: transform var(--duration-normal) var(--ease-spring),
-    box-shadow var(--duration-normal) var(--ease-smooth);
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .big-button-inner:hover {
-  transform: scale(1.04);
+  transform: scale(1.06);
   box-shadow:
-    0 6px 28px rgba(0,0,0,0.1),
+    0 8px 32px rgba(0,0,0,0.1),
+    0 0 0 2px rgba(255,255,255,0.8),
     inset 0 -2px 6px rgba(0,0,0,0.04);
 }
 
 .big-button-inner:active {
-  transform: scale(0.97);
+  transform: scale(0.94);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.06),
+    inset 0 2px 4px rgba(0,0,0,0.06);
+  transition-duration: 80ms;
 }

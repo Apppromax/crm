@@ -39,7 +39,7 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
 
     return (
         <div className="mx-auto max-w-lg min-h-dvh">
-            <header className="sticky top-0 z-40 bg-white/40 backdrop-blur-xl">
+            <header className="sticky top-0 z-40 bg-white/20 backdrop-blur-2xl border-b border-white/30">
                 <div className="px-4 py-3">
                     <h1 className="text-lg font-bold text-slate-800 mb-3">Danh sách khách hàng</h1>
 
@@ -100,7 +100,7 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                 </div>
             </header>
 
-            <div className="px-4 py-3 space-y-2 stagger-children">
+            <div className="px-4 py-3 space-y-3 stagger-children">
                 {filtered.length === 0 ? (
                     <div className="py-16 text-center animate-fade-in">
                         <Filter className="h-10 w-10 text-slate-300/60 mx-auto mb-3" />
@@ -120,7 +120,7 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
     return (
         <Link href={`/sale/leads/${lead.id}`}>
             <div className={cn(
-                'rounded-xl sale-glass-card p-3 transition-all active:scale-[0.98]',
+                'rounded-xl sale-glass-card p-3 transition-all active:scale-[0.98] glass-interactive',
                 lead.status === 'WON' && 'ring-1 ring-emerald-300/40'
             )}>
                 <div className="flex items-center gap-3">
