@@ -67,12 +67,45 @@ export function SaleHomeClient({ userId, topCards, stats }: Props) {
                 </div>
             </header>
 
-            {/* Top Cards — glass */}
-            <div className="px-4 pt-1 flex flex-col gap-4 stagger-children">
-                {topCards.map((card, index) => (
+            {/* Hot Seat Area */}
+            {topCards.filter(c => c.currentMilestone >= 4 && c.priorityReason === 'hot_lead').length > 0 && (
+                <div className="px-4 pt-2 mb-2 animate-scale-in">
+                    <div className="text-center mb-2">
+                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] uppercase font-black tracking-wider px-3 py-1 rounded-full shadow-[0_0_15px_rgba(249,115,22,0.8)] animate-pulse">
+                            <Flame className="w-3 h-3 fill-white" /> VÙNG TREO - DỒN CHỐT
+                        </span>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        {topCards.filter(c => c.currentMilestone >= 4 && c.priorityReason === 'hot_lead').map((card, index) => (
+                            <SmartCard key={card.id} card={card as any} rank={0} />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Normal Top Cards — glass */}
+            <div className="px-4 pt-2 flex flex-col gap-4 stagger-children">
+                {topCards.filter(c => !(c.currentMilestone >= 4 && c.priorityReason === 'hot_lead')).map((card, index) => (
                     <SmartCard key={card.id} card={card as any} rank={index + 1} />
                 ))}
             </div>
+
+            {/* Queue Bar - Gamification */}
+            {topCards.length > 0 && (
+                <div className="mx-4 mt-6 animate-slide-up" style={{ animationDelay: '250ms', animationFillMode: 'both' }}>
+                    <div className="bg-white/40 backdrop-blur-2xl rounded-full p-[3px] pr-1.5 border border-white/60 flex items-center shadow-sm relative z-20">
+                        <div className="flex-none bg-gradient-to-b from-white to-slate-50 rounded-full px-3 py-1 border border-black/5 shadow-sm relative">
+                            <span className="text-[10px] font-black text-slate-800 relative z-10 whitespace-nowrap">GIỎ ĐỢI (5)</span>
+                        </div>
+                        <div className="flex-1 mx-2 h-[6px] rounded-full bg-rose-200 overflow-hidden shadow-inner">
+                            <div className="h-full rounded-full transition-all duration-1000 bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" style={{ width: '60%' }}></div>
+                        </div>
+                        <div className="w-6 h-6 shrink-0 rounded-full bg-emerald-500 shadow-[0_2px_8px_rgba(16,185,129,0.4)] flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Big Button overlaps with Stats box */}
             {topCards.length > 0 && (

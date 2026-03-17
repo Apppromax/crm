@@ -40,8 +40,14 @@ export function SmartCard({ card, rank }: SmartCardProps) {
         <Link href={`/sale/leads/${card.id}`}>
             <div
                 className={cn(
-                    'animate-slide-up glass-interactive bg-white/35 backdrop-blur-2xl border border-white/70 p-4 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.04),inset_0_1px_0px_rgba(255,255,255,0.6)]',
-                    isGolden && 'ring-2 ring-amber-300/40',
+                    'animate-slide-up glass-interactive bg-white/35 backdrop-blur-2xl border border-white/70 p-4 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.04),inset_0_1px_0px_rgba(255,255,255,0.6)] relative overflow-hidden',
+                    // Nét viền Neon
+                    (card.heatScore > 70 && card.priorityReason !== 'hot_lead') && 'ring-2 ring-red-400/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]',
+                    // Hot seat (Dồn chốt)
+                    card.priorityReason === 'hot_lead' && 'ring-2 ring-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.6)] animate-pulse',
+                    // Retry (Xám mờ)
+                    card.priorityReason === 'retry' && 'opacity-65 grayscale-[30%]',
+                    isGolden && !card.priorityReason.includes('hot') && 'ring-2 ring-amber-300/40'
                 )}
                 style={{ animationDelay: `${rank * 80}ms` }}
             >
@@ -82,7 +88,14 @@ export function SmartCard({ card, rank }: SmartCardProps) {
                     </div>
                     <div className="h-[6px] rounded-full overflow-hidden bg-white/80">
                         <div
-                            className="milestone-bar h-full rounded-full bg-[#1A89B0]"
+                            className={cn(
+                                "milestone-bar h-full rounded-full transition-all duration-500",
+                                card.currentMilestone === 1 && "bg-blue-300", // Tiếp cận: Xanh nhạt
+                                card.currentMilestone === 2 && "bg-teal-400", // Chào mồi: Xanh ngọc
+                                card.currentMilestone === 3 && "bg-amber-400", // Niềm tin: Vàng ấm
+                                card.currentMilestone === 4 && "bg-orange-500", // Dồn chốt: Cam rực cháy
+                                card.currentMilestone >= 5 && "bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400" // Chốt cọc: Kim Cương
+                            )}
                             style={{ width: `${percentage}%` }}
                         />
                     </div>
