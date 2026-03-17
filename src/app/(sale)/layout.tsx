@@ -43,9 +43,9 @@ export default function SaleLayout({ children }: { children: React.ReactNode }) 
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className="flex -mt-5 h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-lg shadow-primary-500/25 transition-all duration-200 active:scale-90 hover:shadow-primary-500/40 hover:scale-105 press-effect"
+                                        className="flex -mt-6 h-[54px] w-[54px] items-center justify-center rounded-full bg-gradient-to-br from-[#18C3F5] to-[#41d48c] text-white shadow-[0_8px_20px_rgba(40,200,180,0.3)] transition-all duration-200 active:scale-90 hover:scale-105 press-effect"
                                     >
-                                        <Icon className="h-6 w-6" />
+                                        <Icon className="h-6 w-6 stroke-[2.5]" />
                                     </Link>
                                 )
                             }

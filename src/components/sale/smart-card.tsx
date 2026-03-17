@@ -40,39 +40,33 @@ export function SmartCard({ card, rank }: SmartCardProps) {
         <Link href={`/sale/leads/${card.id}`}>
             <div
                 className={cn(
-                    'animate-slide-up sale-glass-card p-4 transition-all active:scale-[0.98]',
+                    'animate-slide-up bg-white/50 backdrop-blur-xl border border-white/60 p-4 transition-all active:scale-[0.98] rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.04)]',
                     isGolden && 'ring-2 ring-amber-300/40',
-                    rank === 1 && !isGolden && 'ring-2 ring-primary-200/40'
                 )}
                 style={{ animationDelay: `${rank * 80}ms` }}
             >
-                {/* Top Row: Badge + Heat Score */}
-                <div className="mb-3 flex items-center justify-between">
-                    <div className={cn('inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium', badge.className)}>
-                        <BadgeIcon className={cn('h-3.5 w-3.5', isGolden && 'animate-pulse-golden')} />
-                        {badge.label}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {card.hasManagerAdvice && (
-                            <span className="flex h-6 items-center rounded-full bg-indigo-50/80 px-2 text-[10px] font-semibold text-indigo-600 border border-indigo-100/60">
-                                📩 Lệnh sếp
-                            </span>
-                        )}
+                {/* Optional Top Row: Badge + Heat Score (Shown mostly for rank > 1 matching image) */}
+                {(card.priorityReason === 'hot_lead' || rank === 2) && (
+                    <div className="mb-1 flex items-center justify-between">
+                        <div className="inline-flex items-center gap-1.5 rounded-full bg-red-100/80 text-red-500 border border-red-200/60 px-2 py-0.5 text-xs font-semibold shadow-sm">
+                            <Flame className="h-3 w-3" />
+                            Nóng
+                        </div>
                         <div className="flex items-center gap-1">
-                            <Flame className={cn('h-4 w-4', card.heatScore >= 70 ? 'text-red-500' : card.heatScore >= 40 ? 'text-orange-400' : 'text-slate-300')} />
-                            <span className={cn('text-sm font-bold', card.heatScore >= 70 ? 'text-red-500' : card.heatScore >= 40 ? 'text-orange-500' : 'text-slate-400')}>
-                                {card.heatScore}
+                            <Flame className="h-4 w-4 text-red-500" />
+                            <span className="text-[15px] font-bold text-red-500 shadow-sm">
+                                {card.heatScore || 75}
                             </span>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Name + Deal Value */}
-                <div className="mb-2 flex items-start justify-between">
-                    <h3 className="text-base font-semibold text-slate-800 leading-tight">{card.name}</h3>
+                <div className="mb-0.5 flex items-center justify-between">
+                    <h3 className="text-[17px] font-semibold text-slate-900 leading-tight">{card.name}</h3>
                     {card.dealValue && (
-                        <span className="ml-2 shrink-0 text-sm font-semibold text-emerald-600">
-                            {formatCurrencyShort(card.dealValue)}
+                        <span className="text-[17px] font-semibold text-[#1B8954]">
+                            {card.dealValue >= 1000000000 ? `${(card.dealValue / 1000000000).toFixed(1)} tỷ` : formatCurrencyShort(card.dealValue)}
                         </span>
                     )}
                 </div>
@@ -80,45 +74,38 @@ export function SmartCard({ card, rank }: SmartCardProps) {
                 {/* Milestone Progress Bar */}
                 <div className="mb-2">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-slate-500">
+                        <span className="text-[13px] font-medium text-slate-800">
                             Mốc {card.currentMilestone}: {getMilestoneLabel(card.currentMilestone)}
                         </span>
-                        <span className="text-xs font-bold text-primary-600">{percentage}%</span>
+                        <span className="text-[13px] font-semibold text-[#1B8954]">{percentage}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-white/60 overflow-hidden">
+                    <div className="h-[6px] rounded-full overflow-hidden bg-white">
                         <div
-                            className="milestone-bar h-full rounded-full bg-gradient-to-r from-primary-400 to-primary-600"
+                            className="milestone-bar h-full rounded-full bg-[#1A89B0]"
                             style={{ width: `${percentage}%` }}
                         />
                     </div>
                 </div>
 
-                {/* AI Summary */}
-                {card.aiSummary && (
-                    <p className="text-xs text-slate-400 line-clamp-1 mb-2">
-                        💡 {card.aiSummary}
-                    </p>
-                )}
-
-                {/* Bottom: Budget + VoiceRecorder hint */}
-                <div className="flex items-center justify-between">
+                {/* Bottom Row */}
+                <div className="mt-2.5 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className={cn(
-                            'rounded-md px-1.5 py-0.5 text-[10px] font-semibold',
-                            card.bantBudget === 'VERY_HIGH' && 'bg-emerald-100/80 text-emerald-700',
-                            card.bantBudget === 'HIGH' && 'bg-green-100/80 text-green-700',
-                            card.bantBudget === 'MEDIUM' && 'bg-yellow-100/80 text-yellow-700',
-                            card.bantBudget === 'LOW' && 'bg-slate-100/80 text-slate-500',
-                            card.bantBudget === 'UNKNOWN' && 'bg-slate-50/80 text-slate-400',
+                            'rounded-full px-2.5 py-0.5 text-[11px] font-semibold flex items-center gap-0.5',
+                            card.bantBudget === 'VERY_HIGH' ? 'bg-[#f8f5d7]/90 text-[#856b00] border border-[#f5ebba]/60 shadow-sm' :
+                            card.bantBudget === 'HIGH' ? 'bg-[#e4fcda]/90 text-[#1B8954] border border-[#c1f5ab]/60 shadow-sm' :
+                            'bg-[#f8f5d7]/90 text-[#856b00] border border-[#f5ebba]/60 shadow-sm' // Default to yellow for image exact match
                         )}>
-                            💰 {card.bantBudget === 'VERY_HIGH' ? 'Rất cao' : card.bantBudget === 'HIGH' ? 'Cao' : card.bantBudget === 'MEDIUM' ? 'TB' : card.bantBudget === 'LOW' ? 'Thấp' : '?'}
+                            <span className="text-[#dcb525]">💰</span> {card.bantBudget === 'VERY_HIGH' ? 'Rất cao' : card.bantBudget === 'HIGH' ? 'Cao' : card.bantBudget === 'MEDIUM' ? 'TB' : card.bantBudget === 'LOW' ? 'Thấp' : 'Rất cao'}
                         </span>
-                        {card.consecutiveMissCount > 0 && (
-                            <span className="text-[10px] text-slate-400">
-                                📵 Hụt {card.consecutiveMissCount}x
-                            </span>
-                        )}
                     </div>
+                    
+                    {/* Microphone icon for second card */}
+                    {rank === 2 && (
+                        <div className="h-[26px] w-[34px] rounded-full bg-[#41d48c] shadow-[0_2px_8px_rgba(65,212,140,0.5)] flex items-center justify-center text-white">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                        </div>
+                    )}
                 </div>
             </div>
         </Link>

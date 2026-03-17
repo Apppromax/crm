@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Bell, User } from 'lucide-react'
+import { Bell, User, Flame } from 'lucide-react'
 import { SmartCard } from '@/components/sale/smart-card'
 import { BigButton } from '@/components/sale/big-button'
 import { formatCurrencyShort } from '@/lib/utils'
@@ -39,67 +39,70 @@ export function SaleHomeClient({ userId, topCards, stats }: Props) {
 
     return (
         <div className="mx-auto max-w-lg">
-            {/* Header — transparent, blends into gradient */}
-            <header className="sticky top-0 z-40 flex items-center justify-between px-4 py-3 bg-transparent">
-                <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-primary-500 flex items-center justify-center shadow-md shadow-primary-500/20">
-                        <span className="text-sm font-bold text-white">C</span>
+            {/* Header */}
+            <header className="sticky top-0 z-40 flex items-center justify-between px-4 py-4 bg-transparent">
+                <div className="flex items-center gap-2 bg-white/30 backdrop-blur-md rounded-full pr-4 p-1 pl-1 border border-white/40 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+                    <div className="h-9 w-9 rounded-full bg-[#18C3F5] flex items-center justify-center shadow-sm">
+                        <span className="text-[15px] font-bold text-white">C</span>
                     </div>
-                    <div>
-                        <h1 className="text-base font-semibold text-slate-800">CRM Pro</h1>
-                        <p className="text-xs text-slate-500">{topCards.length} khách cần xử lý</p>
+                    <div className="flex flex-col justify-center">
+                        <h1 className="text-[13px] font-bold text-slate-900 leading-tight">CRM Pro</h1>
+                        <p className="text-[10px] font-medium text-slate-800 leading-tight mt-0.5">{topCards.length} khách cần xử lý</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5 bg-white/30 backdrop-blur-md rounded-full px-1.5 py-1.5 border border-white/40 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
                     <button
                         onClick={() => setShowNotifications(true)}
-                        className="relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/40"
+                        className="relative flex h-7 w-7 items-center justify-center rounded-full text-slate-700 hover:bg-white/40"
                     >
-                        <Bell className="h-5 w-5" />
-                        <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-danger border-2 border-white/80" />
+                        <Bell className="h-4 w-4 stroke-[2]" />
+                        <span className="absolute right-0.5 top-0.5 h-[7px] w-[7px] rounded-full bg-red-500 border border-white" />
                     </button>
                     <Link
                         href="/sale/achievements"
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/40"
+                        className="flex h-7 w-7 items-center justify-center rounded-full text-slate-700 hover:bg-white/40"
                     >
-                        <User className="h-5 w-5" />
+                        <User className="h-4 w-4 stroke-[2]" />
                     </Link>
                 </div>
             </header>
 
-            {/* Top 3 Cards — glass */}
-            <div className="px-4 pt-2 space-y-3 stagger-children">
+            {/* Top Cards — glass */}
+            <div className="px-4 pt-1 space-y-3 stagger-children">
                 {topCards.map((card, index) => (
                     <SmartCard key={card.id} card={card as any} rank={index + 1} />
                 ))}
             </div>
 
-            {/* Big Button — circular with rainbow ring */}
+            {/* Big Button overlaps with Stats box */}
             {topCards.length > 0 && (
-                <div className="flex justify-center px-4 pt-6 pb-4 animate-pop-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
+                <div className="flex justify-center px-4 pt-7 animate-pop-in relative z-20 -mb-[45px]" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
                     <BigButton leadName={topCards[0].name} leadId={topCards[0].id} />
                 </div>
             )}
 
             {/* Quick Stats — glass card with warm gradient */}
-            <div className="mx-4 mb-6 sale-stats-card p-5 animate-scale-in" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p className="text-2xl font-bold text-primary-600">{stats.totalLeads}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Active Leads</p>
+            <div className="mx-4 mb-6 bg-white/30 backdrop-blur-xl border border-white/50 p-5 pt-[60px] pb-6 rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.03)] animate-scale-in relative z-10" style={{ animationDelay: '400ms', animationFillMode: 'both' }}>
+                <div className="grid grid-cols-3 gap-2 text-center text-slate-800">
+                    <div className="flex flex-col items-center">
+                        <p className="text-[26px] font-bold text-[#1A89B0] leading-none mb-1">{stats.totalLeads}</p>
+                        <p className="text-[11px] font-semibold text-slate-700">Active Leads</p>
                     </div>
-                    <div>
-                        <p className="text-2xl font-bold text-success">{stats.milestone45}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Mốc 4-5</p>
+                    <div className="flex flex-col items-center border-l border-r border-white/60">
+                        <p className="text-[26px] font-bold text-[#2ea869] leading-none mb-1">{stats.milestone45}</p>
+                        <p className="text-[11px] font-semibold text-slate-700">Mốc 4-5</p>
                     </div>
-                    <div>
-                        <p className="text-2xl font-bold text-warning">{stats.streakCount}</p>
-                        <p className="text-xs text-slate-500 mt-0.5 flex items-center justify-center gap-1">🔥 Streak</p>
+                    <div className="flex flex-col items-center">
+                        <p className="text-[26px] font-bold text-[#e89028] leading-none mb-1">{stats.streakCount}</p>
+                        <p className="text-[11px] font-semibold text-slate-700 flex items-center justify-center gap-1"><Flame className="w-3 h-3 text-red-500 fill-red-500" /> Streak</p>
                     </div>
                 </div>
-                <div className="mt-3 pt-3 border-t border-white/40 text-center">
-                    <p className="text-xs text-slate-500">Pipeline Value</p>
-                    <p className="text-xl font-bold text-emerald-600 mt-0.5">{formatCurrencyShort(stats.pipelineValue)}</p>
+                
+                <div className="mt-5 text-center">
+                    <p className="text-[11px] font-semibold text-slate-800 mb-0.5">Pipeline Value</p>
+                    <p className="text-[34px] font-bold leading-none tracking-tight text-white drop-shadow-[0_2px_8px_rgba(230,140,80,0.5)]">
+                        {stats.pipelineValue >= 1000000000 ? `${(stats.pipelineValue / 1000000000).toFixed(1)} tỷ` : formatCurrencyShort(stats.pipelineValue)}
+                    </p>
                 </div>
             </div>
 
