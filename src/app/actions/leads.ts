@@ -31,6 +31,34 @@ export async function getLeadPool(orgId: string) {
     return getCachedLeadPool(orgId)
 }
 
+export async function getQueueLeads(userId: string) {
+    return prisma.lead.findMany({
+        where: {
+            assignedTo: userId,
+            status: 'ACTIVE',
+            OR: [
+                { snoozeUntil: null },
+                { snoozeUntil: { lt: new Date() } },
+            ],
+        },
+        select: {
+            id: true,
+            name: true,
+            currentMilestone: true,
+            heatScore: true,
+            priorityScore: true,
+            dealValue: true,
+            consecutiveMissCount: true,
+            golden72hExpiresAt: true,
+            createdAt: true,
+        },
+        orderBy: { priorityScore: 'desc' },
+        // Skip top 3, get the rest
+        skip: 3,
+        take: 20,
+    })
+}
+
 // ============================================
 // MUTATIONS (invalidate cache tags)
 // ============================================

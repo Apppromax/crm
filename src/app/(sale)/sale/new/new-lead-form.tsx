@@ -62,7 +62,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                     <Check className="h-10 w-10 text-success" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-1">Đã thêm Lead mới!</h2>
-                <p className="text-sm text-slate-500">Lead sẽ xuất hiện trong Top 3 theo 72h Vàng</p>
+                <p className="text-sm text-slate-500">Lead đã vào Giỏ đợi và sẽ được ưu tiên theo 72h Vàng</p>
             </div>
         )
     }
@@ -199,7 +199,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                 </button>
 
                 <p className="text-xs text-slate-500 text-center leading-relaxed">
-                    Lead mới sẽ tự động vào <span className="font-medium text-amber-600">Quy tắc 72h Vàng</span> và được ưu tiên trong Top 3.
+                    Lead mới sẽ tự động vào <span className="font-medium text-amber-600">Giỏ đợi</span> và áp dụng <span className="font-medium text-amber-600">Quy tắc 72h Vàng</span>.
                 </p>
             </form>
         </div>

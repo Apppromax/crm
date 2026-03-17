@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getTopPriorityLeads } from '@/app/actions/leads'
+import { getTopPriorityLeads, getQueueLeads } from '@/app/actions/leads'
 import { getUserByRole, getUserStats } from '@/app/actions/users'
 import { SaleHomeClient } from './home-client'
 import { RealtimeListener } from '@/components/realtime-listener'
@@ -24,9 +24,10 @@ async function SaleHomeDataLoader() {
     const user = await getUserByRole('SALE')
     if (!user) return <div className="p-8 text-center text-slate-400">No sale user found</div>
 
-    const [leads, stats] = await Promise.all([
+    const [leads, stats, queueLeads] = await Promise.all([
         getTopPriorityLeads(user.id, 3),
         getUserStats(user.id),
+        getQueueLeads(user.id),
     ])
 
     const topCards = leads.map(lead => ({
@@ -44,12 +45,24 @@ async function SaleHomeDataLoader() {
         nextSchedule: null,
     }))
 
+    const queueItems = queueLeads.map(lead => ({
+        id: lead.id,
+        name: lead.name,
+        currentMilestone: lead.currentMilestone,
+        heatScore: lead.heatScore,
+        priorityScore: lead.priorityScore,
+        dealValue: lead.dealValue,
+        isGolden: !!(lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()),
+        isRetry: lead.consecutiveMissCount > 0,
+    }))
+
     return (
         <>
             <RealtimeListener table="leads" userId={user.id} />
             <SaleHomeClient
                 userId={user.id}
                 topCards={topCards}
+                queueItems={queueItems}
                 stats={{
                     totalLeads: stats.activeLeads,
                     milestone45: stats.milestone45,
