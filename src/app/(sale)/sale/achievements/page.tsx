@@ -12,11 +12,11 @@ export default async function AchievementsPage() {
 
     return (
         <div className="mx-auto max-w-2xl min-h-dvh">
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <Link href="/sale/settings" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100">
+            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/40 backdrop-blur-xl px-4 py-3">
+                <Link href="/sale/settings" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/50">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
-                <h1 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <h1 className="text-base font-bold text-slate-800 flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-amber-500" />
                     Thành Tích
                 </h1>
@@ -59,7 +59,7 @@ export default async function AchievementsPage() {
                 <AchievementBadges />
 
                 {/* Activity Summary */}
-                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                <div className="sale-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
                         <Star className="h-4 w-4 text-amber-500" />
                         Kỷ lục cá nhân
@@ -78,7 +78,7 @@ export default async function AchievementsPage() {
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
     return (
-        <div className="rounded-xl bg-white border border-slate-100 shadow-sm p-3 text-center">
+        <div className="sale-glass-card p-3 text-center">
             <div className="flex justify-center mb-1">{icon}</div>
             <p className="text-base font-bold text-slate-800">{value}</p>
             <p className="text-[10px] text-slate-400">{label}</p>
@@ -88,8 +88,8 @@ function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string
 
 function RecordRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
-            <span className="text-xs text-slate-400">{label}</span>
+        <div className="flex items-center justify-between py-1.5 border-b border-white/30 last:border-0">
+            <span className="text-xs text-slate-500">{label}</span>
             <span className="text-xs font-semibold text-slate-700">{value}</span>
         </div>
     )

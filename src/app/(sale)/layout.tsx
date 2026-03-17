@@ -23,16 +23,16 @@ export default function SaleLayout({ children }: { children: React.ReactNode }) 
     const isDetailPage = pathname.match(/\/sale\/leads\/.+/)
 
     return (
-        <div className="flex min-h-dvh flex-col bg-slate-50">
+        <div className="flex min-h-dvh flex-col sale-gradient-bg">
             <PrefetchPages paths={SALE_PREFETCH} />
             {/* Main Content */}
-            <main className={cn('flex-1 page-enter', !isDetailPage && 'pb-20')}>
+            <main className={cn('flex-1 page-enter', !isDetailPage && 'pb-24')}>
                 {children}
             </main>
 
             {/* Bottom Navigation — Hidden on detail pages */}
             {!isDetailPage && (
-                <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-2xl safe-bottom animate-slide-up">
+                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-2xl safe-bottom animate-slide-up border-t border-white/40">
                     <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1">
                         {navItems.map((item) => {
                             const isActive = pathname === item.href
@@ -43,7 +43,7 @@ export default function SaleLayout({ children }: { children: React.ReactNode }) 
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className="flex -mt-5 h-14 w-14 items-center justify-center rounded-full bg-primary-500 text-white shadow-lg shadow-primary-500/30 transition-all duration-200 active:scale-90 hover:shadow-primary-500/50 hover:scale-105 press-effect"
+                                        className="flex -mt-5 h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-white shadow-lg shadow-primary-500/25 transition-all duration-200 active:scale-90 hover:shadow-primary-500/40 hover:scale-105 press-effect"
                                     >
                                         <Icon className="h-6 w-6" />
                                     </Link>

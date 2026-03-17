@@ -29,7 +29,7 @@ export function WinRateCard({ prediction }: Props) {
             <button
                 onClick={() => setExpanded(!expanded)}
                 className={cn(
-                    'w-full rounded-2xl border border-slate-100 bg-white shadow-sm p-4',
+                    'w-full rounded-2xl sale-glass-card p-4',
                     'transition-all hover:shadow-md'
                 )}
             >
@@ -63,7 +63,7 @@ export function WinRateCard({ prediction }: Props) {
                 </div>
 
                 {/* Progress bar */}
-                <div className="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="mt-3 h-2 rounded-full bg-white/50 overflow-hidden">
                     <div
                         className={cn('h-full rounded-full transition-all duration-700', colors.bar)}
                         style={{ width: `${prediction.probability}%` }}
@@ -72,7 +72,7 @@ export function WinRateCard({ prediction }: Props) {
             </button>
 
             {expanded && (
-                <div className="mt-2 rounded-2xl border border-slate-100 bg-white shadow-sm p-4 space-y-3 animate-slide-up">
+                <div className="mt-2 sale-glass-card p-4 space-y-3 animate-slide-up">
                     {/* Factors */}
                     <div>
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">

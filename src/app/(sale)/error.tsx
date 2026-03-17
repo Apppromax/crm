@@ -17,7 +17,7 @@ export default function Error({
     return (
         <div className="flex min-h-[60dvh] flex-col items-center justify-center px-4">
             <div className="text-center max-w-sm">
-                <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-red-50 mb-4">
+                <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-red-50/80 mb-4">
                     <AlertTriangle className="h-8 w-8 text-red-500" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-1">Đã xảy ra lỗi</h2>

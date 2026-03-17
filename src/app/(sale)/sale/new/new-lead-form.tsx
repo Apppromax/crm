@@ -39,7 +39,6 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
         setLoading(true)
         setError('')
 
-        // Show success immediately for better UX
         createLead({
             orgId,
             assignedTo: userId,
@@ -58,31 +57,31 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
 
     if (success) {
         return (
-            <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-4">
+            <div className="flex min-h-dvh flex-col items-center justify-center px-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 mb-4 animate-slide-up">
                     <Check className="h-10 w-10 text-success" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-800 mb-1">Đã thêm Lead mới!</h2>
-                <p className="text-sm text-slate-400">Lead sẽ xuất hiện trong Top 3 theo 72h Vàng</p>
+                <p className="text-sm text-slate-500">Lead sẽ xuất hiện trong Top 3 theo 72h Vàng</p>
             </div>
         )
     }
 
     return (
-        <div className="mx-auto max-w-lg min-h-dvh bg-white">
+        <div className="mx-auto max-w-lg min-h-dvh">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <Link href="/sale" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors">
+            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/40 backdrop-blur-xl px-4 py-3">
+                <Link href="/sale" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/50 transition-colors">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
-                <h1 className="text-base font-semibold text-slate-900">Thêm khách mới</h1>
+                <h1 className="text-base font-semibold text-slate-800">Thêm khách mới</h1>
             </header>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="px-4 py-5 space-y-4">
                 {/* Error */}
                 {error && (
-                    <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-600">
+                    <div className="rounded-xl bg-red-50/80 border border-red-100/60 px-4 py-3 text-sm text-red-600">
                         {error}
                     </div>
                 )}
@@ -99,7 +98,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                         onChange={e => updateField('name', e.target.value)}
                         placeholder="Nguyễn Văn A"
                         required
-                        className="form-input"
+                        className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all placeholder-slate-400"
                     />
                 </FormField>
 
@@ -115,7 +114,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                         onChange={e => updateField('phone', e.target.value)}
                         placeholder="0901234567"
                         required
-                        className="form-input"
+                        className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all placeholder-slate-400"
                     />
                 </FormField>
 
@@ -129,7 +128,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                         value={form.email}
                         onChange={e => updateField('email', e.target.value)}
                         placeholder="email@example.com"
-                        className="form-input"
+                        className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all placeholder-slate-400"
                     />
                 </FormField>
 
@@ -145,8 +144,8 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                                 key={src}
                                 onClick={() => updateField('source', src)}
                                 className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${form.source === src
-                                    ? 'border-primary-400 bg-primary-50 text-primary-700'
-                                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                    ? 'border-primary-400/60 bg-primary-50/80 text-primary-700'
+                                    : 'border-white/50 bg-white/30 text-slate-500 hover:bg-white/50'
                                     }`}
                             >
                                 {src}
@@ -165,7 +164,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                         value={form.dealValue}
                         onChange={e => updateField('dealValue', e.target.value)}
                         placeholder="3,500,000,000"
-                        className="form-input"
+                        className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all placeholder-slate-400"
                     />
                 </FormField>
 
@@ -179,7 +178,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                         onChange={e => updateField('note', e.target.value)}
                         placeholder="Ghi chú sơ bộ về nhu cầu khách..."
                         rows={3}
-                        className="form-input resize-none"
+                        className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all placeholder-slate-400 resize-none"
                     />
                 </FormField>
 
@@ -199,7 +198,7 @@ export function NewLeadForm({ userId, orgId, teamId }: Props) {
                     )}
                 </button>
 
-                <p className="text-xs text-slate-400 text-center leading-relaxed">
+                <p className="text-xs text-slate-500 text-center leading-relaxed">
                     Lead mới sẽ tự động vào <span className="font-medium text-amber-600">Quy tắc 72h Vàng</span> và được ưu tiên trong Top 3.
                 </p>
             </form>

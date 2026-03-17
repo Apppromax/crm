@@ -113,14 +113,14 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
     }
 
     return (
-        <div className="mx-auto max-w-lg min-h-dvh bg-slate-50">
+        <div className="mx-auto max-w-lg min-h-dvh">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <Link href="/sale" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors">
+            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/40 backdrop-blur-xl px-4 py-3">
+                <Link href="/sale" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/50 transition-colors">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <div className="flex-1 min-w-0">
-                    <h1 className="text-base font-semibold text-slate-900 truncate">{lead.name}</h1>
+                    <h1 className="text-base font-semibold text-slate-800 truncate">{lead.name}</h1>
                     <p className="text-xs text-slate-400">{lead.source} • {formatRelativeTime(lead.createdAt)}</p>
                 </div>
                 <a href={`tel:${lead.phone}`} className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success hover:bg-success/20 transition-colors">
@@ -129,12 +129,12 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </header>
 
             {/* Milestone Progress */}
-            <div className="bg-white px-4 py-4 border-b border-slate-100">
+            <div className="mx-4 mt-3 sale-glass-card px-4 py-4">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-slate-700">Tiến trình bán hàng</span>
                     <span className="text-sm font-bold text-primary-600">{percentage}%</span>
                 </div>
-                <div className="h-3 rounded-full bg-slate-100 overflow-hidden mb-3">
+                <div className="h-3 rounded-full bg-white/50 overflow-hidden mb-3">
                     <div
                         className="milestone-bar h-full rounded-full bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600"
                         style={{ width: `${percentage}%` }}
@@ -220,11 +220,11 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             )}
 
             {/* Customer Info */}
-            <div className="mx-4 mt-4 rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-4 py-3 border-b border-slate-50">
+            <div className="mx-4 mt-4 sale-glass-card overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/30">
                     <h3 className="text-sm font-semibold text-slate-700">Thông tin khách</h3>
                 </div>
-                <div className="divide-y divide-slate-50">
+                <div className="divide-y divide-white/30">
                     <InfoRow icon={<Phone className="h-4 w-4" />} label="SĐT" value={lead.phone} action={
                         <a href={`tel:${lead.phone}`} className="text-xs text-primary-600 font-medium px-2 py-1 rounded-lg bg-primary-50">Gọi</a>
                     } />
@@ -255,12 +255,12 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </div>
 
             {/* Timeline */}
-            <div className="mx-4 mt-4 rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden mb-4">
-                <div className="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
+            <div className="mx-4 mt-4 sale-glass-card overflow-hidden mb-4">
+                <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-slate-700">Lịch sử tương tác</h3>
                     <span className="text-xs text-slate-400">{lead.interactions.length} entries</span>
                 </div>
-                <div className="divide-y divide-slate-50">
+                <div className="divide-y divide-white/30">
                     {lead.interactions.length === 0 ? (
                         <p className="px-4 py-6 text-sm text-slate-400 text-center">Chưa có tương tác nào</p>
                     ) : (
@@ -307,8 +307,8 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
 
             {/* Milestone History */}
             {lead.milestoneHistory.length > 0 && (
-                <div className="mx-4 mb-4 rounded-2xl bg-white border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="px-4 py-3 border-b border-slate-50">
+                <div className="mx-4 mb-4 sale-glass-card overflow-hidden">
+                    <div className="px-4 py-3 border-b border-white/30">
                         <h3 className="text-sm font-semibold text-slate-700">Lịch sử mốc</h3>
                     </div>
                     <div className="px-4 py-3 space-y-2">
@@ -352,7 +352,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             )}
 
             {/* Interaction Type Selector + Note Input — Fixed Bottom */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 safe-bottom">
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-2xl border-t border-white/40 safe-bottom">
                 {/* Type selector */}
                 <div className="mx-auto max-w-lg flex gap-1 px-4 pt-2">
                     {([

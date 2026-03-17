@@ -11,21 +11,21 @@ export default async function SettingsPage() {
 
     return (
         <div className="mx-auto max-w-lg">
-            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <h1 className="text-lg font-bold text-slate-900">Cài đặt</h1>
+            <header className="sticky top-0 z-40 bg-transparent px-4 py-3">
+                <h1 className="text-lg font-bold text-slate-800">Cài đặt</h1>
             </header>
 
             <div className="px-4 py-4 space-y-4">
                 {/* Profile */}
-                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                <div className="sale-glass-card p-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-lg font-bold">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100/80 text-primary-700 text-lg font-bold">
                             {user.name.split(' ').pop()?.[0]}
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="text-base font-semibold text-slate-800 truncate">{user.name}</h3>
-                            <p className="text-sm text-slate-400 truncate">{user.email}</p>
-                            <span className="inline-flex items-center mt-1 rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary-700">
+                            <p className="text-sm text-slate-500 truncate">{user.email}</p>
+                            <span className="inline-flex items-center mt-1 rounded-full bg-primary-50/80 px-2 py-0.5 text-[10px] font-semibold text-primary-700">
                                 {user.role} {user.team ? `• ${user.team.name}` : ''}
                             </span>
                         </div>
@@ -61,7 +61,7 @@ export default async function SettingsPage() {
                 {/* Logout */}
                 <LogoutButton />
 
-                <p className="text-center text-[10px] text-slate-300 pb-4 mt-8">
+                <p className="text-center text-[10px] text-slate-400 pb-4 mt-8">
                     CRM Pro V2 — Version 0.2.0
                 </p>
             </div>
@@ -72,8 +72,8 @@ export default async function SettingsPage() {
 function SettingsGroup({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">{title}</p>
-            <div className="rounded-2xl bg-white border border-slate-100 shadow-sm divide-y divide-slate-50 overflow-hidden">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-1">{title}</p>
+            <div className="sale-glass-card divide-y divide-white/30 overflow-hidden">
                 {children}
             </div>
         </div>
@@ -84,9 +84,9 @@ function SettingItem({ icon, label, subtitle, disabled }: { icon: React.ReactNod
     return (
         <button disabled={disabled} className={cn(
             'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors',
-            disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50/50'
+            disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/30'
         )}>
-            <span className="text-slate-400">{icon}</span>
+            <span className="text-slate-500">{icon}</span>
             <div className="flex-1">
                 <p className="text-sm font-medium text-slate-700">{label}</p>
                 <p className="text-xs text-slate-400">{subtitle}</p>

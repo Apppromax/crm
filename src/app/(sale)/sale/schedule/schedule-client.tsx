@@ -27,10 +27,10 @@ type LeadOption = {
 }
 
 const typeConfig: Record<string, { icon: typeof Phone; color: string; bg: string; label: string }> = {
-    MEETING: { icon: Users, color: 'text-primary-500', bg: 'bg-primary-50', label: 'Gặp mặt' },
-    FOLLOW_UP: { icon: Phone, color: 'text-emerald-500', bg: 'bg-emerald-50', label: 'Follow-up' },
-    GOLDEN_72H: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50', label: '72h Vàng' },
-    AI_WARMUP: { icon: Video, color: 'text-indigo-500', bg: 'bg-indigo-50', label: 'AI Warmup' },
+    MEETING: { icon: Users, color: 'text-primary-500', bg: 'bg-primary-50/80', label: 'Gặp mặt' },
+    FOLLOW_UP: { icon: Phone, color: 'text-emerald-500', bg: 'bg-emerald-50/80', label: 'Follow-up' },
+    GOLDEN_72H: { icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50/80', label: '72h Vàng' },
+    AI_WARMUP: { icon: Video, color: 'text-indigo-500', bg: 'bg-indigo-50/80', label: 'AI Warmup' },
 }
 
 export function ScheduleClient({
@@ -94,15 +94,15 @@ export function ScheduleClient({
 
     return (
         <div className="mx-auto max-w-lg min-h-dvh">
-            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
+            <header className="sticky top-0 z-40 bg-white/40 backdrop-blur-xl px-4 py-3">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <h1 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                         <Calendar className="h-5 w-5 text-primary-500" />
                         Lịch hẹn
                     </h1>
                     <button
                         onClick={() => setShowForm(!showForm)}
-                        className="flex items-center gap-1 rounded-xl bg-primary-50 px-3 py-2 text-xs font-medium text-primary-600 hover:bg-primary-100"
+                        className="flex items-center gap-1 rounded-xl bg-primary-50/80 px-3 py-2 text-xs font-medium text-primary-600 hover:bg-primary-100/80 transition-all"
                     >
                         {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                         {showForm ? 'Đóng' : 'Thêm'}
@@ -112,12 +112,12 @@ export function ScheduleClient({
 
             {/* Create Schedule Form */}
             {showForm && (
-                <div className="bg-white border-b border-slate-100 px-4 py-4">
+                <div className="mx-4 mb-3 sale-glass-card p-4 animate-slide-up">
                     <form action={handleCreateSchedule} className="space-y-3">
                         <div>
                             <label className="text-xs font-medium text-slate-500 mb-1 block">Khách hàng</label>
                             <select name="leadId" required
-                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20"
+                                className="w-full rounded-xl border border-white/50 bg-white/50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-400/20 transition-all"
                             >
                                 <option value="">Chọn khách hàng...</option>
                                 {leads.map(l => (
@@ -131,7 +131,7 @@ export function ScheduleClient({
                             <div>
                                 <label className="text-xs font-medium text-slate-500 mb-1 block">Loại</label>
                                 <select name="type" required
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400"
+                                    className="w-full rounded-xl border border-white/50 bg-white/50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 transition-all"
                                 >
                                     <option value="FOLLOW_UP">Follow-up</option>
                                     <option value="MEETING">Gặp mặt</option>
@@ -143,7 +143,7 @@ export function ScheduleClient({
                                 <label className="text-xs font-medium text-slate-500 mb-1 block">Ngày</label>
                                 <input type="date" name="date" required
                                     defaultValue={today.toISOString().split('T')[0]}
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400"
+                                    className="w-full rounded-xl border border-white/50 bg-white/50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 transition-all"
                                 />
                             </div>
                         </div>
@@ -152,18 +152,18 @@ export function ScheduleClient({
                                 <label className="text-xs font-medium text-slate-500 mb-1 block">Giờ</label>
                                 <input type="time" name="time" required
                                     defaultValue="09:00"
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400"
+                                    className="w-full rounded-xl border border-white/50 bg-white/50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 transition-all"
                                 />
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-slate-500 mb-1 block">Ghi chú</label>
                                 <input type="text" name="note" placeholder="VD: Xem dự án"
-                                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400"
+                                    className="w-full rounded-xl border border-white/50 bg-white/50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-primary-400 transition-all"
                                 />
                             </div>
                         </div>
                         <button type="submit" disabled={isPending}
-                            className="w-full rounded-xl bg-primary-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary-500/20 hover:bg-primary-600 disabled:opacity-50"
+                            className="w-full rounded-xl bg-primary-500 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary-500/20 hover:bg-primary-600 disabled:opacity-50 transition-all"
                         >
                             {isPending ? 'Đang tạo...' : 'Tạo lịch hẹn'}
                         </button>
@@ -172,7 +172,7 @@ export function ScheduleClient({
             )}
 
             {/* Week Calendar Strip */}
-            <div className="bg-white border-b border-slate-100 px-4 py-3">
+            <div className="mx-4 mb-3 sale-glass-card p-3">
                 <div className="grid grid-cols-7 gap-1">
                     {weekDays.map((day, idx) => {
                         const isSelected = day.toDateString() === selectedDate.toDateString()
@@ -189,8 +189,8 @@ export function ScheduleClient({
                                     isSelected
                                         ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
                                         : isToday
-                                            ? 'bg-primary-50 text-primary-700'
-                                            : 'text-slate-500 hover:bg-slate-50'
+                                            ? 'bg-primary-50/80 text-primary-700'
+                                            : 'text-slate-500 hover:bg-white/50'
                                 )}
                             >
                                 <span className="text-[10px] font-medium">{dayNames[idx]}</span>
@@ -206,16 +206,16 @@ export function ScheduleClient({
 
             {/* Selected Day Events */}
             <div className="px-4 py-4">
-                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
                     {selectedDate.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' })}
                     {filteredSchedules.length > 0 && ` — ${filteredSchedules.length} lịch`}
                 </p>
 
                 {filteredSchedules.length === 0 ? (
                     <div className="py-12 text-center">
-                        <Calendar className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-                        <p className="text-sm text-slate-400">Không có lịch hẹn</p>
-                        <p className="text-xs text-slate-300 mt-1">Ngày rảnh — tập trung gọi leads mới!</p>
+                        <Calendar className="h-12 w-12 text-slate-300/60 mx-auto mb-3" />
+                        <p className="text-sm text-slate-500">Không có lịch hẹn</p>
+                        <p className="text-xs text-slate-400 mt-1">Ngày rảnh — tập trung gọi leads mới!</p>
                     </div>
                 ) : (
                     <div className="space-y-3">
@@ -224,7 +224,7 @@ export function ScheduleClient({
                             const Icon = config.icon
                             const schedDate = new Date(schedule.scheduledAt)
                             return (
-                                <div key={schedule.id} className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                                <div key={schedule.id} className="sale-glass-card p-4">
                                     <div className="flex items-start gap-3">
                                         <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', config.bg)}>
                                             <Icon className={cn('h-5 w-5', config.color)} />
@@ -257,7 +257,7 @@ export function ScheduleClient({
                                         <button
                                             onClick={() => handleComplete(schedule.id)}
                                             disabled={isPending}
-                                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-500 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50/80 text-emerald-500 hover:bg-emerald-100/80 transition-colors disabled:opacity-50"
                                             title="Hoàn thành"
                                         >
                                             <Check className="h-4 w-4" />
@@ -273,14 +273,14 @@ export function ScheduleClient({
             {/* Upcoming */}
             {upcomingSchedules.length > 0 && (
                 <div className="px-4 pb-24">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Sắp tới</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Sắp tới</p>
                     <div className="space-y-2">
                         {upcomingSchedules.slice(0, 5).map(s => {
                             const config = typeConfig[s.type] || typeConfig.FOLLOW_UP
                             const Icon = config.icon
                             const sDate = new Date(s.scheduledAt)
                             return (
-                                <div key={s.id} className="flex items-center gap-3 rounded-xl bg-white border border-slate-100 p-3">
+                                <div key={s.id} className="flex items-center gap-3 sale-glass-card p-3">
                                     <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', config.bg)}>
                                         <Icon className={cn('h-4 w-4', config.color)} />
                                     </div>

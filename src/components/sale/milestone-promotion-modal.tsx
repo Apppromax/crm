@@ -43,7 +43,7 @@ export function MilestonePromotionModal({ currentMilestone, signal, leadId, user
     return (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
             <div
-                className="w-full max-w-lg rounded-t-3xl bg-white shadow-2xl animate-slide-up"
+                className="w-full max-w-lg rounded-t-3xl bg-white/85 backdrop-blur-2xl shadow-2xl animate-slide-up"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Handle bar */}

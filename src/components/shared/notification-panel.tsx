@@ -64,11 +64,11 @@ export function NotificationPanel({ isOpen, onClose, userId, initialNotification
     return (
         <div className="fixed inset-0 z-[90] flex justify-end" onClick={onClose}>
             <div
-                className="w-full max-w-sm h-full bg-white shadow-2xl animate-slide-up overflow-y-auto"
+                className="w-full max-w-sm h-full bg-white/80 backdrop-blur-2xl shadow-2xl animate-slide-up overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between z-10">
+                <div className="sticky top-0 bg-white/70 backdrop-blur-xl border-b border-white/40 px-4 py-3 flex items-center justify-between z-10">
                     <div className="flex items-center gap-2">
                         <Bell className="h-5 w-5 text-slate-700" />
                         <h2 className="text-base font-bold text-slate-800">Thông báo</h2>
@@ -96,7 +96,7 @@ export function NotificationPanel({ isOpen, onClose, userId, initialNotification
                 </div>
 
                 {/* Notification List */}
-                <div className="divide-y divide-slate-50">
+                <div className="divide-y divide-white/30">
                     {notifications.length === 0 ? (
                         <div className="py-16 text-center">
                             <Bell className="h-10 w-10 text-slate-200 mx-auto mb-3" />

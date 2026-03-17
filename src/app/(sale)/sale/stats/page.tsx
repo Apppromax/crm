@@ -11,8 +11,8 @@ export default function StatsPage() {
 
     return (
         <div className="mx-auto max-w-lg">
-            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <h1 className="text-lg font-bold text-slate-900">Thống kê</h1>
+            <header className="sticky top-0 z-40 bg-transparent px-4 py-3">
+                <h1 className="text-lg font-bold text-slate-800">Thống kê</h1>
             </header>
 
             <div className="px-4 py-4 space-y-4">
@@ -35,7 +35,7 @@ export default function StatsPage() {
                 </div>
 
                 {/* Funnel Chart */}
-                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                <div className="sale-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                         <Users className="h-4 w-4 text-slate-400" />
                         Phễu bán hàng
@@ -48,7 +48,7 @@ export default function StatsPage() {
                                 <div key={m.milestone} className="flex items-center gap-3">
                                     <span className="text-xs text-slate-400 w-8 shrink-0">M{m.milestone}</span>
                                     <div className="flex-1">
-                                        <div className="h-8 rounded-lg bg-slate-50 overflow-hidden relative">
+                                        <div className="h-8 rounded-lg bg-white/50 overflow-hidden relative">
                                             <div
                                                 className="h-full rounded-lg bg-gradient-to-r from-primary-400 to-primary-500 flex items-center px-2 transition-all duration-500"
                                                 style={{ width: `${widthPct}%` }}
@@ -76,7 +76,7 @@ function StatCard({ icon, label, value, subtitle, color }: {
     color: string
 }) {
     return (
-        <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+        <div className="sale-glass-card p-4">
             <div className="flex items-center gap-2 mb-2">{icon}<span className="text-xs text-slate-400">{label}</span></div>
             <p className="text-2xl font-bold text-slate-800">{value}</p>
             <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>

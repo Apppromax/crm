@@ -39,9 +39,9 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
 
     return (
         <div className="mx-auto max-w-lg min-h-dvh">
-            <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+            <header className="sticky top-0 z-40 bg-white/40 backdrop-blur-xl">
                 <div className="px-4 py-3">
-                    <h1 className="text-lg font-bold text-slate-900 mb-3">Danh sách khách hàng</h1>
+                    <h1 className="text-lg font-bold text-slate-800 mb-3">Danh sách khách hàng</h1>
 
                     <div className="relative mb-3">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -50,7 +50,7 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Tìm theo tên..."
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-400/20"
+                            className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all"
                         />
                     </div>
 
@@ -66,14 +66,14 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                                 className={cn(
                                     'flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-all',
                                     filter === s.key
-                                        ? 'border-primary-400 bg-primary-50 text-primary-700'
-                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                        ? 'border-primary-400/60 bg-primary-50/80 text-primary-700'
+                                        : 'border-white/50 bg-white/30 text-slate-500 hover:bg-white/50'
                                 )}
                             >
                                 {s.label}
                                 <span className={cn(
                                     'rounded-full px-1.5 py-0.5 text-[10px]',
-                                    filter === s.key ? 'bg-primary-200 text-primary-800' : 'bg-slate-100 text-slate-400'
+                                    filter === s.key ? 'bg-primary-200/80 text-primary-800' : 'bg-white/50 text-slate-400'
                                 )}>
                                     {s.count}
                                 </span>
@@ -89,8 +89,8 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                                 className={cn(
                                     'whitespace-nowrap rounded-lg border px-2 py-1 text-[10px] font-medium transition-all',
                                     milestoneFilter === m
-                                        ? 'border-primary-400 bg-primary-50 text-primary-700'
-                                        : 'border-slate-150 text-slate-400 hover:border-slate-300'
+                                        ? 'border-primary-400/60 bg-primary-50/80 text-primary-700'
+                                        : 'border-white/50 bg-white/30 text-slate-400 hover:bg-white/50'
                                 )}
                             >
                                 M{m}
@@ -103,8 +103,8 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
             <div className="px-4 py-3 space-y-2 stagger-children">
                 {filtered.length === 0 ? (
                     <div className="py-16 text-center animate-fade-in">
-                        <Filter className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                        <p className="text-sm text-slate-400">Không tìm thấy khách hàng</p>
+                        <Filter className="h-10 w-10 text-slate-300/60 mx-auto mb-3" />
+                        <p className="text-sm text-slate-500">Không tìm thấy khách hàng</p>
                     </div>
                 ) : (
                     filtered.map(lead => <LeadListItem key={lead.id} lead={lead} />)
@@ -120,13 +120,13 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
     return (
         <Link href={`/sale/leads/${lead.id}`}>
             <div className={cn(
-                'rounded-xl bg-white border border-slate-100 p-3 transition-all active:scale-[0.98] hover:border-slate-200',
-                lead.status === 'WON' && 'border-emerald-100 bg-emerald-50/30'
+                'rounded-xl sale-glass-card p-3 transition-all active:scale-[0.98]',
+                lead.status === 'WON' && 'ring-1 ring-emerald-300/40'
             )}>
                 <div className="flex items-center gap-3">
                     <div className={cn(
                         'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold shrink-0',
-                        lead.status === 'WON' ? 'bg-emerald-100 text-emerald-700' : 'bg-primary-100 text-primary-700'
+                        lead.status === 'WON' ? 'bg-emerald-100/80 text-emerald-700' : 'bg-primary-100/80 text-primary-700'
                     )}>
                         {lead.name.split(' ').pop()?.[0]}
                     </div>
@@ -134,10 +134,10 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm font-semibold text-slate-800 truncate">{lead.name}</h3>
-                            {lead.status === 'WON' && <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">WON</span>}
+                            {lead.status === 'WON' && <span className="text-[10px] bg-emerald-100/80 text-emerald-700 px-1.5 py-0.5 rounded font-semibold">WON</span>}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-slate-400">M{lead.currentMilestone} • {getMilestoneLabel(lead.currentMilestone)}</span>
+                            <span className="text-[10px] text-slate-500">M{lead.currentMilestone} • {getMilestoneLabel(lead.currentMilestone)}</span>
                             {lead.dealValue && (
                                 <span className="text-[10px] font-semibold text-emerald-600">{formatCurrencyShort(lead.dealValue)}</span>
                             )}
@@ -160,7 +160,7 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
                     </div>
                 </div>
 
-                <div className="mt-2 h-1 rounded-full bg-slate-100 overflow-hidden">
+                <div className="mt-2 h-1 rounded-full bg-white/50 overflow-hidden">
                     <div
                         className={cn(
                             'h-full rounded-full transition-all',
