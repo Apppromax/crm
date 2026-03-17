@@ -22,7 +22,7 @@ export async function markNotificationRead(notificationId: string) {
         where: { id: notificationId },
         data: { read: true },
     })
-    revalidateTag('notifications')
+    revalidateTag('notifications' as any, undefined as any)
 }
 
 export async function markAllNotificationsRead(userId: string) {
@@ -30,7 +30,7 @@ export async function markAllNotificationsRead(userId: string) {
         where: { userId, read: false },
         data: { read: true },
     })
-    revalidateTag('notifications')
+    revalidateTag('notifications' as any, undefined as any)
 }
 
 export async function createNotification(data: {
@@ -49,6 +49,6 @@ export async function createNotification(data: {
             leadId: data.leadId,
         },
     })
-    revalidateTag('notifications')
+    revalidateTag('notifications' as any, undefined as any)
     return notif
 }

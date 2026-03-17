@@ -26,7 +26,7 @@ export async function generateTeamReport(teamId: string) {
                     interactions: { where: { createdAt: { gte: weekAgo } } },
                 },
             },
-            leads: {
+            assignedLeads: {
                 where: { status: 'ACTIVE' },
                 select: { id: true },
             },
@@ -35,7 +35,7 @@ export async function generateTeamReport(teamId: string) {
 
     const memberReports: TeamMemberReport[] = members.map(m => {
         const interactionsWeek = m._count.interactions
-        const activeLeads = m.leads.length
+        const activeLeads = m.assignedLeads.length
 
         const burnout = detectBurnout({
             interactionsLast7Days: interactionsWeek,

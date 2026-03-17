@@ -54,7 +54,7 @@ export async function generateWeeklySnapshot(orgId: string): Promise<WeeklySnaps
         prisma.lead.count({
             where: {
                 orgId,
-                status: { in: ['LOST', 'RECYCLED'] },
+                status: { in: ['LOST', 'ARCHIVED'] },
                 updatedAt: { gte: weekAgo },
             },
         }),
