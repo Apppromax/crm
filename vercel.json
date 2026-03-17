@@ -1,12 +1,1 @@
-{
-    "crons": [
-        {
-            "path": "/api/cron/check-leads",
-            "schedule": "*/15 * * * *"
-        },
-        {
-            "path": "/api/cron/weekly-snapshot",
-            "schedule": "0 9 * * 1"
-        }
-    ]
-}
+{}
