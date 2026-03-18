@@ -150,7 +150,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </header>
 
             {/* Milestone Progress */}
-            <div className="mx-4 mt-3 mgr-glass-card px-4 py-4">
+            <div className="mx-4 mt-5 mgr-glass-card px-4 py-4">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-slate-700">Tiến trình bán hàng</span>
                     <span className="text-sm font-bold text-primary-600">{percentage}%</span>
@@ -189,7 +189,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             {winRate && <WinRateCard prediction={winRate as any} />}
 
             {/* AI Coach Panel */}
-            <div className="mx-4 mt-4">
+            <div className="mx-4 mt-5">
                 <button
                     onClick={() => setShowAiCoach(!showAiCoach)}
                     className="flex w-full items-center justify-between rounded-t-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-3 text-white shadow-lg shadow-indigo-500/20"
@@ -231,7 +231,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
 
             {/* Manager Advice */}
             {lead.managerAdvice && (
-                <div className="mx-4 mt-3 rounded-2xl bg-indigo-50 border border-indigo-100 p-4 animate-slide-up">
+                <div className="mx-4 mt-5 rounded-2xl bg-indigo-50 border border-indigo-100 p-4 animate-slide-up">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-sm font-semibold text-indigo-700">📩 Lệnh sếp</span>
                         <span className="text-[10px] rounded-full bg-indigo-200 text-indigo-700 px-2 py-0.5">Manager</span>
@@ -241,7 +241,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             )}
 
             {/* Customer Info */}
-            <div className="mx-4 mt-4 mgr-glass-card overflow-hidden">
+            <div className="mx-4 mt-5 mgr-glass-card overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/30">
                     <h3 className="text-sm font-semibold text-slate-700">Thông tin khách</h3>
                 </div>
@@ -276,7 +276,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </div>
 
             {/* Timeline */}
-            <div className="mx-4 mt-4 mgr-glass-card overflow-hidden mb-4">
+            <div className="mx-4 mt-5 mgr-glass-card overflow-hidden mb-5">
                 <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-slate-700">Lịch sử tương tác</h3>
                     <span className="text-xs text-slate-400">{lead.interactions.length} entries</span>
@@ -328,7 +328,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
 
             {/* Milestone History */}
             {lead.milestoneHistory.length > 0 && (
-                <div className="mx-4 mb-4 mgr-glass-card overflow-hidden">
+                <div className="mx-4 mb-5 mgr-glass-card overflow-hidden">
                     <div className="px-4 py-3 border-b border-white/30">
                         <h3 className="text-sm font-semibold text-slate-700">Lịch sử mốc</h3>
                     </div>
@@ -349,7 +349,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
 
             {/* Golden Timer + Snooze Button */}
             {(goldenTimer || true) && (
-                <div className="mx-4 mb-4 flex gap-2">
+                <div className="mx-4 mb-5 flex gap-2">
                     {goldenTimer?.isActive && (
                         <div className={cn(
                             'flex-1 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-semibold',

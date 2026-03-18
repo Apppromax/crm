@@ -106,7 +106,7 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                 </div>
             </header>
 
-            <div className="px-4 py-3 space-y-3 stagger-children">
+            <div className="px-4 py-4 space-y-4 stagger-children">
                 {filtered.length === 0 ? (
                     <div className="py-16 text-center animate-fade-in">
                         <Filter className="h-10 w-10 text-slate-300/60 mx-auto mb-3" />
@@ -126,7 +126,7 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
     return (
         <Link href={`/sale/leads/${lead.id}`}>
             <div className={cn(
-                'rounded-xl mgr-glass-card p-3 transition-all active:scale-[0.98] glass-interactive',
+                'rounded-2xl mgr-glass-card p-4 transition-all active:scale-[0.98] glass-interactive',
                 lead.status === 'WON' && 'ring-1 ring-emerald-300/40'
             )}>
                 <div className="flex items-center gap-3">
