@@ -4,6 +4,26 @@
 > Format: [Semantic Versioning](https://semver.org/)
 
 ---
+## [0.3.0] - 2026-03-18 — Session 8: UI/UX Masterpiece & Workflow Logic
+
+### 🚀 Added
+- **Multi-Theme System (Zustand)**: Introduced `Electric Acid`, `Neo-Luxury`, and `Liquid Silver` themes replacing plain dark mode. Theme Switcher added to Sale Settings.
+- **Glassmorphism Base UI**: Converted Bottom Navigation into native-like floating edge bars, transformed cards into Backdrop-blur Glass UI.
+- **CSS Variables Architecture**: Extracted hardcoded Tailwind values into CSS Custom Properties (`globals.css`) bound to `data-theme` for native OS-level performance switching.
+
+### 🧠 Logic Parsing (Operational Workflow specs applied)
+- **Backend Query Ordering**: `getTopPriorityLeads` and `getQueueLeads` directly integrated the "Heat Score > Fresh Lead > Schedule Due" priority logic into Prisma queries and `unstable_cache`.
+- **Card-Level Gamification (Visual FX)**:
+   - **Diamond (Mốc 5)**: Shimmer animation, scale up, Teal glow.
+   - **Hot Seat (Mốc 4)**: Burning Orange pulse animation `shadow-[...rgba(249,115,22,0.8)]`.
+   - **Khách Nét (Heatscore > 80)**: Neon border stroke, saturate 1.1 multiplier.
+   - **Khách Retry**: Grayscale overlay `opacity-[0.6] blur-[0.2px]`, showing ↻ icon state.
+
+### 🔧 Fixed
+- Supabase Pooling password character escaping for Prisma deployment scaling.
+- Database Schema and RLS re-sync for new `kqwntmhulobobczmwqda` deployment project.
+
+---
 ## [0.2.0] - 2026-03-16 — Session 7: Feature Completion
 
 ### 🚀 Added
