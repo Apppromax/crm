@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const PUBLIC_PATHS = ['/login', '/register', '/forgot-password']
 const PROTECTED_PREFIXES = ['/sale', '/manager', '/ceo']
 
 export async function updateSession(request: NextRequest) {
@@ -38,35 +39,51 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // Use getUser() for production reliability — it validates with Supabase Auth server
-    // getSession() was causing auth failures on Vercel because expired JWT still decoded
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path))
+    const isProtectedPath = PROTECTED_PREFIXES.some(path => pathname.startsWith(path))
 
-    // Public routes
-    const publicPaths = ['/login', '/register', '/forgot-password']
-    const isPublicPath = publicPaths.some(path =>
-        pathname.startsWith(path)
-    )
+    // For public paths (login, register, etc.):
+    // Use getSession() first (local JWT decode, no network call) for speed.
+    // Only redirect logged-in users away from public pages.
+    if (isPublicPath) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
+        return supabaseResponse
+    }
 
-    if (!user && !isPublicPath) {
+    // For protected paths: validate with getUser() (network call to Supabase Auth)
+    // This ensures the token is still valid server-side.
+    if (isProtectedPath) {
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            return NextResponse.redirect(url)
+        }
+
+        supabaseResponse.headers.set('x-supabase-uid', user.id)
+        return supabaseResponse
+    }
+
+    // For root `/` and other non-protected, non-public paths:
+    // Use getSession() (fast, local decode) to check auth state.
+    // If no session, redirect to login. No network call needed.
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
 
-    if (user && isPublicPath) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/'
-        return NextResponse.redirect(url)
-    }
-
-    // Pass supabase user ID to server components (skip duplicate auth call)
-    if (user) {
-        supabaseResponse.headers.set('x-supabase-uid', user.id)
+    if (session.user) {
+        supabaseResponse.headers.set('x-supabase-uid', session.user.id)
     }
 
     return supabaseResponse
 }
-
