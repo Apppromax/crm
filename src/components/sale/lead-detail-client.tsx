@@ -37,6 +37,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
     const [showAntiHoarding, setShowAntiHoarding] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [saveSuccess, setSaveSuccess] = useState(false)
+    const [isDismissing, setIsDismissing] = useState(false)
     const [interactionType, setInteractionType] = useState<'NOTE' | 'CALL' | 'ZALO_CHAT' | 'MEETING'>('NOTE')
 
     const antiHoardingAlert = checkAntiHoarding(lead)
@@ -91,29 +92,49 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
     async function handlePromote() {
         // INSTANT close modal
         setShowPromotion(false)
+        setIsDismissing(true)
 
-        // Server call — refresh happens in background
+        // Snooze lead 4h so it drops from queue
+        const snoozeUntil = new Date(Date.now() + 4 * 60 * 60 * 1000)
+        snoozeLead(lead.id, snoozeUntil, 'UPDATED').catch(console.error)
+
+        // Server call — milestone update
         updateMilestone(
             lead.id,
             userId,
             Math.min(lead.currentMilestone + 1, 5),
             undefined
-        ).then(() => {
-            startTransition(() => router.refresh())
-        }).catch(err => {
+        ).catch(err => {
             console.error('Promote failed:', err)
         })
+
+        // Animate out then navigate
+        setTimeout(() => {
+            router.push('/sale')
+            router.refresh()
+        }, 500)
     }
 
     function handleSkipPromotion() {
         setShowPromotion(false)
-        setNoteText('')
-        setInteractionType('NOTE')
-        startTransition(() => router.refresh())
+        setIsDismissing(true)
+
+        // Snooze lead 4h so it drops from queue
+        const snoozeUntil = new Date(Date.now() + 4 * 60 * 60 * 1000)
+        snoozeLead(lead.id, snoozeUntil, 'UPDATED').catch(console.error)
+
+        // Animate out then navigate
+        setTimeout(() => {
+            router.push('/sale')
+            router.refresh()
+        }, 500)
     }
 
     return (
-        <div className="mx-auto max-w-lg min-h-dvh">
+        <div className={cn(
+            'mx-auto max-w-lg min-h-dvh transition-all duration-500',
+            isDismissing && 'opacity-0 scale-95 translate-y-4'
+        )}>
             {/* Header */}
             <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/40 backdrop-blur-xl px-4 py-3">
                 <Link href="/sale" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/50 transition-colors">

@@ -89,19 +89,22 @@ function getLeadPriorityTier(lead: {
 }
 
 export async function getAllSmartQueueLeads(userId: string) {
+    const now = new Date()
     const leads = await prisma.lead.findMany({
         where: {
             assignedTo: userId,
             NOT: { status: { in: ['WON', 'LOST', 'ARCHIVED'] } },
             OR: [
                 { status: 'UNPROCESSED' },
-                { snoozeUntil: { lte: new Date() } },
-                { status: 'RETRYING', nextVisibleAt: { lte: new Date() } },
-                { status: 'ACTIVE', nextGoldenPingAt: { lte: new Date() } },
-                { status: 'ACTIVE' } // For testing fallback
+                { snoozeUntil: { lte: now } },
+                { status: 'RETRYING', nextVisibleAt: { lte: now } },
+                { status: 'ACTIVE', nextGoldenPingAt: { lte: now } },
+                // Fallback: Active leads with NO snooze or snooze expired
+                { status: 'ACTIVE', snoozeUntil: null },
+                { status: 'ACTIVE', snoozeUntil: { lte: now } },
             ]
         },
-        take: 50, // Lấy nhiều hơn rồi sort ở app layer
+        take: 50,
     })
 
     // Sort theo 3 tầng ưu tiên nghiệp vụ
