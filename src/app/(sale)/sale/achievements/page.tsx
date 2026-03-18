@@ -59,7 +59,7 @@ export default async function AchievementsPage() {
                 <AchievementBadges />
 
                 {/* Activity Summary */}
-                <div className="sale-glass-card p-4">
+                <div className="mgr-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
                         <Star className="h-4 w-4 text-amber-500" />
                         Kỷ lục cá nhân
@@ -78,7 +78,7 @@ export default async function AchievementsPage() {
 
 function StatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
     return (
-        <div className="sale-glass-card p-3 text-center">
+        <div className="mgr-glass-card p-3 text-center">
             <div className="flex justify-center mb-1">{icon}</div>
             <p className="text-base font-bold text-slate-800">{value}</p>
             <p className="text-[10px] text-slate-400">{label}</p>

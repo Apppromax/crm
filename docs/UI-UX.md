@@ -1,10 +1,10 @@
 # CRM Pro V2 — UI/UX Design Specification
 
-> **Phiên bản:** 1.0  
+> **Phiên bản:** 1.1  
 > **Ngày tạo:** 2026-03-14  
-> **Cập nhật lần cuối:** 2026-03-14  
-> **Trạng thái:** Draft  
-> **Tham chiếu:** [PRD.md](./PRD.md) | [SRS.md](./SRS.md)  
+> **Cập nhật lần cuối:** 2026-03-18  
+> **Trạng thái:** Active  
+> **Tham chiếu:** [PRD.md](./PRD.md) | [SRS.md](./SRS.md) | [OPERATIONAL_WORKFLOW.md](./OPERATIONAL_WORKFLOW.md)  
 
 ---
 
@@ -152,6 +152,44 @@ Glassmorphism (CEO):
 
 /* Streak fire */
 .streak-fire { animation: bounce 1s ease infinite; }
+```
+
+### 2.7 Milestone Color System (Session 9)
+
+Thanh Milestone trên Smart Card đổi màu từ lạnh → nóng:
+
+| Mốc | Tên | Màu BG | Màu Text | Glow |
+|-----|-----|--------|----------|------|
+| 1 | Tiếp cận | `bg-sky-400` | `text-sky-700` | `shadow-sky-400/50` |
+| 2 | Chào mồi | `bg-teal-500` | `text-teal-700` | `shadow-teal-500/50` |
+| 3 | Niềm tin | `bg-amber-500` | `text-amber-700` | `shadow-amber-500/50` |
+| 4 | Dồn chốt | `bg-orange-500` | `text-orange-700` | `shadow-orange-500/50` |
+| 5 | 💎 Kim Cương | `bg-gradient-to-r from-cyan-400 to-emerald-400` | `text-teal-900` | `shadow-teal-400/60` |
+
+**Đặc biệt Mốc 3 (Niềm tin):** Hiển banner gợi ý “Dấu hiệu tin tưởng”:
+- Kết bạn Zalo
+- Gửi CCCD
+- Mời cafe
+
+**Đặc biệt Mốc 5 (Kim Cương):** Shimmer animation, diamond icon, ring glow, font black
+
+### 2.8 Hot Seat Visual (Vùng Treo Dồn Chốt)
+
+```
+Container:  border-2 border-red-500/70
+            bg-gradient-to-br from-red-50/50 via-white/30 to-orange-50/40
+            shadow-[0_12px_40px_-8px_rgba(239,68,68,0.5)]
+
+Glow:       bg-gradient-to-br from-red-500/25 via-orange-500/20 to-red-400/25
+            blur-xl animate-pulse
+
+Label:      bg-gradient-to-r from-red-600 to-orange-600
+            text-white font-black tracking-widest animate-pulse
+
+3 Tín hiệu:  ❤️ Tin Sale (emerald) | 💬 Thích Dự án (blue) | 💳 Hỏi giá (amber)
+
+Buttons:    💎 CHỐT CỌC   → gradient cyan→teal→emerald (Kim Cương)
+            ↻  NUÔI LẠI  → white/60 border-slate-200 (neutral)
 ```
 
 ---
@@ -446,11 +484,12 @@ Glassmorphism (CEO):
 ### 6.2 Role-Specific Components
 
 **Sale:**
-- `SmartCard` — Compact lead card with priority info
+- `SmartCard` — Compact lead card with priority info + MilestoneBar (5-dot progress)
 - `BigButton` — Primary action CTA
 - `AICoachPanel` — Collapsible AI advice
 - `MilestonePromotion` — Post-note confirmation popup
 - `ManagerAdviceBanner` — "Lệnh sếp" notification
+- `HotSeatZone` — Vùng Treo Dồn Chốt với 2 nút CHỐT/NUÔI LẠI (Session 9)
 
 **Manager:**
 - `TeamHeatmap` — 3-color team status overview
@@ -536,4 +575,5 @@ Glassmorphism (CEO):
 > 📌 **Lịch sử thay đổi**
 > | Ngày | Phiên bản | Thay đổi | Người |
 > |------|-----------|----------|-------|
+> | 2026-03-18 | 1.1 | Session 9: Milestone Color System, Hot Seat Visual, HotSeatZone component | AI |
 > | 2026-03-14 | 1.0 | Tạo UI/UX Spec — Design System + Wireframes 3 roles | AI |

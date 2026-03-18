@@ -15,6 +15,7 @@ interface LeadItem {
     dealValue: number | null
     lastInteractionAt: string | null
     interactionCount: number
+    phoneSuffix: string // 3 số cuối SĐT để tìm nhanh
 }
 
 type FilterStatus = 'ALL' | 'ACTIVE' | 'WON'
@@ -27,7 +28,12 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
     const filtered = leads.filter(lead => {
         if (filter !== 'ALL' && lead.status !== filter) return false
         if (milestoneFilter && lead.currentMilestone !== milestoneFilter) return false
-        if (search && !lead.name.toLowerCase().includes(search.toLowerCase())) return false
+        if (search) {
+            const q = search.toLowerCase().trim()
+            const matchName = lead.name.toLowerCase().includes(q)
+            const matchPhone = /^\d+$/.test(q) && lead.phoneSuffix.endsWith(q)
+            if (!matchName && !matchPhone) return false
+        }
         return true
     })
 
@@ -49,7 +55,7 @@ export function LeadsListClient({ leads }: { leads: LeadItem[] }) {
                             type="text"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Tìm theo tên..."
+                            placeholder="Tìm theo tên hoặc 3 số cuối SĐT..."
                             className="w-full rounded-xl border border-white/50 bg-white/50 backdrop-blur-sm py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary-400 focus:bg-white/70 focus:ring-2 focus:ring-primary-400/20 transition-all"
                         />
                     </div>
@@ -120,7 +126,7 @@ function LeadListItem({ lead }: { lead: LeadItem }) {
     return (
         <Link href={`/sale/leads/${lead.id}`}>
             <div className={cn(
-                'rounded-xl sale-glass-card p-3 transition-all active:scale-[0.98] glass-interactive',
+                'rounded-xl mgr-glass-card p-3 transition-all active:scale-[0.98] glass-interactive',
                 lead.status === 'WON' && 'ring-1 ring-emerald-300/40'
             )}>
                 <div className="flex items-center gap-3">

@@ -83,12 +83,12 @@ async function TeamMemberDetail({ params }: Props) {
     return (
         <div className="mx-auto max-w-2xl min-h-dvh">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <Link href="/manager/team" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors press-effect">
+            <header className="sticky top-0 z-40 flex items-center gap-3 px-4 py-3 bg-white/20 backdrop-blur-2xl border-b border-white/40">
+                <Link href="/manager/team" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/30 transition-colors press-effect">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <div className="flex-1">
-                    <h1 className="text-base font-semibold text-slate-900">{member.name}</h1>
+                    <h1 className="text-base font-semibold text-slate-700">{member.name}</h1>
                     <p className="text-xs text-slate-400">{member.email}</p>
                 </div>
                 <span className={cn('rounded-full px-2.5 py-1 text-[10px] font-bold text-white', sc.bg)}>
@@ -133,8 +133,8 @@ async function TeamMemberDetail({ params }: Props) {
                     ) : (
                         member.assignedLeads.map(lead => (
                             <Link key={lead.id} href={`/manager/shadow/${lead.id}`}>
-                                <div className="rounded-xl bg-white border border-slate-100 p-3 flex items-center gap-3 hover:border-slate-200 transition-all active:scale-[0.98] press-effect">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-primary-700 text-xs font-bold shrink-0">
+                                <div className="mgr-glass-card p-3 flex items-center gap-3 transition-all active:scale-[0.98] press-effect">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-500/15 text-teal-600 text-xs font-bold shrink-0">
                                         {lead.name.split(' ').pop()?.[0]}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -166,7 +166,7 @@ async function TeamMemberDetail({ params }: Props) {
 
             {/* Summary */}
             <div className="px-4 mt-5 mb-24">
-                <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 text-center">
+                <div className="mgr-glass-card p-4 text-center">
                     <p className="text-xs text-slate-400">
                         {pendingSchedules} lịch hẹn sắp tới • {interactionsWeek} tương tác tuần này
                     </p>
@@ -178,7 +178,7 @@ async function TeamMemberDetail({ params }: Props) {
 
 function StatMini({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
     return (
-        <div className="rounded-xl bg-white border border-slate-100 p-2.5 text-center">
+        <div className="mgr-glass-card p-2.5 text-center">
             <div className="flex justify-center mb-1">{icon}</div>
             <p className="text-sm font-bold text-slate-800">{value}</p>
             <p className="text-[10px] text-slate-400">{label}</p>

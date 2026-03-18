@@ -30,6 +30,15 @@ enum LeadStatus {
   ARCHIVED
   WON
   LOST
+  UNPROCESSED
+  RETRYING
+}
+
+enum CardColor {
+  GREEN
+  ORANGE
+  RED
+  GRAY
 }
 
 enum SnoozeReason {
@@ -204,9 +213,24 @@ model Lead {
 
   // Snooze & 72h
   golden72hExpiresAt   DateTime?   @map("golden_72h_expires_at")
+  nextGoldenPingAt     DateTime?   @map("next_golden_ping_at")
+  goldenPingCount      Int         @default(0) @map("golden_ping_count")
   snoozeUntil          DateTime?   @map("snooze_until")
   snoozeReason         SnoozeReason? @map("snooze_reason")
   consecutiveMissCount Int         @default(0) @map("consecutive_miss_count")
+
+  // Lead Reception (Phase 1 AI Data)
+  urgency              String?
+  understanding        String?
+  finReadiness         String?     @map("fin_readiness")
+  productFit           String?     @map("product_fit")
+  note                 String?
+  sharpnessScore       Int?        @map("sharpness_score")
+  colorBadge           CardColor?  @map("color_badge")
+
+  // Phase 2: Retry Logic
+  retryCount           Int         @default(0) @map("retry_count")
+  nextVisibleAt        DateTime?   @map("next_visible_at")
 
   // AI
   aiSummary            String?     @map("ai_summary")

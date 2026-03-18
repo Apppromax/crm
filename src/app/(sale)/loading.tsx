@@ -19,7 +19,7 @@ export default function Loading() {
             {/* Cards skeleton — glass */}
             <div className="space-y-3">
                 {[1, 2, 3].map(i => (
-                    <div key={i} className="rounded-2xl p-4 space-y-3 sale-glass-card" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div key={i} className="rounded-2xl p-4 space-y-3 mgr-glass-card" style={{ animationDelay: `${i * 100}ms` }}>
                         <div className="flex items-center justify-between">
                             <div className="h-5 w-32 rounded-full bg-white/40 animate-pulse" />
                             <div className="h-5 w-16 rounded-full bg-white/40 animate-pulse" />
@@ -39,7 +39,7 @@ export default function Loading() {
             </div>
 
             {/* Stats skeleton */}
-            <div className="sale-stats-card p-5">
+            <div className="mgr-glass-card p-5">
                 <div className="grid grid-cols-3 gap-4">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="text-center space-y-2">

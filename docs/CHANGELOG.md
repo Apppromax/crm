@@ -4,6 +4,69 @@
 > Format: [Semantic Versioning](https://semver.org/)
 
 ---
+## [0.4.0] - 2026-03-18 — Session 9: Sale Workflow 7 Bước (Full Implementation)
+
+### 🚀 Added
+
+#### Bước 1: Tiếp Nhận & Phân Loại Lead ✅
+- **3-Scenario Create Lead**: `createLead()` xử lý INTERACTED (Mài giũa Lead), UNREACHABLE (Retry cycle), LATER (Gọi sau)
+- **Sharpness Score Fallback Heuristic**: 4 chỉ số dropbox (Gấp / Hiểu / Tài chính / Khớp) → AI Score → colorBadge (GREEN/ORANGE/RED)
+- **72h Vàng Auto-Ping**: `nextGoldenPingAt` + 4h chu kỳ trong 3 ngày đầu
+- Files: `actions/leads.ts` (`createLead`), `new-lead-form.tsx`
+
+#### Bước 2: Queue Bar Gamification ✅
+- **Zero-Inbox Gamification**: Thanh Bar đổi màu Emerald(0) → Amber(1-4) → Rose+Pulse(5+)
+- **Expandable Queue Panel**: Click mở danh sách hàng đợi với color badges (Nét/Tiềm năng/Thấp/Mới/72h/Retry)
+- Files: `home-client.tsx` (queue section)
+
+#### Bước 3: Smart Card Priority Engine (3 Tầng) ✅
+- **App-layer Priority Sort**: `getLeadPriorityTier()` — Tier 1 (Sharpness Nét) > Tier 2 (Fresh) > Tier 3 (Due/Retry)
+- **Auto-Slice**: Top 3 → Smart Cards, rest → Queue Bar
+- Files: `actions/leads.ts` (`getAllSmartQueueLeads`, `getLeadPriorityTier`)
+
+#### Bước 4: 5-Mốc Milestone Color System ✅
+- **MilestoneBar Component**: 5-dot progress bar với gradient lạnh→nóng trên Smart Card
+- **Color Map**: Sky(1) → Teal(2) → Amber(3) → Orange(4) → Diamond Cyan→Emerald(5)
+- **Trust Signal Banner**: Mốc 3 hiển thị gợi ý "Dấu hiệu tin tưởng" (Kết bạn Zalo · CCCD · Mời cafe)
+- **Diamond Effect**: Mốc 5 shimmer animation, diamond icon, ring glow
+- `getMilestoneLabel()` + `getMilestoneColor()` utility functions
+- Files: `smart-card.tsx`, `utils.ts`
+
+#### Bước 5: Hot Seat (Vùng Treo Dồn Chốt) ✅
+- **closeDeal()**: Server action — milestone→5, status→WON, ghi MilestoneHistory "Kim Cương 💎"
+- **demoteToNurture()**: Server action — milestone→3, priority-20, heat-15, snooze 24h
+- **Hot Seat UI Upgrade**: Border đỏ rực, pulse glow, 3 tín hiệu checklist (Tin Sale · Thích Dự án · Hỏi giá)
+- **2 Action Buttons**: 💎 CHỐT CỌC (gradient Kim Cương) + ↻ NUÔI LẠI (neutral white) với useTransition
+- Files: `actions/leads.ts`, `home-client.tsx`
+
+#### Bước 6: Inbound Search (Tìm kiếm nhanh) ✅
+- **Dual Search**: Tìm theo tên HOẶC 3 số cuối SĐT (auto-detect digit input → phone match)
+- **phoneSuffix**: Trích 3 ký tự số cuối từ phoneHash, pass đến client component
+- Files: `leads-list-client.tsx`, `leads/page.tsx`
+
+#### Bước 7: Anti-Hoarding Cron (Dọn Rác Tự Động) ✅
+- **Mốc 1-2 Reclaim**: 7 ngày không tương tác → `assignedTo=null`, `status=POOL` (thu hồi về kho chung)
+- **5x Miss Archive**: `consecutiveMissCount ≥ 5` → `status=ARCHIVED` (xóa rác)
+- Chạy tự động mỗi 15 phút trong cron job `/api/cron/check-leads`
+- Files: `api/cron/check-leads/route.ts`
+
+### 🔧 Changed
+- **LeadStatus Enum**: Thêm `UNPROCESSED`, `RETRYING`
+- **CardColor Enum (mới)**: `GREEN`, `ORANGE`, `RED`, `GRAY`
+- **Lead Model**: Thêm 11 cột (urgency, understanding, finReadiness, productFit, note, sharpnessScore, colorBadge, retryCount, nextVisibleAt, nextGoldenPingAt, goldenPingCount)
+- **Milestone Labels**: Mốc 2 "Chào mồi & Đo độ nét" → "Chào mồi", Mốc 5 "Chốt cọc" → "💎 Kim Cương"
+- **Priority Query**: Đổi từ DB orderBy sang app-layer 3-tier sort engine
+- **Search Placeholder**: "Tìm theo tên..." → "Tìm theo tên hoặc 3 số cuối SĐT..."
+- **Hot Seat Visual**: Orange → Red gradient, thêm 3 trust signal badges, thêm 2 action buttons
+- **Cron Job**: Thêm 2 rule anti-hoarding (reclaim + archive) vào check-leads cron
+
+### 📝 Documentation
+- Created `OPERATIONAL_WORKFLOW.md` — Đặc tả luồng vận hành 7 bước đầy đủ
+- Updated `CHANGELOG.md` — Session 9 entry
+- Updated `DATABASE.md` — New enums & columns
+- Created review artifact `sale_workflow_review.md`
+
+---
 ## [0.3.0] - 2026-03-18 — Session 8: UI/UX Masterpiece & Workflow Logic
 
 ### 🚀 Added

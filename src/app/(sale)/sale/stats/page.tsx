@@ -35,7 +35,7 @@ export default function StatsPage() {
                 </div>
 
                 {/* Funnel Chart */}
-                <div className="sale-glass-card p-4">
+                <div className="mgr-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                         <Users className="h-4 w-4 text-slate-400" />
                         Phễu bán hàng
@@ -76,7 +76,7 @@ function StatCard({ icon, label, value, subtitle, color }: {
     color: string
 }) {
     return (
-        <div className="sale-glass-card p-4">
+        <div className="mgr-glass-card p-4">
             <div className="flex items-center gap-2 mb-2">{icon}<span className="text-xs text-slate-400">{label}</span></div>
             <p className="text-2xl font-bold text-slate-800">{value}</p>
             <p className="text-[10px] text-slate-400 mt-0.5">{subtitle}</p>

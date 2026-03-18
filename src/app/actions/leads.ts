@@ -58,10 +58,80 @@ export async function getQueueLeads(userId: string) {
             { currentMilestone: 'asc' },
             { updatedAt: 'desc' }
         ],
-        // Skip top 3, get the rest
         skip: 3,
         take: 20,
     })
+}
+
+// NEW ACTION: Unified slicing queue (Top 3 for UI Smart Cards + rest for Bar)
+// Priority tier engine — maps to business rule:
+// Tier 1: Sharpness nét (GREEN > ORANGE > RED sharpnessScore cao)
+// Tier 2: Fresh Lead mới chưa gọi
+// Tier 3: Due/Retry (đến hạn lịch, retry cycle)
+function getLeadPriorityTier(lead: {
+    status: string
+    colorBadge: string | null
+    sharpnessScore: number | null
+    retryCount: number
+    nextVisibleAt: Date | null
+    createdAt: Date
+}): number {
+    // Tier 1: Khách nét — đã phân tích có điểm cao
+    if (lead.colorBadge === 'GREEN') return 10
+    if (lead.colorBadge === 'ORANGE') return 20
+    if (lead.colorBadge === 'RED') return 30
+    // Tier 2: Khách mới chưa gọi lần nào
+    if (lead.status === 'UNPROCESSED') return 40
+    // Tier 3: Đến hạn lịch hẹn / Retry cycle
+    if (lead.status === 'RETRYING') return 50
+    // Default (Active, đang chăm nhưng chưa phân loại)
+    return 60
+}
+
+export async function getAllSmartQueueLeads(userId: string) {
+    const leads = await prisma.lead.findMany({
+        where: {
+            assignedTo: userId,
+            NOT: { status: { in: ['WON', 'LOST', 'ARCHIVED'] } },
+            OR: [
+                { status: 'UNPROCESSED' },
+                { snoozeUntil: { lte: new Date() } },
+                { status: 'RETRYING', nextVisibleAt: { lte: new Date() } },
+                { status: 'ACTIVE', nextGoldenPingAt: { lte: new Date() } },
+                { status: 'ACTIVE' } // For testing fallback
+            ]
+        },
+        take: 50, // Lấy nhiều hơn rồi sort ở app layer
+    })
+
+    // Sort theo 3 tầng ưu tiên nghiệp vụ
+    return leads.sort((a, b) => {
+        const tierA = getLeadPriorityTier({
+            status: a.status,
+            colorBadge: a.colorBadge,
+            sharpnessScore: a.sharpnessScore,
+            retryCount: a.retryCount,
+            nextVisibleAt: a.nextVisibleAt,
+            createdAt: a.createdAt,
+        })
+        const tierB = getLeadPriorityTier({
+            status: b.status,
+            colorBadge: b.colorBadge,
+            sharpnessScore: b.sharpnessScore,
+            retryCount: b.retryCount,
+            nextVisibleAt: b.nextVisibleAt,
+            createdAt: b.createdAt,
+        })
+
+        // Cùng Tier → xét thêm điểm nét (cao hơn lên trước)
+        if (tierA !== tierB) return tierA - tierB
+        const scoreA = a.sharpnessScore ?? a.priorityScore
+        const scoreB = b.sharpnessScore ?? b.priorityScore
+        if (scoreA !== scoreB) return scoreB - scoreA
+
+        // Cùng điểm nét → Khách chờ lâu hơn được ưu tiên (FIFO)
+        return a.createdAt.getTime() - b.createdAt.getTime()
+    }).slice(0, 23) // 3 Smart Cards + tối đa 20 Giỏ đợi
 }
 
 // ============================================
@@ -77,7 +147,45 @@ export async function createLead(data: {
     sourceId?: string
     bantBudget?: BANTLevel
     bantNeed?: string
+    scenario?: 'INTERACTED' | 'UNREACHABLE' | 'LATER'
+    urgency?: string
+    understanding?: string
+    finReadiness?: string
+    productFit?: string
+    note?: string
 }) {
+    let status = 'UNPROCESSED'
+    let colorBadge = 'GRAY'
+    let sharpnessScore = 0
+    let nextVisibleAt: Date | null = null
+    let nextGoldenPingAt: Date | null = null
+    let retryCount = 0
+
+    const scenario = data.scenario || 'LATER'
+
+    if (scenario === 'INTERACTED') {
+        status = 'ACTIVE'
+        // Fallback Heuristic
+        let score = 50
+        if (data.urgency?.includes('gấp') || data.urgency?.includes('Gấp')) score += 15
+        if (data.understanding?.includes('Rất') || data.understanding?.includes('kỹ')) score += 15
+        if (data.finReadiness?.includes('Sẵn')) score += 10
+        if (data.productFit?.includes('Rất') || data.productFit?.includes('Rất khớp')) score += 10
+
+        sharpnessScore = Math.min(100, score)
+        
+        if (sharpnessScore >= 80) colorBadge = 'GREEN'
+        else if (sharpnessScore >= 60) colorBadge = 'ORANGE'
+        else colorBadge = 'RED'
+        
+        // Cài đặt 72h Vàng chu kỳ Ping
+        nextGoldenPingAt = new Date(Date.now() + 4 * 60 * 60 * 1000) // 4 hours
+    } else if (scenario === 'UNREACHABLE') {
+        status = 'RETRYING'
+        nextVisibleAt = new Date(Date.now() + 30 * 60 * 1000) // 30 mins later
+        retryCount = 1
+    }
+
     const lead = await prisma.lead.create({
         data: {
             orgId: data.orgId,
@@ -90,8 +198,19 @@ export async function createLead(data: {
             bantBudget: data.bantBudget || 'UNKNOWN',
             bantNeed: data.bantNeed || undefined,
             golden72hExpiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
-            priorityScore: 50,
+            priorityScore: sharpnessScore > 0 ? sharpnessScore : 50,
             heatScore: 50,
+            status: status as any,
+            colorBadge: colorBadge as any,
+            sharpnessScore,
+            urgency: data.urgency,
+            understanding: data.understanding,
+            finReadiness: data.finReadiness,
+            productFit: data.productFit,
+            note: data.note,
+            retryCount,
+            nextVisibleAt,
+            nextGoldenPingAt,
         },
     })
     updateTag(CACHE_TAGS.leads(data.assignedTo))
@@ -171,3 +290,74 @@ export async function snoozeLead(leadId: string, until: Date, reason: string) {
     return result
 }
 
+// ============================================
+// HOT SEAT ACTIONS
+// ============================================
+
+/** CHỐT → Card biến Kim Cương, status WON */
+export async function closeDeal(leadId: string, userId: string, note?: string) {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } })
+    if (!lead) throw new Error('Lead not found')
+
+    const [updatedLead] = await prisma.$transaction([
+        prisma.lead.update({
+            where: { id: leadId },
+            data: {
+                currentMilestone: 5,
+                status: 'WON',
+                colorBadge: 'GREEN' as any,
+                snoozeUntil: null,
+                snoozeReason: null,
+            },
+        }),
+        prisma.milestoneHistory.create({
+            data: {
+                leadId,
+                fromMilestone: lead.currentMilestone,
+                toMilestone: 5,
+                reason: 'PROMOTION',
+                note: note || 'CHỐT CỌC — Kim Cương 💎',
+                changedBy: userId,
+            },
+        }),
+    ])
+
+    updateTag(CACHE_TAGS.leadDetail(leadId))
+    if (lead.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
+    if (lead.orgId) updateTag(CACHE_TAGS.dashboard(lead.orgId))
+    return updatedLead
+}
+
+/** NUÔI LẠI → Tụt Mốc 3, ẩn khỏi màn hình (snooze 24h) */
+export async function demoteToNurture(leadId: string, userId: string, note?: string) {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } })
+    if (!lead) throw new Error('Lead not found')
+
+    const [updatedLead] = await prisma.$transaction([
+        prisma.lead.update({
+            where: { id: leadId },
+            data: {
+                currentMilestone: 3,
+                priorityScore: Math.max(0, lead.priorityScore - 20),
+                heatScore: Math.max(0, lead.heatScore - 15),
+                snoozeUntil: new Date(Date.now() + 24 * 60 * 60 * 1000), // Ẩn 24h
+                snoozeReason: 'UPDATED' as any,
+            },
+        }),
+        prisma.milestoneHistory.create({
+            data: {
+                leadId,
+                fromMilestone: lead.currentMilestone,
+                toMilestone: 3,
+                reason: 'DEMOTION',
+                note: note || 'NUÔI LẠI — Tụt về Mốc 3 Niềm tin',
+                changedBy: userId,
+            },
+        }),
+    ])
+
+    updateTag(CACHE_TAGS.leadDetail(leadId))
+    if (lead.assignedTo) updateTag(CACHE_TAGS.leads(lead.assignedTo))
+    if (lead.orgId) updateTag(CACHE_TAGS.dashboard(lead.orgId))
+    return updatedLead
+}

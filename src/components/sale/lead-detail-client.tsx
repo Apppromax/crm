@@ -129,7 +129,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </header>
 
             {/* Milestone Progress */}
-            <div className="mx-4 mt-3 sale-glass-card px-4 py-4">
+            <div className="mx-4 mt-3 mgr-glass-card px-4 py-4">
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-slate-700">Tiến trình bán hàng</span>
                     <span className="text-sm font-bold text-primary-600">{percentage}%</span>
@@ -220,7 +220,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             )}
 
             {/* Customer Info */}
-            <div className="mx-4 mt-4 sale-glass-card overflow-hidden">
+            <div className="mx-4 mt-4 mgr-glass-card overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/30">
                     <h3 className="text-sm font-semibold text-slate-700">Thông tin khách</h3>
                 </div>
@@ -255,7 +255,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
             </div>
 
             {/* Timeline */}
-            <div className="mx-4 mt-4 sale-glass-card overflow-hidden mb-4">
+            <div className="mx-4 mt-4 mgr-glass-card overflow-hidden mb-4">
                 <div className="px-4 py-3 border-b border-white/30 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-slate-700">Lịch sử tương tác</h3>
                     <span className="text-xs text-slate-400">{lead.interactions.length} entries</span>
@@ -307,7 +307,7 @@ export function LeadDetailClient({ lead, aiCoach, winRate, userId }: Props) {
 
             {/* Milestone History */}
             {lead.milestoneHistory.length > 0 && (
-                <div className="mx-4 mb-4 sale-glass-card overflow-hidden">
+                <div className="mx-4 mb-4 mgr-glass-card overflow-hidden">
                     <div className="px-4 py-3 border-b border-white/30">
                         <h3 className="text-sm font-semibold text-slate-700">Lịch sử mốc</h3>
                     </div>

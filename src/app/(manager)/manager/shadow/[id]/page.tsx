@@ -75,20 +75,20 @@ async function ShadowPage({ params }: Props) {
     return (
         <div className="mx-auto max-w-2xl min-h-dvh">
             {/* Header */}
-            <header className="sticky top-0 z-40 flex items-center gap-3 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <Link href="/manager" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 transition-colors press-effect">
+            <header className="sticky top-0 z-40 flex items-center gap-3 px-4 py-3 bg-white/20 backdrop-blur-2xl border-b border-white/40">
+                <Link href="/manager" className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-white/30 transition-colors press-effect">
                     <ArrowLeft className="h-5 w-5" />
                 </Link>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-indigo-500" />
-                        <h1 className="text-base font-semibold text-slate-900">{lead.name}</h1>
+                        <Eye className="h-4 w-4 text-teal-500" />
+                        <h1 className="text-base font-semibold text-slate-700">{lead.name}</h1>
                     </div>
                     <p className="text-xs text-slate-400">
                         {lead.assignee?.name || 'Chưa gán'} • {lead.source?.name || 'Unknown'}
                     </p>
                 </div>
-                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold text-indigo-600">
+                <span className="rounded-full bg-teal-500/10 border border-teal-200/30 px-2.5 py-1 text-[10px] font-bold text-teal-600">
                     Chế độ xem
                 </span>
             </header>
@@ -101,7 +101,7 @@ async function ShadowPage({ params }: Props) {
                     </span>
                     <span className="text-[10px] text-slate-400">{milestonePercent}%</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-2 rounded-full bg-white/40 overflow-hidden">
                     <div
                         className="h-full rounded-full bg-gradient-to-r from-primary-400 to-primary-600 milestone-bar"
                         style={{ width: `${milestonePercent}%` }}
@@ -111,7 +111,7 @@ async function ShadowPage({ params }: Props) {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-2 px-4 pt-4 stagger-children">
-                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                <div className="mgr-glass-card p-3 text-center">
                     <p className={cn(
                         'text-lg font-bold',
                         lead.heatScore >= 70 ? 'text-red-500' : lead.heatScore >= 40 ? 'text-orange-500' : 'text-slate-600'
@@ -120,11 +120,11 @@ async function ShadowPage({ params }: Props) {
                     </p>
                     <p className="text-[10px] text-slate-400">Heat Score</p>
                 </div>
-                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                <div className="mgr-glass-card p-3 text-center">
                     <p className="text-lg font-bold text-slate-800">{lead.interactions.length}</p>
                     <p className="text-[10px] text-slate-400">Tương tác</p>
                 </div>
-                <div className="rounded-xl bg-white border border-slate-100 p-3 text-center">
+                <div className="mgr-glass-card p-3 text-center">
                     <p className="text-lg font-bold text-emerald-600">
                         {lead.dealValue ? formatCurrencyShort(lead.dealValue) : 'N/A'}
                     </p>
@@ -134,7 +134,7 @@ async function ShadowPage({ params }: Props) {
 
             {/* BANT */}
             {(lead.bantBudget || lead.bantAuthority || lead.bantNeed || lead.bantTimeline) && (
-                <div className="mx-4 mt-4 rounded-xl bg-white border border-slate-100 p-4">
+                <div className="mx-4 mt-4 mgr-glass-card p-4">
                     <h3 className="text-xs font-bold text-slate-600 mb-2">BANT</h3>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                         <div><span className="text-slate-400">Budget:</span> <span className="font-medium text-slate-700">{lead.bantBudget || '-'}</span></div>
@@ -147,7 +147,7 @@ async function ShadowPage({ params }: Props) {
 
             {/* Upcoming Schedules */}
             {lead.schedules.length > 0 && (
-                <div className="mx-4 mt-4 rounded-xl bg-amber-50 border border-amber-100 p-4">
+                <div className="mx-4 mt-4 mgr-glass-card p-4 ring-1 ring-amber-300/30">
                     <h3 className="text-xs font-bold text-amber-700 mb-2 flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" /> Lịch hẹn sắp tới
                     </h3>

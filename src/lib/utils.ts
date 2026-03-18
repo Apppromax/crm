@@ -40,16 +40,28 @@ export function formatRelativeTime(date: Date | string): string {
 export function getMilestoneLabel(milestone: number): string {
     const labels: Record<number, string> = {
         1: 'Tiếp cận',
-        2: 'Chào mồi & Đo độ nét',
+        2: 'Chào mồi',
         3: 'Niềm tin',
         4: 'Dồn chốt',
-        5: 'Chốt cọc',
+        5: '💎 Kim Cương',
     }
     return labels[milestone] || `Mốc ${milestone}`
 }
 
 export function getMilestonePercentage(milestone: number): number {
     return milestone * 20
+}
+
+// Milestone → Color mapping (dùng cho thanh progress bar, background, etc.)
+export function getMilestoneColor(milestone: number): { bg: string; text: string; glow: string } {
+    const colors: Record<number, { bg: string; text: string; glow: string }> = {
+        1: { bg: 'bg-sky-400', text: 'text-sky-700', glow: 'shadow-sky-400/50' },
+        2: { bg: 'bg-teal-500', text: 'text-teal-700', glow: 'shadow-teal-500/50' },
+        3: { bg: 'bg-amber-500', text: 'text-amber-700', glow: 'shadow-amber-500/50' },
+        4: { bg: 'bg-orange-500', text: 'text-orange-700', glow: 'shadow-orange-500/50' },
+        5: { bg: 'bg-gradient-to-r from-cyan-400 to-emerald-400', text: 'text-teal-900', glow: 'shadow-teal-400/60' },
+    }
+    return colors[milestone] || { bg: 'bg-slate-300', text: 'text-slate-600', glow: '' }
 }
 
 export function getHeatColor(score: number): string {

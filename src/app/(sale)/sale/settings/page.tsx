@@ -17,7 +17,7 @@ export default async function SettingsPage() {
 
             <div className="px-4 py-4 space-y-4">
                 {/* Profile */}
-                <div className="sale-glass-card p-4">
+                <div className="mgr-glass-card p-4">
                     <div className="flex items-center gap-3">
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100/80 text-primary-700 text-lg font-bold">
                             {user.name.split(' ').pop()?.[0]}
@@ -75,7 +75,7 @@ function SettingsGroup({ title, children }: { title: string; children: React.Rea
     return (
         <div>
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-1">{title}</p>
-            <div className="sale-glass-card divide-y divide-white/30 overflow-hidden">
+            <div className="mgr-glass-card divide-y divide-white/30 overflow-hidden">
                 {children}
             </div>
         </div>

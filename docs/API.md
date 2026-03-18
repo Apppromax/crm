@@ -1,10 +1,10 @@
 # CRM Pro V2 — API Specification
 
-> **Phiên bản:** 1.0  
+> **Phiên bản:** 1.1  
 > **Ngày tạo:** 2026-03-14  
-> **Cập nhật lần cuối:** 2026-03-14  
-> **Trạng thái:** Draft  
-> **Base URL:** `/api/v1`  
+> **Cập nhật lần cuối:** 2026-03-18  
+> **Trạng thái:** Active  
+> **Base URL:** `/api/v1` (REST) / Server Actions (Next.js)  
 > **Auth:** Bearer JWT (Supabase Auth)  
 > **Tham chiếu:** [SRS.md](./SRS.md) | [DATABASE.md](./DATABASE.md)  
 
@@ -111,7 +111,7 @@ GET /api/v1/leads
 |-------|------|---------|-------------|
 | `status` | LeadStatus | ACTIVE | Filter by status |
 | `milestone` | number | - | Filter by milestone (1-5) |
-| `search` | string | - | Search by name |
+| `search` | string | - | Search by name or last 3 phone digits |
 | `page` | number | 1 | Pagination |
 | `limit` | number | 20 | Items per page (max 50) |
 | `sort` | string | priorityScore | Sort field |
@@ -691,6 +691,36 @@ POST /api/v1/notifications/weekly-snapshot
 
 ---
 
+## 8.4 Hot Seat Actions (Session 9)
+
+### Close Deal (Đóng Deal - CHỐT CỌC)
+```
+Server Action: closeDeal(leadId, userId, note?)
+```
+
+**Logic:**
+- `currentMilestone → 5`
+- `status → WON`
+- `colorBadge → GREEN`
+- Clear snooze
+- Ghi MilestoneHistory (PROMOTION, "CHỐT CỌC — Kim Cương 💎")
+- Invalidate cache tags: leadDetail, leads, dashboard
+
+### Demote to Nurture (NUÔI LẠI)
+```
+Server Action: demoteToNurture(leadId, userId, note?)
+```
+
+**Logic:**
+- `currentMilestone → 3`  
+- `priorityScore -= 20`
+- `heatScore -= 15`
+- `snoozeUntil = +24h` (Ẩn khỏi màn hình)
+- Ghi MilestoneHistory (DEMOTION, "NUÔI LẠI — Tụt về Mốc 3")
+- Invalidate cache tags: leadDetail, leads, dashboard
+
+---
+
 ## 9. Schedule APIs
 
 ### 9.1 Create Schedule
@@ -745,4 +775,5 @@ GET /api/v1/schedules/today
 > 📌 **Lịch sử thay đổi**
 > | Ngày | Phiên bản | Thay đổi | Người |
 > |------|-----------|----------|-------|
+> | 2026-03-18 | 1.1 | Session 9: Hot Seat actions, search by phone, cron anti-hoarding | AI |
 > | 2026-03-14 | 1.0 | Tạo API Spec ban đầu — 25+ endpoints | AI |

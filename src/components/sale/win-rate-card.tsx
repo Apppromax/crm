@@ -29,7 +29,7 @@ export function WinRateCard({ prediction }: Props) {
             <button
                 onClick={() => setExpanded(!expanded)}
                 className={cn(
-                    'w-full rounded-2xl sale-glass-card p-4',
+                    'w-full rounded-2xl mgr-glass-card p-4',
                     'transition-all hover:shadow-md'
                 )}
             >
@@ -72,7 +72,7 @@ export function WinRateCard({ prediction }: Props) {
             </button>
 
             {expanded && (
-                <div className="mt-2 sale-glass-card p-4 space-y-3 animate-slide-up">
+                <div className="mt-2 mgr-glass-card p-4 space-y-3 animate-slide-up">
                     {/* Factors */}
                     <div>
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">

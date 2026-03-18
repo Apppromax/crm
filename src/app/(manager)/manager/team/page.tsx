@@ -6,9 +6,9 @@ import { getUserByRole, getTeamPerformance } from '@/app/actions/users'
 import Loading from '@/app/(manager)/loading'
 
 function getStatusConfig(compliance: number) {
-    if (compliance >= 80) return { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' }
-    if (compliance >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' }
-    return { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' }
+    if (compliance >= 80) return { bg: 'bg-emerald-500/15', text: 'text-emerald-600', dot: 'bg-emerald-500' }
+    if (compliance >= 50) return { bg: 'bg-amber-500/15', text: 'text-amber-600', dot: 'bg-amber-500' }
+    return { bg: 'bg-red-500/15', text: 'text-red-600', dot: 'bg-red-500' }
 }
 
 export default function TeamPage() {
@@ -40,33 +40,33 @@ async function TeamContent() {
 
     return (
         <div className="mx-auto max-w-2xl">
-            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
-                <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary-500" />
+            <header className="sticky top-0 z-40 px-4 py-3 bg-white/20 backdrop-blur-2xl border-b border-white/40">
+                <h1 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-teal-500" />
                     Quản lý Team
                 </h1>
-                <p className="text-xs text-slate-400 mt-0.5">{user.team?.name || 'All Teams'} • {teamMembers.length} thành viên</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{user.team?.name || 'All Teams'} • {teamMembers.length} thành viên</p>
             </header>
 
-            <div className="px-4 py-4 space-y-3">
+            <div className="px-4 py-4 space-y-3 stagger-children">
                 {teamMembers.length === 0 ? (
                     <div className="py-16 text-center">
-                        <Users className="h-12 w-12 text-slate-200 mx-auto mb-3" />
-                        <p className="text-sm text-slate-400">Chưa có thành viên</p>
+                        <Users className="h-12 w-12 text-slate-300/60 mx-auto mb-3" />
+                        <p className="text-sm text-slate-500">Chưa có thành viên</p>
                     </div>
                 ) : (
                     teamMembers.map(member => {
                         const sc = member.status
                         return (
                             <Link key={member.id} href={`/manager/team/${member.id}`}>
-                                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4 hover:border-slate-200 transition-all active:scale-[0.99]">
+                                <div className="mgr-glass-card p-4 transition-all active:scale-[0.99]">
                                     <div className="flex items-center gap-3">
                                         <div className={cn('h-11 w-11 rounded-full flex items-center justify-center text-sm font-bold', sc.bg, sc.text)}>
                                             {member.name.split(' ').pop()?.[0]}
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-sm font-semibold text-slate-800">{member.name}</h3>
+                                                <h3 className="text-sm font-semibold text-slate-700">{member.name}</h3>
                                                 <span className={cn('h-2 w-2 rounded-full', sc.dot)} />
                                             </div>
                                             <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-400">
@@ -92,4 +92,3 @@ async function TeamContent() {
         </div>
     )
 }
-

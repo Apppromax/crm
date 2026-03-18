@@ -41,8 +41,8 @@ export function PipelineFunnel({ data }: Props) {
     })
 
     return (
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
-            <h3 className="text-sm font-semibold text-white/80 mb-4">📊 Pipeline Funnel</h3>
+        <div className="mgr-glass-card p-5">
+            <h3 className="text-sm font-semibold text-slate-600 mb-4">📊 Pipeline Funnel</h3>
 
             <div className="space-y-3">
                 {milestones.map((m, i) => {
@@ -52,16 +52,16 @@ export function PipelineFunnel({ data }: Props) {
                     return (
                         <div key={m.key}>
                             <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-white/60">{m.label}</span>
-                                <span className="text-xs font-bold text-white/90">{value}</span>
+                                <span className="text-xs text-slate-500">{m.label}</span>
+                                <span className="text-xs font-bold text-slate-700">{value}</span>
                             </div>
-                            <div className="relative h-8 rounded-lg bg-white/5 overflow-hidden">
+                            <div className="relative h-8 rounded-lg bg-white/30 overflow-hidden">
                                 <div
                                     className={cn('h-full rounded-lg transition-all duration-700 flex items-center justify-end px-2', m.color)}
                                     style={{ width: `${width}%` }}
                                 >
                                     {value > 0 && (
-                                        <span className="text-[10px] font-bold text-white/90">
+                                        <span className="text-[10px] font-bold text-white drop-shadow-sm">
                                             {Math.round((value / total) * 100)}%
                                         </span>
                                     )}
@@ -71,7 +71,7 @@ export function PipelineFunnel({ data }: Props) {
                             {i < conversions.length && (
                                 <div className="flex items-center justify-center py-1">
                                     <div className="flex items-center gap-1">
-                                        <div className="h-3 w-px bg-white/20" />
+                                        <div className="h-3 w-px bg-white/30" />
                                         <span className={cn(
                                             'text-[10px] font-medium',
                                             conversions[i] >= 50 ? 'text-emerald-400' :
@@ -79,7 +79,7 @@ export function PipelineFunnel({ data }: Props) {
                                         )}>
                                             ↓ {conversions[i]}%
                                         </span>
-                                        <div className="h-3 w-px bg-white/20" />
+                                        <div className="h-3 w-px bg-white/30" />
                                     </div>
                                 </div>
                             )}
@@ -90,22 +90,22 @@ export function PipelineFunnel({ data }: Props) {
 
             {/* Lost */}
             {data.lost > 0 && (
-                <div className="mt-3 pt-3 border-t border-white/10">
+                <div className="mt-3 pt-3 border-t border-white/30">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/40">🔄 Lost / Recycled</span>
+                        <span className="text-xs text-slate-400">🔄 Lost / Recycled</span>
                         <span className="text-xs font-medium text-red-400">{data.lost}</span>
                     </div>
                 </div>
             )}
 
             {/* Overall conversion */}
-            <div className="mt-4 pt-3 border-t border-white/10">
+            <div className="mt-4 pt-3 border-t border-white/30">
                 <div className="flex items-center justify-between">
-                    <span className="text-xs text-white/50">Tổng conversion M1→M5</span>
+                    <span className="text-xs text-slate-400">Tổng conversion M1→M5</span>
                     <span className={cn(
                         'text-sm font-bold',
                         data.m1 > 0 && (data.m5 / data.m1) * 100 >= 10
-                            ? 'text-emerald-400' : 'text-amber-400'
+                            ? 'text-emerald-500' : 'text-amber-500'
                     )}>
                         {data.m1 > 0 ? Math.round((data.m5 / data.m1) * 100) : 0}%
                     </span>

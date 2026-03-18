@@ -1,9 +1,12 @@
 # CRM Pro V2 — Database Schema Design
 
-> **Phiên bản:** 1.0  
+> **Phiên bản:** 1.1  
 > **Ngày tạo:** 2026-03-14  
-> **Cập nhật lần cuối:** 2026-03-14  
-> **Trạng thái:** Draft  
+> **Cập nhật lần cuối:** 2026-03-18  
+> **Trạng thái:** Active  
+> **Database:** PostgreSQL (Supabase)  
+> **ORM:** Prisma  
+> **Tham chiếu:** [SRS.md](./SRS.md) | [ARCHITECTURE.md](./ARCHITECTURE.md)  
 > **Database:** PostgreSQL (Supabase)  
 > **ORM:** Prisma  
 > **Tham chiếu:** [SRS.md](./SRS.md) | [ARCHITECTURE.md](./ARCHITECTURE.md)  
@@ -127,6 +130,15 @@ enum LeadStatus {
   ARCHIVED     // Đã xóa/rác
   WON          // Đã chốt cọc thành công
   LOST         // Mất deal (không quay lại)
+  UNPROCESSED  // Mới thêm, chưa gọi lần nào (Bước 1 - Kịch bản 3)
+  RETRYING     // Đang trong chu kỳ retry tự động (Bước 1 - Kịch bản 2)
+}
+
+enum CardColor {
+  GREEN        // Khách nét (Sharpness ≥ 80)
+  ORANGE       // Khách tiềm năng (Sharpness 60-79)
+  RED          // Khách score thấp (Sharpness < 60)
+  GRAY         // Chưa phân loại
 }
 
 enum SnoozeReason {
@@ -299,6 +311,19 @@ model Lead {
   snoozeUntil          DateTime?  @map("snooze_until")
   snoozeReason         SnoozeReason? @map("snooze_reason")
   consecutiveMissCount Int        @default(0) @map("consecutive_miss_count")
+
+  // Lead Reception Fields (Session 9 — Bước 1)
+  sharpnessScore       Int        @default(0) @map("sharpness_score")    // Điểm nét AI
+  colorBadge           CardColor  @default(GRAY) @map("color_badge")     // Badge màu card
+  retryCount           Int        @default(0) @map("retry_count")        // Số lần retry
+  nextVisibleAt        DateTime?  @map("next_visible_at")                // Retry: hiện lại khi nào
+  nextGoldenPingAt     DateTime?  @map("next_golden_ping_at")            // 72h: lần ping kế
+  goldenPingCount      Int        @default(0) @map("golden_ping_count")  // 72h: đã ping bao nhiêu lần
+  urgency              String?    // Dropbox 1: Độ gấp
+  understanding        String?    // Dropbox 2: Hiểu dự án
+  finReadiness         String?    @map("fin_readiness")                  // Dropbox 3: Tài chính
+  productFit           String?    @map("product_fit")                    // Dropbox 4: Khớp sản phẩm
+  note                 String?    // Note tự do
 
   // AI
   aiSummary            String?    @map("ai_summary")      // Timeline tóm tắt 1 dòng
@@ -628,17 +653,25 @@ WHERE org_id = :orgId
   AND current_milestone IN (4, 5);
 ```
 
-### 4.5 Anti-Hoarding Check (Cron Job)
+### 4.5 Anti-Hoarding Check (Cron Job — Updated Session 9)
 
 ```sql
--- Lead đứng hình 15 ngày ở Mốc 1-2
+-- Rule 4a: Mốc 1-2 + 7 ngày không tương tác → Thu hồi về Pool
 UPDATE leads
 SET status = 'POOL', assigned_to = NULL
 WHERE status = 'ACTIVE'
-  AND current_milestone IN (1, 2)
-  AND last_interaction_at < NOW() - INTERVAL '15 days'
-RETURNING id, assigned_to;
--- → Tạo notification cho Sale & Manager
+  AND current_milestone <= 2
+  AND assigned_to IS NOT NULL
+  AND (
+    (last_interaction_at IS NULL AND created_at < NOW() - INTERVAL '7 days')
+    OR last_interaction_at < NOW() - INTERVAL '7 days'
+  );
+
+-- Rule 4b: 5 lần liên lạc hụt liên tiếp → Xóa rác
+UPDATE leads
+SET status = 'ARCHIVED', snooze_until = NULL
+WHERE status IN ('ACTIVE', 'RETRYING')
+  AND consecutive_miss_count >= 5;
 ```
 
 ---
@@ -702,4 +735,5 @@ function maskLeadData(lead: Lead, viewer: User): MaskedLead {
 > 📌 **Lịch sử thay đổi**
 > | Ngày | Phiên bản | Thay đổi | Người |
 > |------|-----------|----------|-------|
+> | 2026-03-18 | 1.1 | Session 9: Lead Reception Fields, CardColor enum, Anti-Hoarding v2 | AI |
 > | 2026-03-14 | 1.0 | Tạo Database Schema ban đầu — 14 tables | AI |

@@ -10,10 +10,10 @@ const weeklyData = [
 ]
 
 const milestoneDistribution = [
-    { label: 'M1 Tiếp cận', count: 1, color: 'bg-slate-300' },
-    { label: 'M2 Chào mồi', count: 1, color: 'bg-blue-400' },
-    { label: 'M3 Niềm tin', count: 2, color: 'bg-indigo-400' },
-    { label: 'M4 Dồn chốt', count: 1, color: 'bg-amber-400' },
+    { label: 'M1 Tiếp cận', count: 1, color: 'bg-sky-400' },
+    { label: 'M2 Chào mồi', count: 1, color: 'bg-teal-400' },
+    { label: 'M3 Niềm tin', count: 2, color: 'bg-amber-400' },
+    { label: 'M4 Dồn chốt', count: 1, color: 'bg-orange-400' },
     { label: 'M5 Chốt cọc', count: 1, color: 'bg-emerald-400' },
 ]
 
@@ -24,16 +24,16 @@ export default function ReportsPage() {
 
     return (
         <div className="mx-auto max-w-2xl">
-            <header className="sticky top-0 z-40 bg-white/80 px-4 py-3 backdrop-blur-xl border-b border-slate-100">
+            <header className="sticky top-0 z-40 px-4 py-3 bg-white/20 backdrop-blur-2xl border-b border-white/40">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <BarChart3 className="h-5 w-5 text-primary-500" />
+                        <h1 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-teal-500" />
                             Báo cáo
                         </h1>
-                        <p className="text-xs text-slate-400 mt-0.5">Tháng 3/2026</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Tháng 3/2026</p>
                     </div>
-                    <button className="flex items-center gap-1.5 rounded-xl bg-primary-50 px-3 py-2 text-xs font-medium text-primary-600 hover:bg-primary-100 transition-all">
+                    <button className="flex items-center gap-1.5 rounded-xl bg-teal-500/10 border border-teal-200/30 backdrop-blur-sm px-3 py-2 text-xs font-medium text-teal-600 hover:bg-teal-500/15 transition-all active:scale-[0.98]">
                         <Download className="h-3.5 w-3.5" />
                         Export
                     </button>
@@ -49,7 +49,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Weekly Activity Chart */}
-                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                <div className="mgr-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-slate-400" />
                         Hoạt động theo tuần
@@ -61,24 +61,21 @@ export default function ReportsPage() {
                                 <div key={w.week} className="flex items-center gap-3">
                                     <span className="text-xs text-slate-400 w-8 shrink-0 font-medium">{w.week}</span>
                                     <div className="flex-1 flex items-center gap-2">
-                                        {/* Calls bar */}
-                                        <div className="flex-1 h-6 rounded-lg bg-slate-50 overflow-hidden relative">
+                                        <div className="flex-1 h-6 rounded-lg bg-white/30 overflow-hidden relative">
                                             <div
-                                                className="h-full rounded-lg bg-gradient-to-r from-primary-300 to-primary-500 flex items-center px-2"
+                                                className="h-full rounded-lg bg-gradient-to-r from-teal-300 to-teal-500 flex items-center px-2"
                                                 style={{ width: `${(w.calls / maxCalls) * 100}%` }}
                                             >
                                                 <span className="text-[10px] font-bold text-white">{w.calls}</span>
                                             </div>
                                         </div>
-                                        {/* Meeting dots */}
                                         <div className="flex gap-0.5 w-10 justify-end">
                                             {Array.from({ length: w.meetings }).map((_, i) => (
-                                                <div key={i} className="h-2 w-2 rounded-full bg-indigo-400" />
+                                                <div key={i} className="h-2 w-2 rounded-full bg-sky-400" />
                                             ))}
                                         </div>
-                                        {/* Won */}
                                         {w.won > 0 && (
-                                            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">
+                                            <span className="text-[10px] bg-emerald-500/15 text-emerald-600 px-1.5 py-0.5 rounded-md font-bold border border-emerald-200/30">
                                                 ✓{w.won}
                                             </span>
                                         )}
@@ -87,20 +84,19 @@ export default function ReportsPage() {
                             )
                         })}
                     </div>
-                    <div className="flex gap-4 mt-3 pt-2 border-t border-slate-50 text-[10px] text-slate-400">
-                        <span className="flex items-center gap-1"><span className="h-2 w-5 rounded bg-primary-400" /> Calls</span>
-                        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-indigo-400" /> Meetings</span>
+                    <div className="flex gap-4 mt-3 pt-2 border-t border-white/20 text-[10px] text-slate-400">
+                        <span className="flex items-center gap-1"><span className="h-2 w-5 rounded bg-teal-400" /> Calls</span>
+                        <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-sky-400" /> Meetings</span>
                         <span className="flex items-center gap-1"><span className="text-emerald-600">✓</span> Won</span>
                     </div>
                 </div>
 
                 {/* Milestone Distribution */}
-                <div className="rounded-2xl bg-white border border-slate-100 shadow-sm p-4">
+                <div className="mgr-glass-card p-4">
                     <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
                         <Target className="h-4 w-4 text-slate-400" />
                         Phân bố Milestone
                     </h3>
-                    {/* Stacked bar */}
                     <div className="h-8 rounded-xl overflow-hidden flex mb-3">
                         {milestoneDistribution.map(m => {
                             const total = milestoneDistribution.reduce((s, md) => s + md.count, 0)
@@ -127,15 +123,15 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Pipeline Value */}
-                <div className="rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 p-5 text-white shadow-xl shadow-primary-500/20 mb-6">
+                <div className="rounded-2xl bg-gradient-to-br from-teal-500 to-teal-700 p-5 text-white shadow-xl shadow-teal-500/20 mb-6">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-5 w-5 text-primary-200" />
-                        <span className="text-sm font-medium text-primary-100">Pipeline Value</span>
+                        <TrendingUp className="h-5 w-5 text-teal-200" />
+                        <span className="text-sm font-medium text-teal-100">Pipeline Value</span>
                     </div>
                     <p className="text-3xl font-bold">{formatCurrencyShort(15_500_000_000)}</p>
                     <div className="flex items-center gap-1 mt-1">
                         <ArrowUpRight className="h-3.5 w-3.5 text-emerald-300" />
-                        <span className="text-xs text-primary-200">+82% so với đầu tháng</span>
+                        <span className="text-xs text-teal-200">+82% so với đầu tháng</span>
                     </div>
                 </div>
             </div>
@@ -147,9 +143,9 @@ function KPICard({ label, value, change, positive }: {
     label: string; value: string; change: string; positive: boolean
 }) {
     return (
-        <div className="rounded-xl bg-white border border-slate-100 shadow-sm p-3 text-center">
+        <div className="mgr-glass-card p-3 text-center">
             <p className="text-[10px] text-slate-400 mb-1">{label}</p>
-            <p className="text-xl font-bold text-slate-800">{value}</p>
+            <p className="text-xl font-bold text-slate-700">{value}</p>
             <div className="flex items-center justify-center gap-0.5 mt-0.5">
                 {positive ? (
                     <ArrowUpRight className="h-3 w-3 text-emerald-500" />

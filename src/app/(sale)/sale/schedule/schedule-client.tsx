@@ -112,7 +112,7 @@ export function ScheduleClient({
 
             {/* Create Schedule Form */}
             {showForm && (
-                <div className="mx-4 mb-3 sale-glass-card p-4 animate-slide-up">
+                <div className="mx-4 mb-3 mgr-glass-card p-4 animate-slide-up">
                     <form action={handleCreateSchedule} className="space-y-3">
                         <div>
                             <label className="text-xs font-medium text-slate-500 mb-1 block">Khách hàng</label>
@@ -172,7 +172,7 @@ export function ScheduleClient({
             )}
 
             {/* Week Calendar Strip */}
-            <div className="mx-4 mb-3 sale-glass-card p-3">
+            <div className="mx-4 mb-3 mgr-glass-card p-3">
                 <div className="grid grid-cols-7 gap-1">
                     {weekDays.map((day, idx) => {
                         const isSelected = day.toDateString() === selectedDate.toDateString()
@@ -224,7 +224,7 @@ export function ScheduleClient({
                             const Icon = config.icon
                             const schedDate = new Date(schedule.scheduledAt)
                             return (
-                                <div key={schedule.id} className="sale-glass-card p-4">
+                                <div key={schedule.id} className="mgr-glass-card p-4">
                                     <div className="flex items-start gap-3">
                                         <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', config.bg)}>
                                             <Icon className={cn('h-5 w-5', config.color)} />
@@ -280,7 +280,7 @@ export function ScheduleClient({
                             const Icon = config.icon
                             const sDate = new Date(s.scheduledAt)
                             return (
-                                <div key={s.id} className="flex items-center gap-3 sale-glass-card p-3">
+                                <div key={s.id} className="flex items-center gap-3 mgr-glass-card p-3">
                                     <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', config.bg)}>
                                         <Icon className={cn('h-4 w-4', config.color)} />
                                     </div>

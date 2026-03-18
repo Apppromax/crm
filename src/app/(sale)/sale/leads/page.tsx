@@ -31,6 +31,7 @@ async function LeadsDataLoader() {
         dealValue: lead.dealValue,
         lastInteractionAt: lead.lastInteractionAt ? (typeof lead.lastInteractionAt === 'string' ? lead.lastInteractionAt : lead.lastInteractionAt.toISOString()) : null,
         interactionCount: lead._count.interactions,
+        phoneSuffix: lead.phoneHash?.replace(/\D/g, '').slice(-3) || '',
     }))
 
     return <LeadsListClient leads={leads} />

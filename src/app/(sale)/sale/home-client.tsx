@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { Bell, User, Flame, ChevronDown, ChevronUp, Zap, RotateCcw, X } from 'lucide-react'
+import { useState, useTransition } from 'react'
+import { Bell, User, Flame, ChevronDown, ChevronUp, Zap, RotateCcw, X, Diamond, Heart, Loader2, MessageCircle, CreditCard, UserCheck } from 'lucide-react'
 import { SmartCard } from '@/components/sale/smart-card'
 import { BigButton } from '@/components/sale/big-button'
 import { cn, formatCurrencyShort } from '@/lib/utils'
 import { NotificationPanel } from '@/components/shared/notification-panel'
+import { closeDeal, demoteToNurture } from '@/app/actions/leads'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 interface CardData {
@@ -32,6 +34,9 @@ interface QueueItem {
     dealValue: number | null
     isGolden: boolean
     isRetry: boolean
+    colorBadge: string | null
+    sharpnessScore: number | null
+    isUnprocessed: boolean
 }
 
 interface Props {
@@ -49,20 +54,33 @@ interface Props {
 export function SaleHomeClient({ userId, topCards, queueItems, stats }: Props) {
     const [showNotifications, setShowNotifications] = useState(false)
     const [showQueue, setShowQueue] = useState(false)
+    const [isPending, startTransition] = useTransition()
+    const router = useRouter()
 
     const hotSeats = topCards.filter(c => c.priorityReason === 'hot_seat')
     const normalCards = topCards.filter(c => c.priorityReason !== 'hot_seat')
 
-    // Queue progress: how many have been "cleared" from the total
+    // Queue Gameification logic
     const totalQueue = queueItems.length
-    const queueClearPercent = totalQueue === 0 ? 100 : Math.max(5, Math.round(((stats.totalLeads - totalQueue) / Math.max(stats.totalLeads, 1)) * 100))
+    let queueColorClass = ''
+    let barWidthPercent = 100 // Visual width relative to panic level
 
+    if (totalQueue === 0) {
+        queueColorClass = "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]"
+        barWidthPercent = 100
+    } else if (totalQueue <= 4) {
+        queueColorClass = "bg-amber-400 shadow-[0_0_5px_rgba(245,158,11,0.5)]"
+        barWidthPercent = 50
+    } else {
+        queueColorClass = "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)] animate-pulse"
+        barWidthPercent = 15
+    }
     return (
         <div className="mx-auto max-w-lg">
             {/* Header */}
             <header className="sticky top-0 z-40 flex items-center justify-between px-4 py-4 bg-transparent">
                 <div className="flex items-center gap-2 bg-white/25 backdrop-blur-2xl rounded-full pr-4 p-1 pl-1 border border-white/50 shadow-[0_2px_12px_rgba(0,0,0,0.04),inset_0_1px_0px_rgba(255,255,255,0.5)]">
-                    <div className="h-9 w-9 rounded-full bg-[#18C3F5] flex items-center justify-center shadow-sm">
+                    <div className="h-9 w-9 rounded-full bg-teal-500 flex items-center justify-center shadow-sm">
                         <span className="text-[15px] font-bold text-white">C</span>
                     </div>
                     <div className="flex flex-col justify-center">
@@ -88,33 +106,73 @@ export function SaleHomeClient({ userId, topCards, queueItems, stats }: Props) {
             </header>
 
             {/* ============================================ */}
-            {/* HOT SEAT — "TREO" AREA (Floating, Separated) */}
+            {/* HOT SEAT — “TREO” AREA (Floating, Separated) */}
             {/* ============================================ */}
             {hotSeats.length > 0 && (
                 <div className="mx-4 mt-1 mb-5 relative animate-scale-in">
-                    {/* Floating platform glow */}
-                    <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-orange-400/20 via-red-500/15 to-amber-400/20 blur-xl -z-10 animate-pulse" />
+                    {/* Floating platform glow — đỏ rực sáng */}
+                    <div className="absolute inset-0 rounded-[28px] bg-gradient-to-br from-red-500/25 via-orange-500/20 to-red-400/25 blur-xl -z-10 animate-pulse" />
 
                     {/* Container with burning border */}
-                    <div className="relative rounded-[28px] border-2 border-orange-400/60 bg-gradient-to-br from-orange-50/40 via-white/30 to-red-50/40 backdrop-blur-2xl p-4 shadow-[0_12px_40px_-8px_rgba(249,115,22,0.4),inset_0_1px_0_rgba(255,255,255,0.6)]">
+                    <div className="relative rounded-[28px] border-2 border-red-500/70 bg-gradient-to-br from-red-50/50 via-white/30 to-orange-50/40 backdrop-blur-2xl p-4 shadow-[0_12px_40px_-8px_rgba(239,68,68,0.5),inset_0_1px_0_rgba(255,255,255,0.6)]">
                         {/* Label */}
                         <div className="flex items-center justify-center gap-2 mb-3">
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-300/60 to-transparent" />
-                            <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-red-600 text-white text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(249,115,22,0.6)]">
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-300/60 to-transparent" />
+                            <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-orange-600 text-white text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-full shadow-[0_4px_16px_rgba(239,68,68,0.6)] animate-pulse">
                                 <Flame className="w-3 h-3 fill-white" /> VÙNG TREO · DỒN CHỐT
                             </span>
-                            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-orange-300/60 to-transparent" />
+                            <div className="h-px flex-1 bg-gradient-to-l from-transparent via-red-300/60 to-transparent" />
+                        </div>
+
+                        {/* 3 Tín hiệu checklist */}
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                            <span className="inline-flex items-center gap-1 bg-emerald-100/80 border border-emerald-200/60 text-emerald-700 text-[9px] font-bold px-2 py-1 rounded-lg">
+                                <Heart className="w-2.5 h-2.5 fill-emerald-500 text-emerald-500" /> Tin Sale
+                            </span>
+                            <span className="inline-flex items-center gap-1 bg-blue-100/80 border border-blue-200/60 text-blue-700 text-[9px] font-bold px-2 py-1 rounded-lg">
+                                <MessageCircle className="w-2.5 h-2.5" /> Thích Dự án
+                            </span>
+                            <span className="inline-flex items-center gap-1 bg-amber-100/80 border border-amber-200/60 text-amber-700 text-[9px] font-bold px-2 py-1 rounded-lg">
+                                <CreditCard className="w-2.5 h-2.5" /> Hỏi giá
+                            </span>
                         </div>
 
                         {/* Floating cards */}
                         <div className="flex flex-col gap-3">
                             {hotSeats.map((card) => (
-                                <SmartCard key={card.id} card={card as any} rank={0} />
+                                <div key={card.id}>
+                                    <SmartCard card={card as any} rank={0} />
+                                    {/* CHỐT / NUÔI LẠI Buttons */}
+                                    <div className="flex gap-2 mt-2">
+                                        <button
+                                            disabled={isPending}
+                                            onClick={() => startTransition(async () => {
+                                                await closeDeal(card.id, userId)
+                                                router.refresh()
+                                            })}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 text-white text-sm font-black shadow-[0_4px_20px_rgba(45,212,191,0.5)] transition-all hover:shadow-[0_6px_28px_rgba(45,212,191,0.7)] active:scale-[0.97] disabled:opacity-50"
+                                        >
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Diamond className="w-4 h-4 fill-white" />}
+                                            CHỐT CỌC
+                                        </button>
+                                        <button
+                                            disabled={isPending}
+                                            onClick={() => startTransition(async () => {
+                                                await demoteToNurture(card.id, userId)
+                                                router.refresh()
+                                            })}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white/60 border-2 border-slate-200 text-slate-600 text-sm font-bold backdrop-blur-sm transition-all hover:bg-white/80 active:scale-[0.97] disabled:opacity-50"
+                                        >
+                                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+                                            NUÔI LẠI
+                                        </button>
+                                    </div>
+                                </div>
                             ))}
                         </div>
 
                         {/* Bottom hint */}
-                        <p className="text-center text-[10px] text-orange-600/80 font-semibold mt-3 tracking-wide">
+                        <p className="text-center text-[10px] text-red-600/80 font-semibold mt-3 tracking-wide">
                             ⚡ Tập trung chốt — Không để khách tuột tay!
                         </p>
                     </div>
@@ -146,11 +204,9 @@ export function SaleHomeClient({ userId, topCards, queueItems, stats }: Props) {
                             <div
                                 className={cn(
                                     "h-full rounded-full transition-all duration-1000",
-                                    queueClearPercent >= 80 ? "bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" :
-                                    queueClearPercent >= 40 ? "bg-amber-400 shadow-[0_0_5px_rgba(245,158,11,0.5)]" :
-                                    "bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.5)]"
+                                    queueColorClass
                                 )}
-                                style={{ width: `${queueClearPercent}%` }}
+                                style={{ width: `${barWidthPercent}%` }}
                             />
                         </div>
                         <div className="w-6 h-6 shrink-0 rounded-full bg-slate-200 flex items-center justify-center">
@@ -189,6 +245,21 @@ export function SaleHomeClient({ userId, topCards, queueItems, stats }: Props) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-1.5">
                                                 <span className="text-[13px] font-semibold text-slate-800 truncate">{item.name}</span>
+                                                {/* Tier 1: Nhãn màu nét */}
+                                                {item.colorBadge === 'GREEN' && (
+                                                    <span className="flex-none inline-flex items-center gap-0.5 bg-emerald-100/80 text-emerald-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">● Nét</span>
+                                                )}
+                                                {item.colorBadge === 'ORANGE' && (
+                                                    <span className="flex-none inline-flex items-center gap-0.5 bg-amber-100/80 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">● Tiềm năng</span>
+                                                )}
+                                                {item.colorBadge === 'RED' && (
+                                                    <span className="flex-none inline-flex items-center gap-0.5 bg-red-100/80 text-red-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full">● Thấp</span>
+                                                )}
+                                                {/* Tier 2: Fresh */}
+                                                {item.isUnprocessed && (
+                                                    <span className="flex-none inline-flex items-center gap-0.5 bg-slate-100/80 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded-full">Mới</span>
+                                                )}
+                                                {/* Tier 3: Tags */}
                                                 {item.isGolden && (
                                                     <span className="flex-none inline-flex items-center gap-0.5 bg-amber-100/80 text-amber-700 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                                                         <Zap className="w-2.5 h-2.5" /> 72h

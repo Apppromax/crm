@@ -39,7 +39,7 @@ export function SendAdviceModal({ leadName, saleName, onSend, onClose }: Props) 
     if (sent) {
         return (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="rounded-3xl bg-white p-8 text-center shadow-2xl animate-slide-up">
+                <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/60 p-8 text-center shadow-2xl animate-slide-up">
                     <CheckCircle className="h-14 w-14 text-emerald-500 mx-auto mb-3" />
                     <h3 className="text-base font-bold text-slate-800">Đã gửi lệnh!</h3>
                     <p className="text-sm text-slate-400 mt-1">{saleName} sẽ thấy ngay</p>
@@ -50,7 +50,7 @@ export function SendAdviceModal({ leadName, saleName, onSend, onClose }: Props) 
 
     return (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
-            <div className="w-full max-w-lg rounded-t-3xl bg-white shadow-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-lg rounded-t-3xl bg-white/85 backdrop-blur-2xl border-t border-white/60 shadow-2xl animate-slide-up" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-center pt-3 pb-1">
                     <div className="h-1 w-10 rounded-full bg-slate-200" />
                 </div>
@@ -60,7 +60,7 @@ export function SendAdviceModal({ leadName, saleName, onSend, onClose }: Props) 
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                                <MessageSquare className="h-5 w-5 text-indigo-500" />
+                                <MessageSquare className="h-5 w-5 text-teal-500" />
                                 Gửi lệnh
                             </h2>
                             <p className="text-xs text-slate-400 mt-0.5">
@@ -82,8 +82,8 @@ export function SendAdviceModal({ leadName, saleName, onSend, onClose }: Props) 
                                 className={cn(
                                     'rounded-lg border px-2.5 py-1.5 text-xs transition-all',
                                     message === cmd
-                                        ? 'border-indigo-400 bg-indigo-50 text-indigo-700 font-medium'
-                                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                        ? 'border-teal-400 bg-teal-50/80 text-teal-700 font-medium'
+                                        : 'border-slate-200/60 text-slate-500 hover:border-slate-300 hover:bg-white/50'
                                 )}
                             >
                                 {cmd}
@@ -104,7 +104,7 @@ export function SendAdviceModal({ leadName, saleName, onSend, onClose }: Props) 
                     <button
                         onClick={handleSend}
                         disabled={!message.trim() || sending}
-                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-600 active:scale-[0.98] disabled:opacity-40"
+                        className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-500 py-3 text-sm font-bold text-white shadow-lg shadow-teal-500/25 transition-all hover:bg-teal-600 active:scale-[0.98] disabled:opacity-40"
                     >
                         {sending ? (
                             <Loader2 className="h-5 w-5 animate-spin" />
