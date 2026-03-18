@@ -32,9 +32,9 @@ export default function SaleLayout({ children }: { children: React.ReactNode }) 
 
             {/* Bottom Navigation — Hidden on detail pages */}
             {!isDetailPage && (
-                <div className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pointer-events-none flex justify-center animate-slide-up">
-                    <nav className="pointer-events-auto w-full max-w-[400px] bg-white/40 backdrop-blur-[40px] saturate-150 border border-white/70 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1),inset_0_1px_0px_rgba(255,255,255,0.8),inset_0_-1px_0px_rgba(255,255,255,0.3)] rounded-[32px]">
-                        <div className="flex items-center justify-around px-2 py-3">
+                <div className="fixed bottom-0 left-0 right-0 z-50 pb-[env(safe-area-inset-bottom)] animate-slide-up bg-[#f4f7f9]/60 backdrop-blur-[40px] saturate-[1.8] border-t border-white/70 shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.1),inset_0_1px_0px_rgba(255,255,255,0.8)] rounded-t-[32px]">
+                    <nav className="w-full max-w-[400px] mx-auto pointer-events-auto">
+                        <div className="flex items-center justify-around px-2 pt-3 pb-2">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href
                                 const Icon = item.icon
