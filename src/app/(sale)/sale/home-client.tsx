@@ -14,7 +14,7 @@ interface CardData {
     currentMilestone: number
     heatScore: number
     priorityScore: number
-    priorityReason: 'golden_72h' | 'schedule_due' | 'retry' | 'hot_lead' | 'manager_advice'
+    priorityReason: 'diamond' | 'hot_seat' | 'net' | 'retry' | 'golden_72h' | 'schedule_due' | 'fresh' | 'manager_advice' | string
     dealValue: number | null
     aiSummary: string | null
     bantBudget: string
@@ -50,8 +50,8 @@ export function SaleHomeClient({ userId, topCards, queueItems, stats }: Props) {
     const [showNotifications, setShowNotifications] = useState(false)
     const [showQueue, setShowQueue] = useState(false)
 
-    const hotSeats = topCards.filter(c => c.currentMilestone >= 4 && c.priorityReason === 'hot_lead')
-    const normalCards = topCards.filter(c => !(c.currentMilestone >= 4 && c.priorityReason === 'hot_lead'))
+    const hotSeats = topCards.filter(c => c.priorityReason === 'hot_seat')
+    const normalCards = topCards.filter(c => c.priorityReason !== 'hot_seat')
 
     // Queue progress: how many have been "cleared" from the total
     const totalQueue = queueItems.length

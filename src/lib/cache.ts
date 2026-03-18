@@ -92,7 +92,12 @@ export const getCachedTopPriorityLeads = (userId: string, limit = 3) =>
                     },
                     _count: { select: { interactions: true } },
                 },
-                orderBy: { priorityScore: 'desc' },
+                orderBy: [
+                    { priorityScore: 'desc' },
+                    { heatScore: 'desc' },
+                    { currentMilestone: 'asc' },
+                    { updatedAt: 'desc' }
+                ],
                 take: limit,
             })
         },

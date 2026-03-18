@@ -52,7 +52,12 @@ export async function getQueueLeads(userId: string) {
             golden72hExpiresAt: true,
             createdAt: true,
         },
-        orderBy: { priorityScore: 'desc' },
+        orderBy: [
+            { priorityScore: 'desc' },
+            { heatScore: 'desc' },
+            { currentMilestone: 'asc' },
+            { updatedAt: 'desc' }
+        ],
         // Skip top 3, get the rest
         skip: 3,
         take: 20,

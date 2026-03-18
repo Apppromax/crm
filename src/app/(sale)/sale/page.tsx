@@ -5,11 +5,16 @@ import { SaleHomeClient } from './home-client'
 import { RealtimeListener } from '@/components/realtime-listener'
 import Loading from '@/app/(sale)/loading'
 
-function determinePriorityReason(lead: any): 'golden_72h' | 'schedule_due' | 'retry' | 'hot_lead' | 'manager_advice' {
-    if (lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()) return 'golden_72h'
-    if (lead.heatScore >= 70) return 'hot_lead'
+function determinePriorityReason(lead: any): 'diamond' | 'hot_seat' | 'net' | 'retry' | 'golden_72h' | 'schedule_due' | 'fresh' | 'manager_advice' {
+    if (lead.currentMilestone === 5) return 'diamond'
+    if (lead.currentMilestone === 4) return 'hot_seat' // Vùng treo
     if (lead.consecutiveMissCount > 0) return 'retry'
-    return 'hot_lead'
+    if (lead.heatScore >= 80) return 'net'
+    if (lead.snoozeUntil && new Date(lead.snoozeUntil) <= new Date()) return 'schedule_due'
+    if (lead.golden72hExpiresAt && new Date(lead.golden72hExpiresAt) > new Date()) return 'golden_72h'
+    if (lead.currentMilestone === 1 && (!lead._count || lead._count.interactions === 0)) return 'fresh'
+    if (lead.heatScore >= 50) return 'net'
+    return 'net'
 }
 
 export default function SaleHomePage() {
