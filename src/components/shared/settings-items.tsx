@@ -91,3 +91,32 @@ export function DarkModeToggle() {
         />
     )
 }
+
+export function SaleThemeSelector() {
+    const { saleTheme, setSaleTheme } = useThemeStore()
+
+    const themes: { id: 'default' | 'acid' | 'luxury' | 'silver', name: string, icon: string }[] = [
+        { id: 'default', name: 'Mặc định (Ice)', icon: '🌊' },
+        { id: 'acid', name: 'Electric Acid', icon: '🔥' },
+        { id: 'luxury', name: 'Neo-Luxury', icon: '⚜️' },
+        { id: 'silver', name: 'Liquid Silver', icon: '💿' },
+    ]
+
+    return (
+        <div className="px-4 pt-3 pb-4">
+            <p className="text-sm font-semibold text-slate-700 mb-3 ml-1">Chủ đề giao diện (Mới)</p>
+            <div className="grid grid-cols-2 gap-2">
+                {themes.map(t => (
+                    <button
+                        key={t.id}
+                        onClick={() => setSaleTheme(t.id)}
+                        className={`flex flex-col items-center justify-center p-3 rounded-[20px] border shadow-[0_2px_10px_rgba(0,0,0,0.02)] ${saleTheme === t.id ? 'bg-white/80 border-sky-400 text-sky-700 ring-2 ring-sky-400/20' : 'bg-white/30 border-white/50 text-slate-600 hover:bg-white/50'} transition-all active:scale-95`}
+                    >
+                        <span className="text-[26px] mb-1.5 drop-shadow-md">{t.icon}</span>
+                        <span className="text-[11px] font-black text-center leading-tight tracking-tight uppercase">{t.name}</span>
+                    </button>
+                ))}
+            </div>
+        </div>
+    )
+}

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { getUserByRole } from '@/app/actions/users'
 import { LogoutButton } from '@/components/logout-button'
-import { PasswordButton, HelpButton, DarkModeToggle } from '@/components/shared/settings-items'
+import { PasswordButton, HelpButton, SaleThemeSelector } from '@/components/shared/settings-items'
 
 export default async function SettingsPage() {
     const user = await getUserByRole('SALE')
@@ -39,9 +39,11 @@ export default async function SettingsPage() {
                     <SettingItem icon={<Smartphone className="h-5 w-5" />} label="Cài đặt PWA" subtitle="Sắp ra mắt" disabled />
                 </SettingsGroup>
 
-                <SettingsGroup title="Giao diện">
-                    <DarkModeToggle />
-                    <SettingItem icon={<Globe className="h-5 w-5" />} label="Ngôn ngữ" subtitle="Tiếng Việt" />
+                <SettingsGroup title="Giao diện thiết kế">
+                    <SaleThemeSelector />
+                    <div className="border-t border-white/30">
+                        <SettingItem icon={<Globe className="h-5 w-5" />} label="Ngôn ngữ" subtitle="Tiếng Việt" />
+                    </div>
                 </SettingsGroup>
 
                 <SettingsGroup title="Cá nhân">

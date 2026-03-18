@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, ClipboardList, Plus, Calendar, Settings } from 'lucide-react'
+import { Plus, Calendar, Settings, Home, ClipboardList } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PrefetchPages } from '@/components/prefetch-pages'
+import { useThemeStore } from '@/lib/stores'
 
 const SALE_PREFETCH = ['/sale', '/sale/leads', '/sale/schedule', '/sale/new']
 
@@ -18,12 +19,13 @@ const navItems = [
 
 export default function SaleLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
+    const saleTheme = useThemeStore(s => s.saleTheme)
 
     // Hide bottom nav on lead detail pages
     const isDetailPage = pathname.match(/\/sale\/leads\/.+/)
 
     return (
-        <div className="flex min-h-dvh flex-col sale-gradient-bg">
+        <div className="flex min-h-dvh flex-col sale-gradient-bg transition-colors duration-700" data-theme={saleTheme}>
             <PrefetchPages paths={SALE_PREFETCH} />
             {/* Main Content */}
             <main className={cn('flex-1 page-enter', !isDetailPage && 'pb-24')}>

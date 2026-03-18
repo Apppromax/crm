@@ -9,18 +9,24 @@ import { persist } from 'zustand/middleware'
 // Theme Store (Dark Mode)
 // ============================================
 
+export type SaleTheme = 'default' | 'acid' | 'luxury' | 'silver'
+
 interface ThemeStore {
     isDark: boolean
+    saleTheme: SaleTheme
     toggle: () => void
     setDark: (dark: boolean) => void
+    setSaleTheme: (theme: SaleTheme) => void
 }
 
 export const useThemeStore = create<ThemeStore>()(
     persist(
         (set) => ({
             isDark: false,
+            saleTheme: 'default',
             toggle: () => set((state) => ({ isDark: !state.isDark })),
             setDark: (dark) => set({ isDark: dark }),
+            setSaleTheme: (theme) => set({ saleTheme: theme }),
         }),
         { name: 'crm-theme' }
     )
